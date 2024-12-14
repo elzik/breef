@@ -1,0 +1,8 @@
+@Elzik.Breef.Api_HostAddress = http://localhost:32773
+
+Post {{Elzik.Breef.Api_HostAddress}}/breefs
+Content-Type: application/json
+
+{
+  "url":"http://test.com/article"
+}
