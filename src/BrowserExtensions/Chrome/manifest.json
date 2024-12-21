@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Send URL to API",
+  "version": "1.0",
+  "permissions": [
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "Images/breef-16.png",
+      "48": "Images/breef-48.png",
+      "128": "Images/breef-128.png"
+    }
+  }
+}

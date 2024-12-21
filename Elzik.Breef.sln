@@ -10,6 +10,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BrowserExtensions", "BrowserExtensions", "{8DE26EA3-7C1E-4907-A71F-18EA4C142467}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chrome", "Chrome", "{10347BFB-03B7-4372-AED3-9ACECF635EBD}"
+	ProjectSection(SolutionItems) = preProject
+		src\BrowserExtensions\Chrome\background.js = src\BrowserExtensions\Chrome\background.js
+		src\BrowserExtensions\Chrome\manifest.json = src\BrowserExtensions\Chrome\manifest.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +31,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{10347BFB-03B7-4372-AED3-9ACECF635EBD} = {8DE26EA3-7C1E-4907-A71F-18EA4C142467}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6E3F0693-A48D-48DC-935C-2D8758390BC2}
