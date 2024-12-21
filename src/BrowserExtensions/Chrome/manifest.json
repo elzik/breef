@@ -3,11 +3,13 @@
   "name": "Send URL to API",
   "version": "1.0",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
   "background": {
     "service_worker": "background.js"
   },
+  "options_page": "options.html",
   "action": {
     "default_icon": {
       "16": "Images/breef-16.png",
