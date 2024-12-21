@@ -1,16 +1,14 @@
 {
   "profiles": {
-    "http": {
+    "Local": {
       "commandName": "Project",
-      "launchBrowser": true,
-      "launchUrl": "todos",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5079"
     },
-    "Container (Dockerfile)": {
+    "Docker": {
       "commandName": "Docker",
       "environmentVariables": {
         "ASPNETCORE_HTTP_PORTS": "8080"
