@@ -8,12 +8,28 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
+});
+
 var app = builder.Build();
+app.UseCors();
 
 var breefs = app.MapGroup("/breefs");
 breefs.MapPost("/", async (Breef breef) =>
 {
-    Debug.WriteLine(breef.Url);
+    Debug.WriteLine(DateTime.Now.TimeOfDay.TotalNanoseconds + ": " + breef.Url);
 
     return Results.Created(breef.Url, breef);
 });
