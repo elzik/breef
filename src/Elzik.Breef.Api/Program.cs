@@ -1,3 +1,5 @@
+using AspNetCore.Authentication.ApiKey;
+using Elzik.Breef.Api;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 
@@ -22,9 +24,28 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
+builder.Services.AddAuthentication(ApiKeyDefaults.AuthenticationScheme)
+    .AddApiKeyInHeaderOrQueryParams<EnvironmentApiKeyProvider>(options =>
+    {
+        options.KeyName = "BREEF-API-KEY";
+        options.Realm = "BreefAPI";
+    });
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+app.Use(async (context, next) =>
+{
+    if (!context.User.Identity.IsAuthenticated)
+    {
+        context.Response.StatusCode = 401;
+        await context.Response.WriteAsync("Unauthorized");
+        return;
+    }
+    await next();
+});
 
 var breefs = app.MapGroup("/breefs");
 breefs.MapPost("/", async (Breef breef) =>
@@ -34,12 +55,11 @@ breefs.MapPost("/", async (Breef breef) =>
     return Results.Created(breef.Url, breef);
 });
 
-app.Run();
+await app.RunAsync();
 
 public record Breef(string Url);
 
 [JsonSerializable(typeof(Breef))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
-
 }
