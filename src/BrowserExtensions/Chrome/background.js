@@ -1,10 +1,11 @@
 chrome.action.onClicked.addListener((tab) => {
     if (tab.url) {
-        chrome.storage.sync.get('serverUrl', (data) => {
+        chrome.storage.sync.get(['serverUrl', 'apiKey'], (data) => {
             fetch(data.serverUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'BREEF-API-KEY': data.apiKey
                 },
                 body: JSON.stringify({ url: tab.url })
             })

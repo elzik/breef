@@ -1,7 +1,9 @@
 document.getElementById('save').addEventListener('click', () => {
     const serverUrl = document.getElementById('serverUrl').value;
-    chrome.storage.sync.set({ serverUrl }, () => {
-        console.log('Server URL saved:', serverUrl);
+    const apiKey = document.getElementById('apiKey').value;
+
+    chrome.storage.sync.set({ serverUrl, apiKey }, () => {
+        console.log('Options saved');
     });
 });
 
@@ -12,3 +14,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
