@@ -2,7 +2,7 @@
 
 Post {{Elzik.Breef.Api_HostAddress}}/breefs
 Content-Type: application/json
-BREEF-API-KEY: test!
+BREEF-API-KEY: test-key
 {
   "url":"http://test.com/article"
 }

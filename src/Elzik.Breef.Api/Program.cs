@@ -1,7 +1,6 @@
 using AspNetCore.Authentication.ApiKey;
 using Elzik.Breef.Api;
 using System.Diagnostics;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -38,7 +37,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.Use(async (context, next) =>
 {
-    if (!context.User.Identity.IsAuthenticated)
+    if (context.User.Identity != null && !context.User.Identity.IsAuthenticated)
     {
         context.Response.StatusCode = 401;
         await context.Response.WriteAsync("Unauthorized");
@@ -56,10 +55,3 @@ breefs.MapPost("/", async (Breef breef) =>
 });
 
 await app.RunAsync();
-
-public record Breef(string Url);
-
-[JsonSerializable(typeof(Breef))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
-}
