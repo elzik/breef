@@ -24,7 +24,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
 builder.Services.AddAuthentication(ApiKeyDefaults.AuthenticationScheme)
-    .AddApiKeyInHeaderOrQueryParams<EnvironmentApiKeyProvider>(options =>
+    .AddApiKeyInHeader<EnvironmentApiKeyProvider>(options =>
     {
         options.KeyName = "BREEF-API-KEY";
         options.Realm = "BreefAPI";
