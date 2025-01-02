@@ -71,7 +71,7 @@ jobs:
             --no-restore
     - name: Run tests
       run: |
-          dotnet test src/Elzik.Breef.Api/Elzik.Breef.Api.csproj \
+          dotnet test **/*.csproj \
             --configuration Release \
             --verbosity normal \
             -p:CollectCoverage=true \
