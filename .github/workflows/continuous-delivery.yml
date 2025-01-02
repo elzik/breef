@@ -1,0 +1,89 @@
+name: Continuous Delivery
+
+on:
+  push: {}
+  pull_request: {}
+  workflow_dispatch:
+    inputs:
+      force-release:
+        type: boolean
+        description: Force tag & release even when the source branch is not main or no production source files have changed
+
+jobs:
+  check-release-requirement:
+    runs-on: ubuntu-latest
+    outputs:
+      needs-release: ${{ steps.release-check.outputs.needs-release }}
+      semantic-version: ${{ steps.get-semver.outputs.semantic-version }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: GetSemVer
+      id: get-semver
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 6.1.0
+        output=$(dotnet-gitversion)
+        semver=$(echo $output | grep -oP '"SemVer"\s*:\s*"\K[^"]+')
+        echo $output
+        echo "Semantic version: $semver"
+        echo "semantic-version=$semver" >> $GITHUB_OUTPUT
+    - name: Check for Release Requirement
+      id: release-check
+      run: |
+        productionFilesChangedCount=$(git diff --name-only HEAD^ HEAD | grep -E 'src/' | wc -l)
+        echo "$productionFilesChangedCount production source code files have changed"
+        productionFilesChanged=$((productionFilesChangedCount > 0))
+        echo "Git ref: ${{ github.ref_name }}"
+        branchIsMain=$([[ "${{ github.ref_name }}" == "main" ]] && echo true || echo false)
+        forceReleaseRequested=$([[ "${{ github.event.inputs.force-release }}" == "true" ]] && echo true || echo false)
+        echo "Forced release requested: $forceReleaseRequested"
+        needsRelease=$([[ "$forceReleaseRequested" == "true" || ( "$productionFilesChanged" == "1" && "$branchIsMain" == "true" ) ]] && echo true || echo false)
+        echo "Release will be generated: $needsRelease"
+        echo "needs-release=$needsRelease" >> $GITHUB_OUTPUT
+
+  display-job-outputs:
+    needs: check-release-requirement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display Job Outputs
+        run: |
+            echo "needs-release = ${{ needs.check-release-requirement.outputs.needs-release }}"
+            echo "semantic-version = ${{ needs.check-release-requirement.outputs.semantic-version }}"
+
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    needs: check-release-requirement
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.x.x
+    - name: Restore dependencies
+      run: dotnet restore src/Elzik.Breef.Api/Elzik.Breef.Api.csproj
+    - name: Build
+      run: dotnet build src/Elzik.Breef.Api/Elzik.Breef.Api.csproj \
+        --configuration Release     
+        --no-restore
+    - name: Run tests
+      run: dotnet test src/Elzik.Breef.Api/Elzik.Breef.Api.csproj \
+        -configuration Release \
+        --verbosity normal \
+        -p:CollectCoverage=true \
+        -p:CoverletOutput=TestResults/coverage.opencover.xml \
+        -p:CoverletOutputFormat=opencover
+    - name: Upload Coverage Badge
+      if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
+      uses: exuanbo/actions-deploy-gist@v1
+      with:
+        token: ${{ secrets.CODE_COVERAGE_AUTH_TOKEN }}
+        gist_id: 527882e89a938dc78f61a08c300edec4
+        gist_description: "code-coverage-${{ github.ref_name }}"
+        gist_file_name: breef-code-coverage-${{ github.ref_name }}.svg
+        file_path: tests/TestResults/badge_shieldsio_linecoverage_green.svg
+    - name: Build Docker image
+      run: docker build -t ghcr.io/${{ github.repository_owner }}/elzik-breef-api:latest \
+        -f src/Elzik.Breef.Api/Dockerfile .
