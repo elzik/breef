@@ -65,16 +65,18 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore src/Elzik.Breef.Api/Elzik.Breef.Api.csproj
     - name: Build
-      run: dotnet build src/Elzik.Breef.Api/Elzik.Breef.Api.csproj \
-        --configuration Release \
-        --no-restore
+      run: |
+          dotnet build src/Elzik.Breef.Api/Elzik.Breef.Api.csproj \
+            --configuration Release \
+            --no-restore
     - name: Run tests
-      run: dotnet test src/Elzik.Breef.Api/Elzik.Breef.Api.csproj \
-        --configuration Release \
-        --verbosity normal \
-        -p:CollectCoverage=true \
-        -p:CoverletOutput=TestResults/coverage.opencover.xml \
-        -p:CoverletOutputFormat=opencover
+      run: |
+          dotnet test src/Elzik.Breef.Api/Elzik.Breef.Api.csproj \
+            --configuration Release \
+            --verbosity normal \
+            -p:CollectCoverage=true \
+            -p:CoverletOutput=TestResults/coverage.opencover.xml \
+            -p:CoverletOutputFormat=opencover
     - name: Upload Coverage Badge
       if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
       uses: exuanbo/actions-deploy-gist@v1
