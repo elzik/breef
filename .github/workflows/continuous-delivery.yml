@@ -63,10 +63,10 @@ jobs:
       with:
         dotnet-version: 8.x.x
     - name: Restore dependencies
-      run: dotnet restore src/Elzik.Breef.Api/Elzik.Breef.Api.csproj
+      run: dotnet restore
     - name: Build
       run: |
-          dotnet build src/Elzik.Breef.Api/Elzik.Breef.Api.csproj \
+          dotnet build \
             --configuration Release \
             --no-restore
     - name: Run tests
