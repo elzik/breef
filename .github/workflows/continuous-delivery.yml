@@ -71,13 +71,20 @@ jobs:
             --no-restore
     - name: Run tests
       run: |
-          dotnet test \
-            --configuration Release \
-            --no-build \
-            --verbosity normal \
-            -p:CollectCoverage=true \
-            -p:CoverletOutput=TestResults/coverage.opencover.xml \
-            -p:CoverletOutputFormat=opencover
+        dotnet test \
+          --configuration Release \
+          --no-build \
+          --verbosity normal \
+          -p:CollectCoverage=true \
+          -p:CoverletOutput=TestResults/coverage.opencover.xml \
+          -p:CoverletOutputFormat=opencover
+        dotnet tool update \
+          --global dotnet-reportgenerator-globaltool \
+          --version 5.*
+        reportgenerator \
+          "-reports:${repoRootPath}tests/Elzik.Breef.Api.Tests.Functional/TestResults/coverage.opencover.xml" \
+          "-targetdir:${repoRootPath}tests/TestResults" \
+          "-reporttypes:Badges;Cobertura"
     - name: Upload Coverage Badge
       if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
       uses: exuanbo/actions-deploy-gist@v1
