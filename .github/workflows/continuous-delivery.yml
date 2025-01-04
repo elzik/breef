@@ -63,28 +63,11 @@ jobs:
       with:
         dotnet-version: 8.x.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: pwsh build/api/restore.ps1
     - name: Build
-      run: |
-          dotnet build \
-            --configuration Release \
-            --no-restore
+      run: pwsh build/api/build.ps1
     - name: Run tests
-      run: |
-        dotnet test \
-          --configuration Release \
-          --no-build \
-          --verbosity normal \
-          -p:CollectCoverage=true \
-          -p:CoverletOutput=TestResults/coverage.opencover.xml \
-          -p:CoverletOutputFormat=opencover
-        dotnet tool update \
-          --global dotnet-reportgenerator-globaltool \
-          --version 5.*
-        reportgenerator \
-          "-reports:${repoRootPath}tests/Elzik.Breef.Api.Tests.Functional/TestResults/coverage.opencover.xml" \
-          "-targetdir:${repoRootPath}tests/TestResults" \
-          "-reporttypes:Badges;Cobertura"
+      run: pwsh build/api/test.ps1
     - name: Upload Coverage Badge
       if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
       uses: exuanbo/actions-deploy-gist@v1
@@ -95,8 +78,4 @@ jobs:
         gist_file_name: breef-code-coverage-${{ github.ref_name }}.svg
         file_path: tests/TestResults/badge_shieldsio_linecoverage_green.svg
     - name: Build Docker image
-      run: |
-        docker build \
-          -t ghcr.io/${{ github.repository_owner }}/elzik-breef-api:latest \
-          -f src/Elzik.Breef.Api/Dockerfile \
-          src
+      run: pwsh build/api/docker-build.ps1
