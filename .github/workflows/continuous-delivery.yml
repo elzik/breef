@@ -78,4 +78,4 @@ jobs:
         gist_file_name: breef-code-coverage-${{ github.ref_name }}.svg
         file_path: tests/TestResults/badge_shieldsio_linecoverage_green.svg
     - name: Build Docker image
-      run: pwsh build/api/docker-build.ps1
+      run: pwsh build/api/build-docker.ps1
