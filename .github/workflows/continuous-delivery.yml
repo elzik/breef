@@ -95,5 +95,7 @@ jobs:
         gist_file_name: breef-code-coverage-${{ github.ref_name }}.svg
         file_path: tests/TestResults/badge_shieldsio_linecoverage_green.svg
     - name: Build Docker image
-      run: docker build -t ghcr.io/${{ github.repository_owner }}/elzik-breef-api:latest \
-        -f src/Elzik.Breef.Api/Dockerfile .
+      run: |
+        docker build \
+          -t ghcr.io/${{ github.repository_owner }}/elzik-breef-api:latest \
+          -f src/Elzik.Breef.Api/Dockerfile .
