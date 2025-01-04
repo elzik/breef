@@ -7,7 +7,7 @@ public class Program
 {
     protected Program()
     {
-        // This satisfies SonarQube's S1118: Utility classes should not have public constructors
+        // This satisfies Sonar's S1118: Utility classes should not have public constructors
     }
 
     public static async Task Main(string[] args)
