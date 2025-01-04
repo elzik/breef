@@ -99,4 +99,4 @@ jobs:
         docker build \
           -t ghcr.io/${{ github.repository_owner }}/elzik-breef-api:latest \
           -f src/Elzik.Breef.Api/Dockerfile \
-          src/Elzik.Breef.Api
+          src
