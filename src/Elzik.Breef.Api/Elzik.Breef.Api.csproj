@@ -18,4 +18,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Elzik.Breef.Application\Elzik.Breef.Application.csproj" />
+    <ProjectReference Include="..\Elzik.Breef.Domain\Elzik.Breef.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

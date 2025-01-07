@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Elzik.Breef.Domain\Elzik.Breef.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

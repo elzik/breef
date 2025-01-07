@@ -24,9 +24,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Api.Tests.Funct
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C0C3A88F-44EC-4383-96FF-3BE016F2122B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Application", "Elzik.Breef.Application\Elzik.Breef.Application.csproj", "{40E22129-42C0-4ACD-BEB2-562E19E403B9}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Domain", "src\Elzik.Breef.Domain\Elzik.Breef.Domain.csproj", "{5EE78092-1835-4537-BB05-94C22252029E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Application", "src\Elzik.Breef.Application\Elzik.Breef.Application.csproj", "{01A87987-E167-4D02-AE4A-C69154F66AEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,14 +42,14 @@ Global
 		{89FEF4C5-5D0F-44A7-8504-5A49C445A000}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89FEF4C5-5D0F-44A7-8504-5A49C445A000}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89FEF4C5-5D0F-44A7-8504-5A49C445A000}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40E22129-42C0-4ACD-BEB2-562E19E403B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40E22129-42C0-4ACD-BEB2-562E19E403B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40E22129-42C0-4ACD-BEB2-562E19E403B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40E22129-42C0-4ACD-BEB2-562E19E403B9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5EE78092-1835-4537-BB05-94C22252029E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5EE78092-1835-4537-BB05-94C22252029E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5EE78092-1835-4537-BB05-94C22252029E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5EE78092-1835-4537-BB05-94C22252029E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01A87987-E167-4D02-AE4A-C69154F66AEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01A87987-E167-4D02-AE4A-C69154F66AEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01A87987-E167-4D02-AE4A-C69154F66AEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01A87987-E167-4D02-AE4A-C69154F66AEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
