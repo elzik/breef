@@ -11,7 +11,8 @@
     "Docker": {
       "commandName": "Docker",
       "environmentVariables": {
-        "ASPNETCORE_HTTP_PORTS": "8080"
+        "ASPNETCORE_HTTP_PORTS": "8080",
+        "BREEF_API_KEY": "test-key"
       },
       "publishAllPorts": true,
       "useSSL": false
