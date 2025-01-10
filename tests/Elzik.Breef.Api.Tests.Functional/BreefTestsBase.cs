@@ -7,19 +7,17 @@ namespace Elzik.Breef.Api.Tests.Functional
 {
     public abstract class BreefTestsBase
     {
-        public static string ApiKey = Guid.NewGuid().ToString();
-        public string BaseUrl => $"http://localhost:{HostPort}";
+        protected static string ApiKey { get; private set; } = ApiKey = Guid.NewGuid().ToString();
+        protected string BaseUrl => $"http://localhost:{HostPort}";
 
-        public virtual int HostPort { get; protected set; } = 8080;
-        public abstract HttpClient Client { get; }
+        protected virtual int HostPort { get; set; } = 8080;
+        protected abstract HttpClient Client { get; }
         protected virtual bool SkipTestsIf { get; }
         protected virtual string SkipTestsReason { get; } = "Test was skipped but no reason was given.";
 
         protected BreefTestsBase()
         {
-            ApiKey = Guid.NewGuid().ToString();
             Environment.SetEnvironmentVariable("BREEF_API_KEY", ApiKey);
-            Debug.WriteLine(this.GetType().Name);
         }
 
 

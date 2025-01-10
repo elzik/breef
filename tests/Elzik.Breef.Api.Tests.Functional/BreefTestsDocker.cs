@@ -9,26 +9,27 @@ namespace Elzik.Breef.Api.Tests.Functional;
 public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 {
     private const string DockerImageName = "ghcr.io/elzik/elzik-breef-api:latest";
-    private readonly IContainer _testContainer;
+    private readonly IContainer? _testContainer;
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly bool _skipTestsIf;
 
     private readonly HttpClient _client;
 
-    public override HttpClient Client => _client;
+    protected override HttpClient Client => _client;
     protected override bool SkipTestsIf => _skipTestsIf;
-    protected override string SkipTestsReason => "Docker is not available. Install Docker Engine for Linux, " +
+    protected override string SkipTestsReason => "Test was skipped because Docker is not available. Install Docker Engine for Linux, " +
         "Docker Desktop for Windows or make peace with the fact that tests can not run for the Docker container.";
 
     public BreefTestsDocker(ITestOutputHelper testOutputHelper)
     {
         _skipTestsIf = DockerIsUnavailable();
+        _testOutputHelper = testOutputHelper
+            ?? throw new ArgumentNullException(nameof(testOutputHelper));
+        _client = new HttpClient();
+        _client.DefaultRequestHeaders.Add("BREEF-API-KEY", ApiKey);
 
         if (!_skipTestsIf)
         {
-            _testOutputHelper = testOutputHelper
-                ?? throw new ArgumentNullException(nameof(testOutputHelper));
-
             BuildDockerImage();
 
             var outputConsumer = Consume.RedirectStdoutAndStderrToStream(
@@ -42,9 +43,6 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8080))
                 .WithOutputConsumer(outputConsumer)
                 .Build();
-
-            _client = new HttpClient();
-            _client.DefaultRequestHeaders.Add("BREEF-API-KEY", ApiKey);
         }
     }
 
@@ -76,7 +74,7 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
         _testOutputHelper.WriteLine(process.StandardOutput.ReadToEnd());
     }
 
-    private bool DockerIsUnavailable()
+    private static bool DockerIsUnavailable()
     {
         try
         {
@@ -119,7 +117,8 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
     {
         if (!_skipTestsIf)
         {
-            await _testContainer.StartAsync();
+            await _testContainer!.StartAsync(); // Null forgiven since if we're not skipping tests,
+                                                // _testContainer will never be null
             HostPort = _testContainer.GetMappedPublicPort(8080);
         }
     }
@@ -128,20 +127,16 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
     {
         if (!_skipTestsIf)
         {
-            await _testContainer.StopAsync();
+            await _testContainer!.StopAsync(); // Null forgiven since if we're not skipping tests,
+                                               // _testContainer will never be null
         }
     }
 }
 
-public class TestOutputHelperStream : Stream
+public class TestOutputHelperStream(ITestOutputHelper testOutputHelper) : Stream
 {
-    private readonly ITestOutputHelper _testOutputHelper;
+    private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
     private readonly MemoryStream _memoryStream = new();
-
-    public TestOutputHelperStream(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
 
     public override void Write(byte[] buffer, int offset, int count)
     {
