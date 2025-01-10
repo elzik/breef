@@ -4,6 +4,7 @@ dotnet test $repoRoot `
     --configuration Release `
     --no-build `
     --verbosity normal `
+    --logger trx `
     -p:CollectCoverage=true `
     -p:CoverletOutput=TestResults/coverage.opencover.xml `
     -p:CoverletOutputFormat=opencover

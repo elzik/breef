@@ -68,11 +68,12 @@ jobs:
       run: pwsh build/api/build.ps1
     - name: Run tests
       run: pwsh build/api/test.ps1
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
+    - name: Test Report
+      uses: dorny/test-reporter@v1
       with:
-        name: test-results
-        path: 'tests/**/TestResults/coverage.opencover.xml'
+        name: Test repot
+        path: tests\**\TestResults\*.trx
+        reporter: dotnet-trx
     - name: Upload Coverage Badge
       if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
       uses: exuanbo/actions-deploy-gist@v1
