@@ -72,7 +72,7 @@ jobs:
       uses: dorny/test-reporter@v1
       with:
         name: Test repot
-        path: tests/**/TestResults/*.trx
+        path: '**/test-results.trx'
         reporter: dotnet-trx
     - name: Upload Coverage Badge
       if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
