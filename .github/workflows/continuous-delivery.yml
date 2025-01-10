@@ -68,6 +68,10 @@ jobs:
       run: pwsh build/api/build.ps1
     - name: Run tests
       run: pwsh build/api/test.ps1
+    - name: Upload test results
+      uses: actions/upload-test-results@v1
+      with:
+        path: '**/TestResults/*.xml'
     - name: Upload Coverage Badge
       if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
       uses: exuanbo/actions-deploy-gist@v1
