@@ -22,33 +22,33 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 
     public BreefTestsDocker(ITestOutputHelper testOutputHelper)
     {
-        _testOutputHelper = testOutputHelper
-            ?? throw new ArgumentNullException(nameof(testOutputHelper));
-
         _skipTestsIf = DockerIsUnavailable();
 
-        if(!_skipTestsIf)
+        if (!_skipTestsIf)
         {
-            BuildImage();
+            _testOutputHelper = testOutputHelper
+                ?? throw new ArgumentNullException(nameof(testOutputHelper));
+
+            BuildDockerImage();
+
+            var outputConsumer = Consume.RedirectStdoutAndStderrToStream(
+                        new TestOutputHelperStream(_testOutputHelper),
+                        new TestOutputHelperStream(_testOutputHelper));
+
+            _testContainer = new ContainerBuilder()
+                .WithImage(DockerImageName) // Replace with your Docker image
+                .WithPortBinding(8080, true) // Use a random available port on the host
+                .WithEnvironment("BREEF_API_KEY", ApiKey)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8080))
+                .WithOutputConsumer(outputConsumer)
+                .Build();
+
+            _client = new HttpClient();
+            _client.DefaultRequestHeaders.Add("BREEF-API-KEY", ApiKey);
         }
-
-        var outputConsumer = Consume.RedirectStdoutAndStderrToStream(
-            new TestOutputHelperStream(_testOutputHelper),
-            new TestOutputHelperStream(_testOutputHelper));
-
-        _testContainer = new ContainerBuilder()
-            .WithImage(DockerImageName) // Replace with your Docker image
-            .WithPortBinding(8080, true) // Use a random available port on the host
-            .WithEnvironment("BREEF_API_KEY", ApiKey)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8080))
-            .WithOutputConsumer(outputConsumer)
-            .Build();
-
-        _client = new HttpClient();
-        _client.DefaultRequestHeaders.Add("BREEF-API-KEY", ApiKey);
     }
 
-    private void BuildImage()
+    private void BuildDockerImage()
     {
         var dockerScriptPath = Path.GetFullPath("./../../../../../build/api/build-docker.ps1");
 
@@ -117,24 +117,19 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        try
+        if (!_skipTestsIf)
         {
             await _testContainer.StartAsync();
+            HostPort = _testContainer.GetMappedPublicPort(8080);
         }
-        catch (Docker.DotNet.DockerApiException ex)
-        {
-            _testOutputHelper.WriteLine($"Ensure that an up-to-date production Docker image named {DockerImageName} " +
-                $"has been built prior to these tests starting.");
-            _testOutputHelper.WriteLine(ex.Message);
-            throw;
-        }
-
-        HostPort = _testContainer.GetMappedPublicPort(8080);
     }
 
     public async Task DisposeAsync()
     {
-        await _testContainer.StopAsync();
+        if (!_skipTestsIf)
+        {
+            await _testContainer.StopAsync();
+        }
     }
 }
 
