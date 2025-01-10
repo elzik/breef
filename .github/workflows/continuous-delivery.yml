@@ -69,8 +69,9 @@ jobs:
     - name: Run tests
       run: pwsh build/api/test.ps1
     - name: Upload test results
-      uses: actions/upload-test-results@v1
+      uses: actions/upload-artifact@v2
       with:
+        name: test-results
         path: '**/TestResults/*.xml'
     - name: Upload Coverage Badge
       if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
