@@ -70,6 +70,8 @@ jobs:
       run: pwsh build/api/restore.ps1
     - name: Build
       run: pwsh build/api/build.ps1
+    - name: Build Docker image
+      run: pwsh build/api/build-docker.ps1
     - name: Run tests
       run: pwsh build/api/test.ps1
     - name: Test report
@@ -87,5 +89,3 @@ jobs:
         gist_description: "code-coverage-${{ github.ref_name }}"
         gist_file_name: breef-code-coverage-${{ github.ref_name }}.svg
         file_path: tests/TestResults/badge_shieldsio_linecoverage_green.svg
-    - name: Build Docker image
-      run: pwsh build/api/build-docker.ps1
