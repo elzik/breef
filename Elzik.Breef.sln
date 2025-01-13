@@ -28,6 +28,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Domain", "src\E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Application", "src\Elzik.Breef.Application\Elzik.Breef.Application.csproj", "{01A87987-E167-4D02-AE4A-C69154F66AEE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Domain.Tests.Integration", "tests\Elzik.Breef.Domain.Tests.Integration\Elzik.Breef.Domain.Tests.Integration.csproj", "{16AA824A-6239-410C-8E2D-F1B3DC4662EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Infrastructure", "src\Elzik.Breef.Infrastructure\Elzik.Breef.Infrastructure.csproj", "{D7D7BA76-05C8-4E8D-AA30-387BC8AC0D4B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Infrastructure.Tests.Integration", "tests\Elzik.Breef.Infrastructure.Tests.Integration\Elzik.Breef.Infrastructure.Tests.Integration.csproj", "{8E5595A3-1208-4E5B-807A-A39E48BA6515}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{7F0140C3-DDE1-4248-9FCC-980699F2D05A}"
+	ProjectSection(SolutionItems) = preProject
+		tests\TestData\TestHtmlPage-ExpectedContent.txt = tests\TestData\TestHtmlPage-ExpectedContent.txt
+		tests\TestData\TestHtmlPage.html = tests\TestData\TestHtmlPage.html
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +62,18 @@ Global
 		{01A87987-E167-4D02-AE4A-C69154F66AEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01A87987-E167-4D02-AE4A-C69154F66AEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01A87987-E167-4D02-AE4A-C69154F66AEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16AA824A-6239-410C-8E2D-F1B3DC4662EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16AA824A-6239-410C-8E2D-F1B3DC4662EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16AA824A-6239-410C-8E2D-F1B3DC4662EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16AA824A-6239-410C-8E2D-F1B3DC4662EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7D7BA76-05C8-4E8D-AA30-387BC8AC0D4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7D7BA76-05C8-4E8D-AA30-387BC8AC0D4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7D7BA76-05C8-4E8D-AA30-387BC8AC0D4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7D7BA76-05C8-4E8D-AA30-387BC8AC0D4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E5595A3-1208-4E5B-807A-A39E48BA6515}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E5595A3-1208-4E5B-807A-A39E48BA6515}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E5595A3-1208-4E5B-807A-A39E48BA6515}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E5595A3-1208-4E5B-807A-A39E48BA6515}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,6 +81,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{10347BFB-03B7-4372-AED3-9ACECF635EBD} = {8DE26EA3-7C1E-4907-A71F-18EA4C142467}
 		{89FEF4C5-5D0F-44A7-8504-5A49C445A000} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
+		{16AA824A-6239-410C-8E2D-F1B3DC4662EF} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
+		{8E5595A3-1208-4E5B-807A-A39E48BA6515} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
+		{7F0140C3-DDE1-4248-9FCC-980699F2D05A} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6E3F0693-A48D-48DC-935C-2D8758390BC2}
