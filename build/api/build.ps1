@@ -5,6 +5,5 @@ try {
         --configuration Release `
         --no-restore -ErrorAction Stop
 } catch {
-    Write-Error "Build failed with error: $_"
-    throw
+    $global:LASTEXITCODE = 1
 }
