@@ -1,17 +1,12 @@
 ﻿using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elzik.Breef.Domain
 {
-    public class ContentExtractor(IHttpClient httpClient)
+    public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
     {
         public async Task<string> Extract(string webPageUrl)
         {
-            var html = await httpClient.GetStringAsync(webPageUrl);
+            var html = await httpClient.DownloadAsync(webPageUrl);
 
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(html);
