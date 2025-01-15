@@ -69,7 +69,7 @@ jobs:
     - name: Restore dependencies
       run: pwsh build/api/restore.ps1
     - name: Build
-      run: pwsh build/api/build.ps1 -ErrorAction Stop
+      run: pwsh build/api/build.ps1
     - name: Build Docker image
       run: pwsh build/api/build-docker.ps1
     - name: Run tests
