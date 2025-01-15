@@ -12,9 +12,9 @@ namespace Elzik.Breef.Domain.Tests.Integration
         {
             // Arrange
             var mockTestUrl = "https://mock.url";
-            var mockHttpClient = Substitute.For<IHttpClient>();
+            var mockHttpClient = Substitute.For<IWebPageDownloader>();
             var testHtml = await File.ReadAllTextAsync(Path.Join("../../../../TestData", testFileName));
-            mockHttpClient.GetStringAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
+            mockHttpClient.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
 
             // Act
             var extractor = new ContentExtractor(mockHttpClient);
