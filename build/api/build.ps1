@@ -6,4 +6,5 @@ try {
         --no-restore -ErrorAction Stop
 } catch {
     $global:LASTEXITCODE = 1
+    Write-Error $_
 }
