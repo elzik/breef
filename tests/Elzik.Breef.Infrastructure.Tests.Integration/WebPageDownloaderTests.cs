@@ -2,17 +2,17 @@ using FluentAssertions;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration
 {
-    public class HttpClientWrapperTests
+    public class WebPageDownloaderTests
     {
         [Fact]
-        public async Task GetStringAsync_WithUrlFromStaticPage_ReturnsString()
+        public async Task DownloadAsync_WithUrlFromStaticPage_ReturnsString()
         {
             // Arrange
             var testUrl = "https://elzik.github.io/test-web/test.html";
 
             // Act
-            var httpClient = new HttpClientWrapper();
-            var result = await httpClient.GetStringAsync(testUrl);
+            var httpClient = new WebPageDownloader();
+            var result = await httpClient.DownloadAsync(testUrl);
             var lineEndingNormalisedResult = result.Replace("\r\n", "\n");
 
             // Assert

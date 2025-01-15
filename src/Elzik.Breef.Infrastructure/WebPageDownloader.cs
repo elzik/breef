@@ -2,11 +2,11 @@
 
 namespace Elzik.Breef.Infrastructure
 {
-    public sealed class HttpClientWrapper : IHttpClient, IDisposable
+    public sealed class WebPageDownloader : IWebPageDownloader, IDisposable
     {
         private readonly HttpClient _httpClient = new();
 
-        public async Task<string> GetStringAsync(string url)
+        public async Task<string> DownloadAsync(string url)
         {
             return await _httpClient.GetStringAsync(url);
         }
