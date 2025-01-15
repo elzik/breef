@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Infrastructure.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{7F0140C3-DDE1-4248-9FCC-980699F2D05A}"
 	ProjectSection(SolutionItems) = preProject
+		tests\TestData\BbcNewsPage-ExpectedContent.txt = tests\TestData\BbcNewsPage-ExpectedContent.txt
+		tests\TestData\BbcNewsPage.html = tests\TestData\BbcNewsPage.html
 		tests\TestData\TestHtmlPage-ExpectedContent.txt = tests\TestData\TestHtmlPage-ExpectedContent.txt
 		tests\TestData\TestHtmlPage.html = tests\TestData\TestHtmlPage.html
 	EndProjectSection

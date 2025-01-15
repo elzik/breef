@@ -8,6 +8,7 @@ namespace Elzik.Breef.Domain.Tests.Integration
     {
         [Theory]
         [InlineData("TestHtmlPage.html", "TestHtmlPage-ExpectedContent.txt")]
+        [InlineData("BbcNewsPage.html", "BbcNewsPage-ExpectedContent.txt")]
         public async Task Extract_WithValidUrl_ExtractsContent(string testFileName, string expectedFileName)
         {
             // Arrange
@@ -24,7 +25,6 @@ namespace Elzik.Breef.Domain.Tests.Integration
             var expected = await File.ReadAllTextAsync(Path.Join("../../../../TestData", expectedFileName));
             var lineEndingNormalisedResult = result.Replace("\r\n", "\n");
 
-            lineEndingNormalisedResult.Should().Be(expected);
             lineEndingNormalisedResult.Should().Be(expected);
         }
     }
