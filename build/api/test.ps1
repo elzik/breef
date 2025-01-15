@@ -16,3 +16,7 @@ reportgenerator `
     "-targetdir:$repoRoot/tests/TestResults" `
     "-reporttypes:Badges;Cobertura" `
     "-filefilters:-*.g.cs" # https://github.com/danielpalme/ReportGenerator/issues/457
+
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
