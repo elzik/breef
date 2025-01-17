@@ -1,7 +1,7 @@
-using AspNetCore.Authentication.ApiKey;
 using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Application;
-using System.Diagnostics;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Elzik.Breef.Api;
 
@@ -38,6 +38,16 @@ public class Program
         builder.AddAuth();
 
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
+
+        var modelId = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_MODEL_ID");
+        var endpoint = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_ENDPOINT");
+        var apiKey = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_API_KEY");
+        var kernelBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
+        kernelBuilder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Trace));
+        var kernel = kernelBuilder.Build();
+        builder.Services.AddSingleton(kernel);
+        builder.Services.AddScoped(sp => sp.GetRequiredService<Kernel>().GetRequiredService<IChatCompletionService>());
+
 
 
         var app = builder.Build();
