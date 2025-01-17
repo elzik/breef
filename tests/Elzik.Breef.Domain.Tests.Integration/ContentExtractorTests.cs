@@ -23,9 +23,16 @@ namespace Elzik.Breef.Domain.Tests.Integration
 
             // Assert
             var expected = await File.ReadAllTextAsync(Path.Join("../../../../TestData", expectedFileName));
-            var lineEndingNormalisedResult = result.Replace("\r\n", "\n");
 
-            lineEndingNormalisedResult.Should().Be(expected);
+            var lineEndingNormalisedExpected = NormaliseLineEndings(expected);
+            var lineEndingNormalisedResult = NormaliseLineEndings(result);
+
+            lineEndingNormalisedResult.Should().Be(lineEndingNormalisedExpected);
+        }
+
+        private string NormaliseLineEndings(string text)
+        {
+            return text.Replace("\r\n", "\n");
         }
     }
 }
