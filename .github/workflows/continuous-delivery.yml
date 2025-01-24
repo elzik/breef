@@ -73,7 +73,11 @@ jobs:
     - name: Build Docker image
       run: pwsh build/api/build-docker.ps1
     - name: Run tests
-      run: pwsh build/api/test.ps1
+      run: |
+        export BREEF_TESTS_AI_MODEL_ID=${{ secrets.BREEF_TESTS_AI_MODEL_ID }}
+        export BREEF_TESTS_AI_ENDPOINT=${{ secrets.BREEF_TESTS_AI_ENDPOINT }}
+        export BREEF_TESTS_AI_API_KEY=${{ secrets.BREEF_TESTS_AI_API_KEY }}
+        pwsh build/api/test.ps1
     - name: Test report
       uses: dorny/test-reporter@v1
       with:

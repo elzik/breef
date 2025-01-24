@@ -31,14 +31,27 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
         {
             BuildDockerImage();
 
+            var modelId = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_MODEL_ID");
+            Skip.If(string.IsNullOrWhiteSpace(modelId),
+                "Skipped because no AI model ID provided in BREEF_TESTS_AI_MODEL_ID environment variable.");
+            var endpoint = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_ENDPOINT");
+            Skip.If(string.IsNullOrWhiteSpace(endpoint),
+                "Skipped because no AI endpoint provided in BREEF_TESTS_AI_ENDPOINT environment variable.");
+            var apiKey = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_API_KEY");
+            Skip.If(string.IsNullOrWhiteSpace(apiKey),
+                "Skipped because no AI API key provided in BREEF_TESTS_AI_API_KEY environment variable.");
+
             var outputConsumer = Consume.RedirectStdoutAndStderrToStream(
                         new TestOutputHelperStream(_testOutputHelper),
                         new TestOutputHelperStream(_testOutputHelper));
 
             _testContainer = new ContainerBuilder()
-                .WithImage(DockerImageName) // Replace with your Docker image
-                .WithPortBinding(8080, true) // Use a random available port on the host
+                .WithImage(DockerImageName)
+                .WithPortBinding(8080, true)
                 .WithEnvironment("BREEF_API_KEY", ApiKey)
+                .WithEnvironment("BREEF_TESTS_AI_MODEL_ID", modelId)
+                .WithEnvironment("BREEF_TESTS_AI_ENDPOINT", endpoint)
+                .WithEnvironment("BREEF_TESTS_AI_API_KEY", apiKey)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8080))
                 .WithOutputConsumer(outputConsumer)
                 .Build();

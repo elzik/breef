@@ -13,11 +13,19 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             // Act
             var httpClient = new WebPageDownloader();
             var result = await httpClient.DownloadAsync(testUrl);
-            var lineEndingNormalisedResult = result.Replace("\r\n", "\n");
 
             // Assert
             var expectedSource = await File.ReadAllTextAsync("../../../../TestData/TestHtmlPage.html");
-            lineEndingNormalisedResult.Should().Be(expectedSource);
+
+            var lineEndingNormalisedExpected = NormaliseLineEndings(expectedSource);
+            var lineEndingNormalisedResult = NormaliseLineEndings(result);
+
+            lineEndingNormalisedResult.Should().Be(lineEndingNormalisedExpected);
+        }
+
+        private string NormaliseLineEndings(string text)
+        {
+            return text.Replace("\r\n", "\n");
         }
     }
 }
