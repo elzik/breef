@@ -2,6 +2,6 @@
 {
     public interface IBreefGenerator
     {
-        Task<Domain.Breef> GenerateBreefAsync(string url);
+        Task<Domain.PublishedBreef> GenerateBreefAsync(string url);
     }
 }

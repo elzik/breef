@@ -4,9 +4,9 @@ namespace Elzik.Breef.Application
 {
     public class BreefGenerator : IBreefGenerator
     {
-        public async Task<Domain.Breef> GenerateBreefAsync(string url)
+        public async Task<Domain.PublishedBreef> GenerateBreefAsync(string url)
         {
-            var breef = new Domain.Breef(url);
+            var breef = new Domain.PublishedBreef(url);
 
             Debug.WriteLine(DateTime.Now.TimeOfDay.TotalNanoseconds + ": " + url);
 
