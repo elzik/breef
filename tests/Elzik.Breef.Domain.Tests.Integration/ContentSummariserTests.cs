@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Elzik.Breef.Domain.Tests.Integration
 {
-    public partial class ContentSummariserTests(ITestOutputHelper TestOutputHelper)
+    public class ContentSummariserTests(ITestOutputHelper TestOutputHelper)
     {
         [SkippableTheory]
         [InlineData("TestHtmlPage-ExpectedContent.txt")]

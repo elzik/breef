@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
 {
-    public partial class WallabagClientTests
+    public class WallabagClientTests
     {
         private readonly IWallabagClient _wallabagClient;
         private readonly ITestOutputHelper _testOutputHelper;
