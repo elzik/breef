@@ -39,9 +39,12 @@ public class Program
 
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
 
-        var modelId = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_MODEL_ID");
-        var endpoint = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_ENDPOINT");
-        var apiKey = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_API_KEY");
+        var modelId = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_MODEL_ID") 
+            ?? throw new InvalidOperationException("BREEF_TESTS_AI_MODEL_ID must contain a model ID.");
+        var endpoint = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_ENDPOINT")
+            ?? throw new InvalidOperationException("BREEF_TESTS_AI_ENDPOINT must contain an endpoint URL.");
+        var apiKey = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_API_KEY")
+            ?? throw new InvalidOperationException("BREEF_TESTS_AI_API_KEY must contain an API key.");
         var kernelBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
         kernelBuilder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Trace));
         var kernel = kernelBuilder.Build();

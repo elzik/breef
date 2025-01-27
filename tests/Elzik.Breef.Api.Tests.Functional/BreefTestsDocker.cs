@@ -10,24 +10,24 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
     private const string DockerImageName = "ghcr.io/elzik/elzik-breef-api:latest";
     private readonly IContainer? _testContainer;
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly bool _skipTestsIf;
+    private readonly bool _dockerIsUnavailable;
 
     private readonly HttpClient _client;
 
     protected override HttpClient Client => _client;
-    protected override bool SkipTestsIf => _skipTestsIf;
+    protected override bool SkipTestsIf => _dockerIsUnavailable;
     protected override string SkipTestsReason => "Test was skipped because Docker is not available. Install Docker Engine for Linux, " +
         "Docker Desktop for Windows or make peace with the fact that tests can not run for the Docker container.";
 
     public BreefTestsDocker(ITestOutputHelper testOutputHelper)
     {
-        _skipTestsIf = DockerIsUnavailable();
+        _dockerIsUnavailable = DockerIsUnavailable();
         _testOutputHelper = testOutputHelper
             ?? throw new ArgumentNullException(nameof(testOutputHelper));
         _client = new HttpClient();
         _client.DefaultRequestHeaders.Add("BREEF-API-KEY", ApiKey);
 
-        if (!_skipTestsIf)
+        if (!_dockerIsUnavailable)
         {
             BuildDockerImage();
 
@@ -127,7 +127,7 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        if (!_skipTestsIf)
+        if (!_dockerIsUnavailable)
         {
             await _testContainer!.StartAsync(); // Null forgiven since if we're not skipping tests,
                                                 // _testContainer will never be null
@@ -137,7 +137,7 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        if (!_skipTestsIf)
+        if (!_dockerIsUnavailable)
         {
             await _testContainer!.StopAsync(); // Null forgiven since if we're not skipping tests,
                                                // _testContainer will never be null

@@ -2,9 +2,9 @@
 {
     public static class BreefExtensions
     {
-        public static BreefResponse ToBreefResonse(this Domain.Breef breef)
+        public static BreefResponse ToBreefResonse(this Domain.PublishedBreef breef)
         {
-            return new BreefResponse(breef.Url);
+            return new BreefResponse(breef.PublishedUrl);
         }
     }
 }

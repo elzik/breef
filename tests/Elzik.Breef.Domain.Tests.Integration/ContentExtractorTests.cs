@@ -1,4 +1,3 @@
-using Elzik.Breef.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
 
@@ -30,7 +29,7 @@ namespace Elzik.Breef.Domain.Tests.Integration
             lineEndingNormalisedResult.Should().Be(lineEndingNormalisedExpected);
         }
 
-        private string NormaliseLineEndings(string text)
+        private static string NormaliseLineEndings(string text)
         {
             return text.Replace("\r\n", "\n");
         }
