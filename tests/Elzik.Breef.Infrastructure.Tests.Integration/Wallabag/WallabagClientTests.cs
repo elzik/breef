@@ -10,31 +10,30 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
         private readonly IWallabagClient _wallabagClient;
         private readonly ITestOutputHelper _testOutputHelper;
 
-        private readonly string _wallabagUrl;
-        private readonly string _wallaClientId;
-        private readonly string _wallabagClientSecret;
-        private readonly string _wallabagUsername;
-        private readonly string _wallabagPassword;
+        private readonly string? _wallabagUrl;
+        private readonly string? _wallaClientId;
+        private readonly string? _wallabagClientSecret;
+        private readonly string? _wallabagUsername;
+        private readonly string? _wallabagPassword;
 
         public WallabagClientTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper 
                 ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
-            _wallabagUrl = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_URL")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_URL must contain a Wallabag URL");
-
-            _wallaClientId = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_ID")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_CLIENT_ID must contain a Wallabag client ID");
-
-            _wallabagClientSecret = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_SECRET")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_CLIENT_SECRET must contain a Wallabag client secret");
-
-            _wallabagUsername = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_USERNAME")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_USERNAME must contain a Wallabag username");
-
-            _wallabagPassword = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_PASSWORD")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_PASSWORD must contain a Wallabag password");
+            _wallabagUrl = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_URL");
+            _wallaClientId = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_ID");
+            _wallabagClientSecret = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_SECRET");
+            _wallabagUsername = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_USERNAME");
+            _wallabagPassword = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_PASSWORD");
+            if (string.IsNullOrWhiteSpace(_wallabagUrl) 
+                || string.IsNullOrWhiteSpace(_wallaClientId) 
+                || string.IsNullOrWhiteSpace(_wallabagClientSecret) 
+                || string.IsNullOrWhiteSpace(_wallabagUsername) 
+                || string.IsNullOrWhiteSpace(_wallabagPassword))
+            {
+                return;
+            }
 
             var refitSettings = new RefitSettings
             {
@@ -61,9 +60,11 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
             _wallabagClient = RestService.For<IWallabagClient>(_wallabagUrl, refitSettings);
         }
 
-        [Fact]
+        [SkippableFact]
         public async Task GetTokenAsync_FromTestWallabagAccount_ReturnsToken()
         {
+            SkipIfEnvironmentVariablesNotSet();
+
             // Arrange
             var tokenRequest = new TokenRequest
             {
@@ -83,9 +84,11 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
             tokenResponse.TokenType.Should().Be("bearer");
         }
 
-        [Fact]
+        [SkippableFact]
         public async Task PostEntryAsync_WithValidEntry_PostsEntry()
         {
+            SkipIfEnvironmentVariablesNotSet();
+
             // Arrange
             var entry = new WallabagEntryCreateRequest
             {
@@ -109,6 +112,15 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
             wallabagEntry.Content.Should().Be(entry.Content);
             wallabagEntry.CreatedAt.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(10));
             wallabagEntry.UpdatedAt.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(10));
+        }
+
+        private void SkipIfEnvironmentVariablesNotSet()
+        {
+            Skip.If(string.IsNullOrWhiteSpace(_wallabagUrl), "Skipped because no Wallabag URL provided in BREEF_TESTS_WALLABAG_URL environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(_wallaClientId), "Skipped because no Wallabag client ID provided in BREEF_TESTS_WALLABAG_CLIENT_ID environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(_wallabagClientSecret), "Skipped because no Wallabag client secret provided in BREEF_TESTS_WALLABAG_CLIENT_SECRET environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(_wallabagUsername), "Skipped because no Wallabag username provided in BREEF_TESTS_WALLABAG_USERNAME environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(_wallabagPassword), "Skipped because no Wallabag password provided in BREEF_TESTS_WALLABAG_PASSWORD environment variable.");
         }
     }
 }
