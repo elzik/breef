@@ -1,5 +1,5 @@
 ﻿using Elzik.Breef.Infrastructure.Wallabag;
-using FluentAssertions;
+using Shouldly;
 using System.Text.Json;
 
 namespace Elzik.Breef.Tests.Infrastructure.Wallabag
@@ -20,7 +20,7 @@ namespace Elzik.Breef.Tests.Infrastructure.Wallabag
             var result = _wallabagDateTimeConverter.Read(ref reader, typeof(DateTime), new JsonSerializerOptions());
 
             // Assert
-            result.ToUniversalTime().Should().Be(new DateTime(2023, 10, 1, 12, 34, 56, DateTimeKind.Utc));
+            result.ToUniversalTime().ShouldBe(new DateTime(2023, 10, 1, 12, 34, 56, DateTimeKind.Utc));
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace Elzik.Breef.Tests.Infrastructure.Wallabag
             }
 
             // Assert
-            ex.Message.Should().Be(expectedMessage);
+            ex.Message.ShouldBe(expectedMessage);
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace Elzik.Breef.Tests.Infrastructure.Wallabag
             // Assert
             testWriter.Flush();
             var writtenJson = System.Text.Encoding.UTF8.GetString(testBuffer.WrittenMemory.ToArray());
-            writtenJson.Should().Be("\"2023-10-01T12:34:56Z\"");
+            writtenJson.ShouldBe("\"2023-10-01T12:34:56Z\"");
         }
     }
 }

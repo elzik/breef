@@ -1,5 +1,5 @@
-using FluentAssertions;
 using NSubstitute;
+using Shouldly;
 
 namespace Elzik.Breef.Domain.Tests.Integration
 {
@@ -26,7 +26,7 @@ namespace Elzik.Breef.Domain.Tests.Integration
             var lineEndingNormalisedExpected = NormaliseLineEndings(expected);
             var lineEndingNormalisedResult = NormaliseLineEndings(result);
 
-            lineEndingNormalisedResult.Should().Be(lineEndingNormalisedExpected);
+            lineEndingNormalisedResult.ShouldBe(lineEndingNormalisedExpected);
         }
 
         private static string NormaliseLineEndings(string text)

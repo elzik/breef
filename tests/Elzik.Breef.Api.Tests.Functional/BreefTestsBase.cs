@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using System.Diagnostics;
+﻿using Shouldly;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -35,8 +34,8 @@ namespace Elzik.Breef.Api.Tests.Functional
             // Assert
             response.EnsureSuccessStatusCode();
             var responseString = await response.Content.ReadAsStringAsync();
-            responseString.Should().NotBeNullOrEmpty();
-            responseString.Should().Contain("http://example.com");
+            responseString.ShouldNotBeNullOrEmpty();
+            responseString.ShouldContain("http://example.com");
         }
 
         [SkippableFact]
@@ -52,10 +51,10 @@ namespace Elzik.Breef.Api.Tests.Functional
             var response = await Client.PostAsJsonAsync($"{BaseUrl}/breefs", breef);
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
             var responseString = await response.Content.ReadAsStringAsync();
-            responseString.Should().NotBeNullOrEmpty();
-            responseString.Should().Contain("Unauthorised");
+            responseString.ShouldNotBeNullOrEmpty();
+            responseString.ShouldContain("Unauthorised");
         }
     }
 }

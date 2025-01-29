@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel;
-using Xunit.Abstractions;
 using Microsoft.Extensions.Logging;
-using FluentAssertions;
-using Xunit;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Shouldly;
+using Xunit.Abstractions;
 
 namespace Elzik.Breef.Domain.Tests.Integration
 {
@@ -17,7 +16,7 @@ namespace Elzik.Breef.Domain.Tests.Integration
         {
             // Arrange
             var modelId = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_MODEL_ID");
-            Skip.If(string.IsNullOrWhiteSpace(modelId), 
+            Skip.If(string.IsNullOrWhiteSpace(modelId),
                 "Skipped because no AI model ID provided in BREEF_TESTS_AI_MODEL_ID environment variable.");
             var endpoint = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_ENDPOINT");
             Skip.If(string.IsNullOrWhiteSpace(endpoint),
@@ -44,7 +43,7 @@ namespace Elzik.Breef.Domain.Tests.Integration
 
             // Assert
             TestOutputHelper.WriteLine(summary);
-            summary.Length.Should().BeGreaterThan(100, "because this is the minimum acceptable summary length");
+            summary.Length.ShouldBeGreaterThan(100, "because this is the minimum acceptable summary length");
         }
     }
 }
