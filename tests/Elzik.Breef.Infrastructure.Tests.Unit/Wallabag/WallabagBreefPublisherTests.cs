@@ -1,7 +1,7 @@
 ﻿using Elzik.Breef.Infrastructure.Wallabag;
-using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using Shouldly;
 
 namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
 {
@@ -56,7 +56,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
                     }
                 }
             };
-            wallabagClient.PostEntryAsync(Arg.Is<WallabagEntryCreateRequest>(r => 
+            wallabagClient.PostEntryAsync(Arg.Is<WallabagEntryCreateRequest>(r =>
                 r.Content == "test-content" &&
                 r.Url == "https://test.com" &&
                 r.Tags == "breef")).Returns(wallabagEntry);
@@ -65,7 +65,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
             var result = await wallabagBreefPublisher.PublishAsync(breef);
 
             // Assert
-            result.PublishedUrl.Should().Be($"{options.Value.BaseUrl}{wallabagEntry.Links.Self.Href}");
+            result.PublishedUrl.ShouldBe($"{options.Value.BaseUrl}{wallabagEntry.Links.Self.Href}");
         }
     }
 }

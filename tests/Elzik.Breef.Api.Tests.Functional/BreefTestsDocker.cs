@@ -115,7 +115,7 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
-            if(ex.Message.StartsWith("An error occurred trying to start process") 
+            if (ex.Message.StartsWith("An error occurred trying to start process")
                 && ex.Message.EndsWith("The system cannot find the file specified."))
             {
                 return true;

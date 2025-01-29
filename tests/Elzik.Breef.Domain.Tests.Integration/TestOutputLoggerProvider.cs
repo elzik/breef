@@ -1,5 +1,5 @@
-﻿using Xunit.Abstractions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 
 namespace Elzik.Breef.Domain.Tests.Integration
 {
