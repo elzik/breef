@@ -1,15 +1,13 @@
 ﻿using Elzik.Breef.Infrastructure.Wallabag;
-using Newtonsoft.Json;
 using Refit;
 using Shouldly;
-using System.Diagnostics;
 using Xunit.Abstractions;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
 {
-    public class WallabagClientTests
+    public class WallabagAuthClientTests
     {
-        private readonly IWallabagClient? _wallabagClient;
+        private readonly IWallabagAuthClient? _wallabagAuthClient;
         private readonly ITestOutputHelper _testOutputHelper;
 
         private readonly string? _wallabagUrl;
@@ -18,7 +16,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
         private readonly string? _wallabagUsername;
         private readonly string? _wallabagPassword;
 
-        public WallabagClientTests(ITestOutputHelper testOutputHelper)
+        public WallabagAuthClientTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper
                 ?? throw new ArgumentNullException(nameof(testOutputHelper));
@@ -36,65 +34,43 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
             {
                 return;
             }
-            var wallabagTokenRequest = new TokenRequest
-            {
-                ClientId = _wallaClientId,
-                ClientSecret = _wallabagClientSecret,
-                Username = _wallabagUsername,
-                Password = _wallabagPassword
-            };
 
-            var wallabagAuthClient = RestService.For<IWallabagAuthClient>(_wallabagUrl);
-            var refitSettings = new RefitSettings
-            {
-                AuthorizationHeaderValueGetter = async (request, cancellationToken) =>
-                {
-                    var tokenResponse = await wallabagAuthClient.GetTokenAsync(wallabagTokenRequest);
-                    return tokenResponse.AccessToken;
-                }
-            };
-
+            var refitSettings = new RefitSettings();
             if (Environment.GetEnvironmentVariable("BREEF_TESTS_ENABLE_HTTP_MESSAGE_LOGGING") == "true")
             {
                 refitSettings.HttpMessageHandlerFactory = () => new HttpMessageLoggingHandler(_testOutputHelper);
             }
 
-            _wallabagClient = RestService.For<IWallabagClient>(_wallabagUrl, refitSettings);
+            _wallabagAuthClient = RestService.For<IWallabagAuthClient>(_wallabagUrl, refitSettings);
+            if (_wallabagAuthClient == null)
+            {
+                throw new InvalidOperationException("Failed to create Wallabag client.");
+            }
         }
 
         [SkippableFact]
-        public async Task PostEntryAsync_WithValidEntry_PostsEntry()
+        public async Task GetTokenAsync_FromTestWallabagAccount_ReturnsToken()
         {
             SkipIfEnvironmentVariablesNotSet();
 
             // Arrange
-            var entry = new WallabagEntryCreateRequest
+            var testWallabagTokenRequest = new TokenRequest
             {
-                Url = $"https://www.{Guid.NewGuid()}.com",
-                Title = $"Example-{DateTime.Now:yyyy-MM-ddTHH-mm-ss.fff}",
-                Content = "Example content",
-                Tags = "example"
+                // Forgive nulls as they will cause the test to be skipped anyway
+                ClientId = _wallaClientId!,
+                ClientSecret = _wallabagClientSecret!,
+                Username = _wallabagUsername!,
+                Password = _wallabagPassword!
             };
 
-            await File.WriteAllTextAsync(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/" + entry.Title + ".txt", entry.Content);
-
             // Act
-            var wallabagEntry = await _wallabagClient!.PostEntryAsync(entry); // _wallabagClient will only be null if test is skipped
+            var tokenResponse = await _wallabagAuthClient!.GetTokenAsync(testWallabagTokenRequest!); // ctor will fail if _wallabagTokenRequest is null
 
             // Assert
-            wallabagEntry.ShouldNotBeNull();
-            wallabagEntry.Links.Self.ShouldNotBeNull();
-            wallabagEntry.Links.Self.Href.ShouldNotBeNullOrEmpty();
-            wallabagEntry.Tags.ShouldHaveSingleItem();
-            wallabagEntry.Tags[0].Label.ShouldBe(entry.Tags);
-            wallabagEntry.Title.ShouldBe(entry.Title);
-            wallabagEntry.Url.ShouldBe(entry.Url);
-            wallabagEntry.Content.ShouldBe(entry.Content);
-            var now = DateTime.Now;
-            var thirtySecondsAgo = now.AddSeconds(-30);
-            var thirtySecondsFromNow = now.AddSeconds(-30);
-            wallabagEntry.CreatedAt.ShouldNotBeInRange(thirtySecondsAgo, thirtySecondsFromNow);
-            wallabagEntry.UpdatedAt.ShouldNotBeInRange(thirtySecondsAgo, thirtySecondsFromNow);
+            tokenResponse.ShouldNotBeNull();
+            tokenResponse.AccessToken.ShouldNotBeNullOrEmpty();
+            tokenResponse.RefreshToken.ShouldNotBeNullOrEmpty();
+            tokenResponse.TokenType.ShouldBe("bearer");
         }
 
         private void SkipIfEnvironmentVariablesNotSet()
