@@ -76,8 +76,6 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
                 Tags = "example"
             };
 
-            await File.WriteAllTextAsync(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/" + entry.Title + ".txt", entry.Content);
-
             // Act
             var wallabagEntry = await _wallabagClient!.PostEntryAsync(entry); // _wallabagClient will only be null if test is skipped
 
