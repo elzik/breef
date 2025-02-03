@@ -4,7 +4,7 @@ namespace Elzik.Breef.Domain
 {
     public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
     {
-        public async Task<string> Extract(string webPageUrl)
+        public async Task<string> ExtractAsync(string webPageUrl)
         {
             var html = await httpClient.DownloadAsync(webPageUrl);
 

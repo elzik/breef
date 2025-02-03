@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace Elzik.Breef.Domain.Tests.Integration
 {
-    public class ContentSummariserTests(ITestOutputHelper TestOutputHelper)
+    public partial class ContentSummariserTests(ITestOutputHelper TestOutputHelper)
     {
         [SkippableTheory]
         [InlineData("TestHtmlPage-ExpectedContent.txt")]
@@ -39,7 +39,7 @@ namespace Elzik.Breef.Domain.Tests.Integration
 
             // Act
             var contentSummariser = new ContentSummariser(chatCompletionService);
-            var summary = await contentSummariser.Summarise(testContent);
+            var summary = await contentSummariser.SummariseAsync(testContent);
 
             // Assert
             TestOutputHelper.WriteLine(summary);

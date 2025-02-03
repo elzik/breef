@@ -1,6 +1,9 @@
-﻿using Shouldly;
+﻿using Elzik.Breef.Api.Presentation;
+using Elzik.Breef.Domain;
+using Shouldly;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace Elzik.Breef.Api.Tests.Functional
 {
@@ -26,16 +29,23 @@ namespace Elzik.Breef.Api.Tests.Functional
             Skip.If(SkipTestsIf, SkipTestsReason);
 
             // Arrange
-            var breef = new { Url = "http://example.com" };
+            var breef = new { Url = $"https://example.com" };
 
             // Act
             var response = await Client.PostAsJsonAsync($"{BaseUrl}/breefs", breef);
 
             // Assert
+            var wallabagBaseUrl = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_URL");
             response.EnsureSuccessStatusCode();
             var responseString = await response.Content.ReadAsStringAsync();
             responseString.ShouldNotBeNullOrEmpty();
-            responseString.ShouldContain("http://example.com");
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var publishedBreef = JsonSerializer.Deserialize<PublishedBreefResponse>(responseString, options); 
+            publishedBreef.ShouldNotBeNull();
+            publishedBreef.Url.ShouldStartWith($"{wallabagBaseUrl}/api/entries/");
         }
 
         [SkippableFact]

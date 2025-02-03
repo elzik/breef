@@ -10,9 +10,9 @@ namespace Elzik.Breef.Api.Presentation
 
             breefs.MapPost("/", async (IBreefGenerator breefGenerator, SourcePageRequest sourcePage) =>
             {
-                var breef  = await breefGenerator.GenerateBreefAsync(sourcePage.Url);
+                var publishedBreef  = await breefGenerator.GenerateBreefAsync(sourcePage.Url);
 
-                return breef.ToBreefResonse();
+                return publishedBreef.ToPublishedBreefResponse();
             });
         }
     }

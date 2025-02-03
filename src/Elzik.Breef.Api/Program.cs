@@ -1,7 +1,13 @@
 using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Application;
+using Elzik.Breef.Domain;
+using Elzik.Breef.Infrastructure;
+using Elzik.Breef.Infrastructure.Wallabag;
+using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Refit;
+using System.Net.Http.Headers;
 
 namespace Elzik.Breef.Api;
 
@@ -37,6 +43,59 @@ public class Program
         });
         builder.AddAuth();
 
+        builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
+        builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
+        builder.Services.AddTransient<IContentSummariser, ContentSummariser>();
+
+        builder.Services.AddRefitClient<IWallabagAuthClient>();
+
+        builder.Services.Configure<WallabagOptions>(options =>
+        {
+            options.BaseUrl = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_URL")
+                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_URL must contain a Wallabag URL.");
+            options.ClientId = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_ID")
+                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_CLIENT_ID must contain a Wallabag client ID.");
+            options.ClientSecret = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_SECRET")
+                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_CLIENT_SECRET must contain a Wallabag client secret.");
+            options.Username = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_USERNAME")
+                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_USERNAME must contain a Wallabag username.");
+            options.Password = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_PASSWORD")
+                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_PASSWORD must contain a Wallabag password.");
+        });
+
+        var wallabagOptions = builder.Services.BuildServiceProvider()
+            .GetRequiredService<IOptions<WallabagOptions>>().Value;
+
+        var refitSettings = new RefitSettings
+        {
+            AuthorizationHeaderValueGetter = async (request, cancellationToken) =>
+            {
+                var wallabagClient = RestService.For<IWallabagAuthClient>(wallabagOptions.BaseUrl);
+
+                var tokenRequest = new TokenRequest
+                {
+                    ClientId = wallabagOptions.ClientId,
+                    ClientSecret = wallabagOptions.ClientSecret,
+                    Username = wallabagOptions.Username,
+                    Password = wallabagOptions.Password
+                };
+
+                var tokenResponse = await wallabagClient.GetTokenAsync(tokenRequest);
+                return tokenResponse.AccessToken;
+            }
+        };
+
+#if DEBUG
+        refitSettings.HttpMessageHandlerFactory = () => new HttpMessageDebugLoggingHandler();
+#endif
+
+        builder.Services.AddRefitClient<IWallabagClient>(refitSettings)
+            .ConfigureHttpClient(client =>
+            {
+                client.BaseAddress = new Uri(wallabagOptions.BaseUrl);
+            });
+
+        builder.Services.AddTransient<IBreefPublisher, WallabagBreefPublisher>();
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
 
         var modelId = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_MODEL_ID") 

@@ -1,16 +1,23 @@
-﻿using System.Diagnostics;
+﻿using Elzik.Breef.Domain;
+using System.Diagnostics;
 
 namespace Elzik.Breef.Application
 {
-    public class BreefGenerator : IBreefGenerator
+    public class BreefGenerator( 
+        IContentExtractor contentExtractor,
+        IContentSummariser contentSummariser,
+        IBreefPublisher breefPublisher) : IBreefGenerator
     {
-        public async Task<Domain.PublishedBreef> GenerateBreefAsync(string url)
+        public async Task<PublishedBreef> GenerateBreefAsync(string url)
         {
-            var breef = new Domain.PublishedBreef(url);
+            var content = await contentExtractor.ExtractAsync(url);
+            var summary = await contentSummariser.SummariseAsync(content);
 
-            Debug.WriteLine(DateTime.Now.TimeOfDay.TotalNanoseconds + ": " + url);
+            var breef = new Domain.Breef(url, url ,summary);
 
-            return breef;
+            var publishedBreef = await breefPublisher.PublishAsync(breef);
+
+            return publishedBreef;
         }
     }
 }

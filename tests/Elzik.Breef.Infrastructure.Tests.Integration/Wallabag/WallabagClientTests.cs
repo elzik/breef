@@ -56,7 +56,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
 
             if (Environment.GetEnvironmentVariable("BREEF_TESTS_ENABLE_HTTP_MESSAGE_LOGGING") == "true")
             {
-                refitSettings.HttpMessageHandlerFactory = () => new HttpMessageLoggingHandler(_testOutputHelper);
+                refitSettings.HttpMessageHandlerFactory = () => new HttpMessageXunitLoggingHandler(_testOutputHelper);
             }
 
             _wallabagClient = RestService.For<IWallabagClient>(_wallabagUrl, refitSettings);

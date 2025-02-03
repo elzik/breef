@@ -5,7 +5,7 @@ namespace Elzik.Breef.Domain
 {
     public class ContentSummariser(IChatCompletionService Chat) : IContentSummariser
     {
-        public async Task<string> Summarise(string content)
+        public async Task<string> SummariseAsync(string content)
         {
             var prompt = $"Summarise the following content: {content}";
 

@@ -2,6 +2,6 @@
 {
     public interface IContentExtractor
     {
-        Task<string> Extract(string webPageUrl);
+        Task<string> ExtractAsync(string webPageUrl);
     }
 }

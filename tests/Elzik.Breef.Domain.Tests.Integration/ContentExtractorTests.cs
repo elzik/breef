@@ -1,3 +1,4 @@
+using Elzik.Breef.Infrastructure;
 using NSubstitute;
 using Shouldly;
 
@@ -18,7 +19,7 @@ namespace Elzik.Breef.Domain.Tests.Integration
 
             // Act
             var extractor = new ContentExtractor(mockHttpClient);
-            var result = await extractor.Extract(mockTestUrl);
+            var result = await extractor.ExtractAsync(mockTestUrl);
 
             // Assert
             var expected = await File.ReadAllTextAsync(Path.Join("../../../../TestData", expectedFileName));
@@ -29,7 +30,7 @@ namespace Elzik.Breef.Domain.Tests.Integration
             lineEndingNormalisedResult.ShouldBe(lineEndingNormalisedExpected);
         }
 
-        private static string NormaliseLineEndings(string text)
+        private string NormaliseLineEndings(string text)
         {
             return text.Replace("\r\n", "\n");
         }
