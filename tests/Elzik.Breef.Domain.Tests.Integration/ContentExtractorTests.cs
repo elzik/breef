@@ -7,9 +7,11 @@ namespace Elzik.Breef.Domain.Tests.Integration
     public class ContentExtractorTests
     {
         [Theory]
-        [InlineData("TestHtmlPage.html", "TestHtmlPage-ExpectedContent.txt")]
-        [InlineData("BbcNewsPage.html", "BbcNewsPage-ExpectedContent.txt")]
-        public async Task Extract_WithValidUrl_ExtractsContent(string testFileName, string expectedFileName)
+        [InlineData("TestHtmlPage.html", "TestHtmlPage-ExpectedContent.txt", "Test HTML Page")]
+        [InlineData("TestHtmlPageNoTitle.html", "TestHtmlPage-ExpectedContent.txt", "https://mock.url")]
+        [InlineData("BbcNewsPage.html", "BbcNewsPage-ExpectedContent.txt", "Artificial Intelligence: Plan to 'unleash AI' across UK revealed")]
+        [InlineData("TestHtmlPageNoContent.html", "TestHtmlPageNoContent-ExpectedContent.txt", "Test HTML Page")]
+        public async Task Extract_WithValidUrl_ExtractsContent(string testFileName, string expectedFileName, string expectedTitle)
         {
             // Arrange
             var mockTestUrl = "https://mock.url";
@@ -25,12 +27,13 @@ namespace Elzik.Breef.Domain.Tests.Integration
             var expected = await File.ReadAllTextAsync(Path.Join("../../../../TestData", expectedFileName));
 
             var lineEndingNormalisedExpected = NormaliseLineEndings(expected);
-            var lineEndingNormalisedResult = NormaliseLineEndings(result);
+            var lineEndingNormalisedContent = NormaliseLineEndings(result.Content);
 
-            lineEndingNormalisedResult.ShouldBe(lineEndingNormalisedExpected);
+            lineEndingNormalisedContent.ShouldBe(lineEndingNormalisedExpected);
+            result.Title.ShouldBe(expectedTitle);
         }
 
-        private string NormaliseLineEndings(string text)
+        private static string NormaliseLineEndings(string text)
         {
             return text.Replace("\r\n", "\n");
         }

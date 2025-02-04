@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{7F
 		tests\TestData\BbcNewsPage.html = tests\TestData\BbcNewsPage.html
 		tests\TestData\TestHtmlPage-ExpectedContent.txt = tests\TestData\TestHtmlPage-ExpectedContent.txt
 		tests\TestData\TestHtmlPage.html = tests\TestData\TestHtmlPage.html
+		tests\TestData\TestHtmlPageNoContent.html = tests\TestData\TestHtmlPageNoContent.html
+		tests\TestData\TestHtmlPageNoTitle.html = tests\TestData\TestHtmlPageNoTitle.html
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Infrastructure.Tests.Unit", "tests\Elzik.Breef.Infrastructure.Tests.Unit\Elzik.Breef.Infrastructure.Tests.Unit.csproj", "{6CACB8E5-4B4C-4C05-AD80-32561037DAF0}"
