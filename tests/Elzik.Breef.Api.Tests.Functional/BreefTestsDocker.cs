@@ -1,5 +1,6 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Xunit.Abstractions;
 
@@ -40,6 +41,21 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
             var apiKey = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_API_KEY");
             Skip.If(string.IsNullOrWhiteSpace(apiKey),
                 "Skipped because no AI API key provided in BREEF_TESTS_AI_API_KEY environment variable.");
+            var wallabagUrl = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_URL");
+            Skip.If(string.IsNullOrWhiteSpace(wallabagUrl),
+                "Skipped because no Wallabag URL provided in BREEF_TESTS_WALLABAG_URL environment variable.");
+            var wallabagClientId = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_ID");
+            Skip.If(string.IsNullOrWhiteSpace(wallabagClientId),
+                "Skipped because no Wallabag client ID provided in BREEF_TESTS_WALLABAG_CLIENT_ID environment variable.");
+            var wallabagClientSecret = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_SECRET");
+            Skip.If(string.IsNullOrWhiteSpace(wallabagClientSecret),
+                "Skipped because no Wallabag client secret provided in BREEF_TESTS_WALLABAG_CLIENT_SECRET environment variable.");
+            var wallabagUsername = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_USERNAME");
+            Skip.If(string.IsNullOrWhiteSpace(wallabagUsername),
+                "Skipped because no Wallabag username provided in BREEF_TESTS_WALLABAG_USERNAME environment variable.");
+            var wallabagPassword = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_PASSWORD");
+            Skip.If(string.IsNullOrWhiteSpace(wallabagPassword),
+                "Skipped because no Wallabag password provided in BREEF_TESTS_WALLABAG_PASSWORD environment variable.");
 
             var outputConsumer = Consume.RedirectStdoutAndStderrToStream(
                         new TestOutputHelperStream(_testOutputHelper),
@@ -52,6 +68,11 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
                 .WithEnvironment("BREEF_TESTS_AI_MODEL_ID", modelId)
                 .WithEnvironment("BREEF_TESTS_AI_ENDPOINT", endpoint)
                 .WithEnvironment("BREEF_TESTS_AI_API_KEY", apiKey)
+                .WithEnvironment("BREEF_TESTS_WALLABAG_URL", wallabagUrl)
+                .WithEnvironment("BREEF_TESTS_WALLABAG_CLIENT_ID", wallabagClientId)
+                .WithEnvironment("BREEF_TESTS_WALLABAG_CLIENT_SECRET", wallabagClientSecret)
+                .WithEnvironment("BREEF_TESTS_WALLABAG_USERNAME", wallabagUsername)
+                .WithEnvironment("BREEF_TESTS_WALLABAG_PASSWORD", wallabagPassword)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8080))
                 .WithOutputConsumer(outputConsumer)
                 .Build();
