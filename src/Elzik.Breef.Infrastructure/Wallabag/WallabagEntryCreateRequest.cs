@@ -1,43 +1,44 @@
 ﻿using Refit;
+using System.Text.Json.Serialization;
 
 namespace Elzik.Breef.Infrastructure.Wallabag
 {
     public class WallabagEntryCreateRequest
     {
-        [AliasAs("url")]
+        [JsonPropertyName("url")]
         public required string Url { get; set; }
 
-        [AliasAs("title")]
+        [JsonPropertyName("title")]
         public string? Title { get; set; }
 
-        [AliasAs("content")]
+        [JsonPropertyName("content")]
         public required string Content { get; set; }
 
-        [AliasAs("tags")]
+        [JsonPropertyName("tags")]
         public string? Tags { get; set; }
 
-        [AliasAs("archive")]
+        [JsonPropertyName("archive")]
         public int Archive { get; set; } = 0;
 
-        [AliasAs("starred")]
+        [JsonPropertyName("starred")]
         public int Starred { get; set; } = 0;
 
-        [AliasAs("language")]
+        [JsonPropertyName("language")]
         public string? Language { get; set; }
 
-        [AliasAs("preview_picture")]
+        [JsonPropertyName("preview_picture")]
         public string? PreviewPicture { get; set; }
 
-        [AliasAs("published_at")]
+        [JsonPropertyName("published_at")]
         public string? PublishedAt { get; set; }
 
-        [AliasAs("authors")]
+        [JsonPropertyName("authors")]
         public string? Authors { get; set; }
 
-        [AliasAs("public")]
+        [JsonPropertyName("public")]
         public int Public { get; set; } = 0;
 
-        [AliasAs("origin_url")]
+        [JsonPropertyName("origin_url")]
         public string? OriginUrl { get; set; }
     }
 }

@@ -13,7 +13,7 @@ namespace Elzik.Breef.Application
             var extract = await contentExtractor.ExtractAsync(url);
             var summary = await contentSummariser.SummariseAsync(extract.Content);
 
-            var breef = new Domain.Breef(url, extract.Title ,summary);
+            var breef = new Domain.Breef(url, extract.Title ,summary, extract.PreviewImageUrl);
 
             var publishedBreef = await breefPublisher.PublishAsync(breef);
 

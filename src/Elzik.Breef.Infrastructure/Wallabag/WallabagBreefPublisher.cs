@@ -13,7 +13,8 @@ namespace Elzik.Breef.Infrastructure.Wallabag
                 Content = breef.Content,
                 Title = breef.Title,
                 Url = breef.OrigUrl,
-                Tags = "breef"
+                Tags = "breef",
+                PreviewPicture = breef.PreviewImageUrl
             };
 
             var wallabagEntry = await WallabagClient.PostEntryAsync(wallabagEntryCreateRequest);

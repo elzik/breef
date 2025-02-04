@@ -62,8 +62,10 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
             _wallabagClient = RestService.For<IWallabagClient>(_wallabagUrl, refitSettings);
         }
 
-        [SkippableFact]
-        public async Task PostEntryAsync_WithValidEntry_PostsEntry()
+        [SkippableTheory]
+        [InlineData("https://wallabag.elzik.co.uk/img/logo-wallabag.svg")]
+        [InlineData(null)]
+        public async Task PostEntryAsync_WithValidEntry_PostsEntry(string? previewImageUrl)
         {
             SkipIfEnvironmentVariablesNotSet();
 
@@ -73,7 +75,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
                 Url = $"https://www.{Guid.NewGuid()}.com",
                 Title = $"Example-{DateTime.Now:yyyy-MM-ddTHH-mm-ss.fff}",
                 Content = "Example content",
-                Tags = "example"
+                Tags = "example",
+                PreviewPicture = previewImageUrl
             };
 
             // Act
@@ -93,6 +96,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
             var thirtySecondsFromNow = now.AddSeconds(-30);
             wallabagEntry.CreatedAt.ShouldNotBeInRange(thirtySecondsAgo, thirtySecondsFromNow);
             wallabagEntry.UpdatedAt.ShouldNotBeInRange(thirtySecondsAgo, thirtySecondsFromNow);
+            wallabagEntry.PreviewPicture.ShouldBe(entry.PreviewPicture);
         }
 
         private void SkipIfEnvironmentVariablesNotSet()

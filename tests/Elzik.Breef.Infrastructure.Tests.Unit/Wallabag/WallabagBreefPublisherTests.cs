@@ -21,7 +21,11 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
                 Password = "test-password"
             });
             var wallabagBreefPublisher = new WallabagBreefPublisher(wallabagClient, options);
-            var breef = new Domain.Breef("https://test.com", "test-title", "test-content");
+            var breef = new Domain.Breef(
+                "https://test.com", 
+                "test-title", 
+                "test-content", 
+                "https://wallabag.elzik.co.uk/img/logo-wallabag.svg");
             var wallabagEntryCreateRequest = new WallabagEntryCreateRequest
             {
                 Content = "test-content",

@@ -10,13 +10,15 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
         var htmlDocument = new HtmlDocument();
         htmlDocument.LoadHtml(html);
 
-        var content = GetContentFromDocument(htmlDocument);
-        var title = GetTitleFromDocument(htmlDocument, webPageUrl);
+        var content = GetContent(htmlDocument);
+        var title = GetTitle(htmlDocument, webPageUrl);
+        var largestImageUrl = GetLargestImageUrl(htmlDocument);
 
-        return new Extract(title, content);
+
+        return new Extract(title, content, largestImageUrl);
     }
 
-    private static string GetContentFromDocument(HtmlDocument htmlDocument)
+    private static string GetContent(HtmlDocument htmlDocument)
     {
         var mainContentNode = htmlDocument.DocumentNode
                     .SelectNodes("//div|//article|//p")
@@ -29,7 +31,7 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
         return content;
     }
 
-    private static string GetTitleFromDocument(HtmlDocument htmlDocument, string defaultWhenMissing)
+    private static string GetTitle(HtmlDocument htmlDocument, string defaultWhenMissing)
     {
         var title = string.Empty;
 
@@ -50,5 +52,26 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
         }
 
         return title;
+    }
+
+    private static string? GetLargestImageUrl(HtmlDocument htmlDocument)
+    {
+        var imageNodes = htmlDocument.DocumentNode.SelectNodes("//img");
+        if (imageNodes == null || imageNodes.Count == 0)
+        {
+            return null;
+        }
+
+        var largestImageNode = imageNodes
+            .Select(node => new
+            {
+                Node = node,
+                Width = int.TryParse(node.GetAttributeValue("width", "0"), out var width) ? width : 0,
+                Height = int.TryParse(node.GetAttributeValue("height", "0"), out var height) ? height : 0
+            })
+            .OrderByDescending(img => img.Width * img.Height)
+            .FirstOrDefault()?.Node;
+
+        return largestImageNode?.GetAttributeValue("src", null);
     }
 }

@@ -8,6 +8,8 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Refit;
 using System.Net.Http.Headers;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Elzik.Breef.Api;
 
@@ -82,7 +84,12 @@ public class Program
 
                 var tokenResponse = await wallabagClient.GetTokenAsync(tokenRequest);
                 return tokenResponse.AccessToken;
-            }
+            },
+            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            })
         };
 
 #if DEBUG
