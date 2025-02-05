@@ -20,6 +20,8 @@ namespace Elzik.Breef.Api.Tests.Functional
         protected BreefTestsBase()
         {
             Environment.SetEnvironmentVariable("BREEF_API_KEY", ApiKey);
+
+
         }
 
 
