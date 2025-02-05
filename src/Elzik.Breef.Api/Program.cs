@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Refit;
-using System.Net.Http.Headers;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 
@@ -23,6 +22,9 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateSlimBuilder(args);
+
+        builder.Logging.AddFilter("Default", LogLevel.Warning);
+        builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 
         builder.Services.ConfigureHttpJsonOptions(options =>
         {
@@ -47,25 +49,140 @@ public class Program
 
         builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
         builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
+
         builder.Services.AddTransient<IContentSummariser, ContentSummariser>();
 
-        builder.Services.AddRefitClient<IWallabagAuthClient>();
+        var configuration = builder.Configuration;
 
-        builder.Services.Configure<WallabagOptions>(options =>
+        AddAiService(builder.Services, configuration);
+        AddWallabagBreefPublisher(builder.Services, configuration);
+        builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
+
+        var app = builder.Build();
+        app.UseCors();
+        app.UseAuth();
+
+        app.AddBreefEndpoints();
+
+        await app.RunAsync();
+    }
+
+    private static void AddAiService(IServiceCollection services, IConfigurationManager configuration)
+    {
+        services.Configure<AiServiceOptions>(configuration.GetSection("AiService"));
+        services.PostConfigure<AiServiceOptions>(aiServiceOptions =>
         {
-            options.BaseUrl = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_URL")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_URL must contain a Wallabag URL.");
-            options.ClientId = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_ID")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_CLIENT_ID must contain a Wallabag client ID.");
-            options.ClientSecret = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_SECRET")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_CLIENT_SECRET must contain a Wallabag client secret.");
-            options.Username = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_USERNAME")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_USERNAME must contain a Wallabag username.");
-            options.Password = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_PASSWORD")
-                ?? throw new InvalidOperationException("BREEF_TESTS_WALLABAG_PASSWORD must contain a Wallabag password.");
+            if (string.IsNullOrWhiteSpace(aiServiceOptions.ModelId))
+            {
+                throw new InvalidOperationException(
+                    "The AI model ID must be specified in the appsettings.json file in AiService.ModelId");
+            }
+
+            if (string.IsNullOrWhiteSpace(aiServiceOptions.EndpointUrl))
+            {
+                throw new InvalidOperationException(
+                    "The AI service endpoint URL must be specified in the appsettings.json file in AiService.EndpointUrl");
+            }
+
+            var aiServiceApiKey = Environment.GetEnvironmentVariable("BREEF_AI_API_KEY");
+            if (string.IsNullOrWhiteSpace(aiServiceOptions.ApiKey)
+                && string.IsNullOrWhiteSpace(aiServiceApiKey))
+            {
+                throw new InvalidOperationException(
+                    "The AI service API key must be specified once in the BREEF_AI_API_KEY environment " +
+                    "variable (recommended) or the appsettings.json file in AiService.ApiKey");
+            }
+            if (!string.IsNullOrWhiteSpace(aiServiceOptions.ApiKey)
+                && !string.IsNullOrWhiteSpace(aiServiceApiKey))
+            {
+                throw new InvalidOperationException(
+                    "The AI service API key has been defined twice. It must be specified in the BREEF_AI_API_KEY environment " +
+                    "variable (recommended) or the appsettings.json file in AiService.ApiKey but not both.");
+            }
+            if (!string.IsNullOrWhiteSpace(aiServiceApiKey))
+            {
+                aiServiceOptions.ApiKey = aiServiceApiKey;
+            }
         });
 
-        var wallabagOptions = builder.Services.BuildServiceProvider()
+        var aiServiceOptions = services.BuildServiceProvider()
+            .GetRequiredService<IOptions<AiServiceOptions>>().Value;
+
+
+        var kernelBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(
+            aiServiceOptions.ModelId, aiServiceOptions.EndpointUrl, aiServiceOptions.ApiKey);
+        kernelBuilder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Trace));
+        var kernel = kernelBuilder.Build();
+        services.AddSingleton(kernel);
+        services.AddScoped(sp => sp.GetRequiredService<Kernel>().GetRequiredService<IChatCompletionService>());
+    }
+
+    private static void AddWallabagBreefPublisher(IServiceCollection services, IConfigurationManager configuration)
+    {
+        services.AddRefitClient<IWallabagAuthClient>();
+        services.Configure<WallabagOptions>(configuration.GetSection("Wallabag"));
+        services.PostConfigure<WallabagOptions>(wallabagOptions =>
+        {
+            if (string.IsNullOrWhiteSpace(wallabagOptions.BaseUrl))
+            {
+                throw new InvalidOperationException(
+                    "The Wallabag base URL must be specified in the appsettings.json file in Wallabag.BaseUrl");
+            }
+
+            if (string.IsNullOrWhiteSpace(wallabagOptions.ClientId))
+            {
+                throw new InvalidOperationException(
+                    "The Wallabag client ID must be specified in the appsettings.json file in Wallabag.ClientId");
+            }
+
+            var wallabagClientSecretEnv = Environment.GetEnvironmentVariable("BREEF_WALLABAG_CLIENT_SECRET");
+            if (string.IsNullOrWhiteSpace(wallabagOptions.ClientSecret)
+                && string.IsNullOrWhiteSpace(wallabagClientSecretEnv))
+            {
+                throw new InvalidOperationException(
+                    "The Wallabag client secret must be specified once in the BREEF_WALLABAG_CLIENT_SECRET environment " +
+                    "variable (recommended) or the appsettings.json file in Wallabag.ClientSecret");
+            }
+            if (!string.IsNullOrWhiteSpace(wallabagOptions.ClientSecret)
+                && !string.IsNullOrWhiteSpace(wallabagClientSecretEnv))
+            {
+                throw new InvalidOperationException(
+                    "The Wallabag client secret has been defined twice. It must be specified in the BREEF_WALLABAG_CLIENT_SECRET environment " +
+                    "variable (recommended) or the appsettings.json file in Wallabag.ClientSecret but not both.");
+            }
+            if (!string.IsNullOrWhiteSpace(wallabagClientSecretEnv))
+            {
+                wallabagOptions.ClientSecret = wallabagClientSecretEnv;
+            }
+
+            if (string.IsNullOrWhiteSpace(wallabagOptions.Username))
+            {
+                throw new InvalidOperationException(
+                    "The Wallabag username must be specified in the appsettings.json file in Wallabag.Username");
+            }
+
+            var wallabagPasswordEnv = Environment.GetEnvironmentVariable("BREEF_WALLABAG_PASSWORD");
+            if (string.IsNullOrWhiteSpace(wallabagOptions.Password)
+                && string.IsNullOrWhiteSpace(wallabagPasswordEnv))
+            {
+                throw new InvalidOperationException(
+                    "The Wallabag password must be specified once in the BREEF_WALLABAG_PASSWORD environment " +
+                    "variable (recommended) or the appsettings.json file in Wallabag.Password");
+            }
+            if (!string.IsNullOrWhiteSpace(wallabagOptions.Password)
+                && !string.IsNullOrWhiteSpace(wallabagPasswordEnv))
+            {
+                throw new InvalidOperationException(
+                    "The Wallabag password has been defined twice. It must be specified in the BREEF_WALLABAG_PASSWORD environment " +
+                    "variable (recommended) or the appsettings.json file in Wallabag.Password but not both");
+            }
+            if (!string.IsNullOrWhiteSpace(wallabagPasswordEnv))
+            {
+                wallabagOptions.Password = wallabagPasswordEnv;
+            }
+        });
+
+        var wallabagOptions = services.BuildServiceProvider()
             .GetRequiredService<IOptions<WallabagOptions>>().Value;
 
         var refitSettings = new RefitSettings
@@ -96,35 +213,12 @@ public class Program
         refitSettings.HttpMessageHandlerFactory = () => new HttpMessageDebugLoggingHandler();
 #endif
 
-        builder.Services.AddRefitClient<IWallabagClient>(refitSettings)
+        services.AddRefitClient<IWallabagClient>(refitSettings)
             .ConfigureHttpClient(client =>
             {
                 client.BaseAddress = new Uri(wallabagOptions.BaseUrl);
             });
 
-        builder.Services.AddTransient<IBreefPublisher, WallabagBreefPublisher>();
-        builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
-
-        var modelId = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_MODEL_ID") 
-            ?? throw new InvalidOperationException("BREEF_TESTS_AI_MODEL_ID must contain a model ID.");
-        var endpoint = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_ENDPOINT")
-            ?? throw new InvalidOperationException("BREEF_TESTS_AI_ENDPOINT must contain an endpoint URL.");
-        var apiKey = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_API_KEY")
-            ?? throw new InvalidOperationException("BREEF_TESTS_AI_API_KEY must contain an API key.");
-        var kernelBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
-        kernelBuilder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Trace));
-        var kernel = kernelBuilder.Build();
-        builder.Services.AddSingleton(kernel);
-        builder.Services.AddScoped(sp => sp.GetRequiredService<Kernel>().GetRequiredService<IChatCompletionService>());
-
-
-
-        var app = builder.Build();
-        app.UseCors();
-        app.UseAuth();
-
-        app.AddBreefEndpoints();
-
-        await app.RunAsync();
+        services.AddTransient<IBreefPublisher, WallabagBreefPublisher>();
     }
 }
