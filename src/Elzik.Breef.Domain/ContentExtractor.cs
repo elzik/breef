@@ -26,7 +26,7 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
                     .FirstOrDefault();
 
         var content = mainContentNode != null
-            ? mainContentNode.InnerText : "Content not found.";
+            ? mainContentNode.InnerText.Trim() : "Content not found.";
 
         return content;
     }
@@ -62,15 +62,16 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
             return null;
         }
 
-        var largestImageNode = imageNodes
+        var imageNodesSortedBySize = imageNodes
             .Select(node => new
             {
                 Node = node,
                 Width = int.TryParse(node.GetAttributeValue("width", "0"), out var width) ? width : 0,
                 Height = int.TryParse(node.GetAttributeValue("height", "0"), out var height) ? height : 0
             })
-            .OrderByDescending(img => img.Width * img.Height)
-            .FirstOrDefault()?.Node;
+            .OrderByDescending(img => img.Width * img.Height);
+
+        var largestImageNode = imageNodesSortedBySize.FirstOrDefault()?.Node;
 
         return largestImageNode?.GetAttributeValue("src", null);
     }

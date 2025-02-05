@@ -15,7 +15,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             var result = await httpClient.DownloadAsync(testUrl);
 
             // Assert
-            var expectedSource = await File.ReadAllTextAsync("../../../../TestData/TestHtmlPage.html");
+            var expectedSource = await File.ReadAllTextAsync("../../../../TestData/StaticTestPage.html");
 
             var lineEndingNormalisedExpected = NormaliseLineEndings(expectedSource);
             var lineEndingNormalisedResult = NormaliseLineEndings(result);
