@@ -73,6 +73,8 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
                 .WithEnvironment("BREEF_TESTS_WALLABAG_CLIENT_SECRET", wallabagClientSecret)
                 .WithEnvironment("BREEF_TESTS_WALLABAG_USERNAME", wallabagUsername)
                 .WithEnvironment("BREEF_TESTS_WALLABAG_PASSWORD", wallabagPassword)
+                .WithEnvironment("breef_BreefApi__ApiKey", 
+                    Environment.GetEnvironmentVariable("breef_BreefApi__ApiKey"))
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8080))
                 .WithOutputConsumer(outputConsumer)
                 .Build();
