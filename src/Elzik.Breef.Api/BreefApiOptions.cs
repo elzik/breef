@@ -2,6 +2,6 @@
 {
     public class BreefApiOptions
     {
-        public string ApiKey { get; set; }
+        public required string ApiKey { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace Elzik.Breef.Api.Tests.Functional
 {
     public abstract class BreefTestsBase
     {
-        protected static string ApiKey { get; private set; } = ApiKey = Guid.NewGuid().ToString();
+        protected static string? ApiKey { get; private set; }
         protected string BaseUrl => $"http://localhost:{HostPort}";
 
         protected virtual int HostPort { get; set; } = 8080;
@@ -19,9 +19,9 @@ namespace Elzik.Breef.Api.Tests.Functional
 
         protected BreefTestsBase()
         {
-            Environment.SetEnvironmentVariable("BREEF_API_KEY", ApiKey);
-
-
+            var apiKeyEnvironmentVariableName = "breef_BreefApi__ApiKey";
+            ApiKey = Environment.GetEnvironmentVariable(apiKeyEnvironmentVariableName)
+                ?? throw new InvalidOperationException($"{apiKeyEnvironmentVariableName} environment variable must contain an API key.");
         }
 
 
