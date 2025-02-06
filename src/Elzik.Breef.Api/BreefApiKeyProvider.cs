@@ -3,15 +3,10 @@ using Microsoft.Extensions.Options;
 
 namespace Elzik.Breef.Api;
 
-public class BreefApiKeyProvider : IApiKeyProvider
+public class BreefApiKeyProvider(IOptions<BreefApiOptions> breefOptions) : IApiKeyProvider
 {
-    private readonly BreefApiOptions _breefOptions;
-
-    public BreefApiKeyProvider(IOptions<BreefApiOptions> breefOptions)
-    {
-        _breefOptions = breefOptions.Value 
+    private readonly BreefApiOptions _breefOptions = breefOptions.Value
             ?? throw new ArgumentNullException(nameof(breefOptions));
-    }
 
     public Task<IApiKey?> ProvideAsync(string key)
     {

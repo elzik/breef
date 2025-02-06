@@ -1,5 +1,7 @@
 ﻿using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Domain;
+using Elzik.Breef.Infrastructure.Wallabag;
+using Microsoft.Extensions.Configuration;
 using Shouldly;
 using System.Net;
 using System.Net.Http.Json;
@@ -17,13 +19,24 @@ namespace Elzik.Breef.Api.Tests.Functional
         protected virtual bool SkipTestsIf { get; }
         protected virtual string SkipTestsReason { get; } = "Test was skipped but no reason was given.";
 
+        private readonly WallabagOptions _wallabagOptions;
+
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
         protected BreefTestsBase()
         {
-            var apiKeyEnvironmentVariableName = "breef_BreefApi__ApiKey";
-            ApiKey = Environment.GetEnvironmentVariable(apiKeyEnvironmentVariableName)
-                ?? throw new InvalidOperationException($"{apiKeyEnvironmentVariableName} environment variable must contain an API key.");
+            var configuration = new ConfigurationBuilder()
+                .AddEnvironmentVariables("breef_")
+                .Build();
+            _wallabagOptions = configuration.GetRequiredSection("Wallabag").Get<WallabagOptions>() 
+                ?? throw new InvalidOperationException("Wallabag options not found in Wallabag configuration section.");
+            var breefApiOptions = configuration.GetRequiredSection("BreefApi").Get<BreefApiOptions>()
+                ?? throw new InvalidOperationException("Breef API options not found in BreefApi configuration section.");
+            ApiKey = breefApiOptions.ApiKey;
         }
-
 
         [SkippableFact]
         public async Task EndToEndHappyPath()
@@ -37,17 +50,13 @@ namespace Elzik.Breef.Api.Tests.Functional
             var response = await Client.PostAsJsonAsync($"{BaseUrl}/breefs", breef);
 
             // Assert
-            var wallabagBaseUrl = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_URL");
             response.EnsureSuccessStatusCode();
             var responseString = await response.Content.ReadAsStringAsync();
             responseString.ShouldNotBeNullOrEmpty();
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            var publishedBreef = JsonSerializer.Deserialize<PublishedBreefResponse>(responseString, options); 
+            var publishedBreef = JsonSerializer
+                .Deserialize<PublishedBreefResponse>(responseString, JsonSerializerOptions);
             publishedBreef.ShouldNotBeNull();
-            publishedBreef.Url.ShouldStartWith($"{wallabagBaseUrl}/api/entries/");
+            publishedBreef.Url.ShouldStartWith($"{_wallabagOptions.BaseUrl}/api/entries/");
         }
 
         [SkippableFact]

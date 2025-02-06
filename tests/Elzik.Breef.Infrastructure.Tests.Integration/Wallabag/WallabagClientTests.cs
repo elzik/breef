@@ -1,4 +1,5 @@
 ﻿using Elzik.Breef.Infrastructure.Wallabag;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Refit;
 using Shouldly;
@@ -12,39 +13,26 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
         private readonly IWallabagClient? _wallabagClient;
         private readonly ITestOutputHelper _testOutputHelper;
 
-        private readonly string? _wallabagUrl;
-        private readonly string? _wallaClientId;
-        private readonly string? _wallabagClientSecret;
-        private readonly string? _wallabagUsername;
-        private readonly string? _wallabagPassword;
-
         public WallabagClientTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper
                 ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
-            _wallabagUrl = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_URL");
-            _wallaClientId = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_ID");
-            _wallabagClientSecret = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_CLIENT_SECRET");
-            _wallabagUsername = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_USERNAME");
-            _wallabagPassword = Environment.GetEnvironmentVariable("BREEF_TESTS_WALLABAG_PASSWORD");
-            if (string.IsNullOrWhiteSpace(_wallabagUrl)
-                || string.IsNullOrWhiteSpace(_wallaClientId)
-                || string.IsNullOrWhiteSpace(_wallabagClientSecret)
-                || string.IsNullOrWhiteSpace(_wallabagUsername)
-                || string.IsNullOrWhiteSpace(_wallabagPassword))
-            {
-                return;
-            }
+            var configuration = new ConfigurationBuilder()
+                .AddEnvironmentVariables("breef_")
+                .Build();
+            var wallabagOptions = configuration.GetRequiredSection("Wallabag").Get<WallabagOptions>()
+                ?? throw new InvalidOperationException("Wallabag options not found in Wallabag configuration section.");
+
             var wallabagTokenRequest = new TokenRequest
             {
-                ClientId = _wallaClientId,
-                ClientSecret = _wallabagClientSecret,
-                Username = _wallabagUsername,
-                Password = _wallabagPassword
+                ClientId = wallabagOptions.ClientId,
+                ClientSecret = wallabagOptions.ClientSecret,
+                Username = wallabagOptions.Username,
+                Password = wallabagOptions.Password
             };
 
-            var wallabagAuthClient = RestService.For<IWallabagAuthClient>(_wallabagUrl);
+            var wallabagAuthClient = RestService.For<IWallabagAuthClient>(wallabagOptions.BaseUrl);
             var refitSettings = new RefitSettings
             {
                 AuthorizationHeaderValueGetter = async (request, cancellationToken) =>
@@ -59,16 +47,14 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
                 refitSettings.HttpMessageHandlerFactory = () => new HttpMessageXunitLoggingHandler(_testOutputHelper);
             }
 
-            _wallabagClient = RestService.For<IWallabagClient>(_wallabagUrl, refitSettings);
+            _wallabagClient = RestService.For<IWallabagClient>(wallabagOptions.BaseUrl, refitSettings);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("https://wallabag.elzik.co.uk/img/logo-wallabag.svg")]
         [InlineData(null)]
         public async Task PostEntryAsync_WithValidEntry_PostsEntry(string? previewImageUrl)
         {
-            SkipIfEnvironmentVariablesNotSet();
-
             // Arrange
             var entry = new WallabagEntryCreateRequest
             {
@@ -97,20 +83,6 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag
             wallabagEntry.CreatedAt.ShouldNotBeInRange(thirtySecondsAgo, thirtySecondsFromNow);
             wallabagEntry.UpdatedAt.ShouldNotBeInRange(thirtySecondsAgo, thirtySecondsFromNow);
             wallabagEntry.PreviewPicture.ShouldBe(entry.PreviewPicture);
-        }
-
-        private void SkipIfEnvironmentVariablesNotSet()
-        {
-            Skip.If(string.IsNullOrWhiteSpace(_wallabagUrl),
-                "Skipped because no URL provided in BREEF_TESTS_WALLABAG_URL env. variable.");
-            Skip.If(string.IsNullOrWhiteSpace(_wallaClientId),
-                "Skipped because no client ID provided in BREEF_TESTS_WALLABAG_CLIENT_ID env. variable.");
-            Skip.If(string.IsNullOrWhiteSpace(_wallabagClientSecret),
-                "Skipped because no client secret provided in BREEF_TESTS_WALLABAG_CLIENT_SECRET env. variable.");
-            Skip.If(string.IsNullOrWhiteSpace(_wallabagUsername),
-                "Skipped because no username provided in BREEF_TESTS_WALLABAG_USERNAME env. variable.");
-            Skip.If(string.IsNullOrWhiteSpace(_wallabagPassword),
-                "Skipped because no password provided in BREEF_TESTS_WALLABAG_PASSWORD env. variable.");
         }
     }
 }
