@@ -2,6 +2,6 @@
 {
     public interface IContentSummariser
     {
-        Task<string> Summarise(string content);
+        Task<string> SummariseAsync(string content);
     }
 }

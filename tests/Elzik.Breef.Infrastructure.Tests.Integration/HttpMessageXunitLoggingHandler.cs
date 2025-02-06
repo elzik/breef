@@ -2,7 +2,7 @@
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration
 {
-    public class HttpMessageLoggingHandler(ITestOutputHelper output) : DelegatingHandler(new HttpClientHandler())
+    public class HttpMessageXunitLoggingHandler(ITestOutputHelper output) : DelegatingHandler(new HttpClientHandler())
     {
         protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)

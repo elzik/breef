@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Elzik.Breef.Api;
 
 [JsonSerializable(typeof(SourcePageRequest))]
-[JsonSerializable(typeof(BreefResponse))]
+[JsonSerializable(typeof(PublishedBreefResponse))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }

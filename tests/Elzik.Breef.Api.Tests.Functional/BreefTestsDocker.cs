@@ -1,5 +1,6 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Xunit.Abstractions;
 
@@ -31,15 +32,33 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
         {
             BuildDockerImage();
 
-            var modelId = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_MODEL_ID");
-            Skip.If(string.IsNullOrWhiteSpace(modelId),
-                "Skipped because no AI model ID provided in BREEF_TESTS_AI_MODEL_ID environment variable.");
-            var endpoint = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_ENDPOINT");
-            Skip.If(string.IsNullOrWhiteSpace(endpoint),
-                "Skipped because no AI endpoint provided in BREEF_TESTS_AI_ENDPOINT environment variable.");
-            var apiKey = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_API_KEY");
-            Skip.If(string.IsNullOrWhiteSpace(apiKey),
-                "Skipped because no AI API key provided in BREEF_TESTS_AI_API_KEY environment variable.");
+            string? breefAiServiceEndpointUrl = Environment.GetEnvironmentVariable("breef_AiService__EndpointUrl");
+            string? breefAiServiceModelId = Environment.GetEnvironmentVariable("breef_AiService__ModelId");
+            string? breefAiServiceApiKey = Environment.GetEnvironmentVariable("breef_AiService__ApiKey");
+
+            string? breefWallabagBaseUrl = Environment.GetEnvironmentVariable("breef_Wallabag__BaseUrl");
+            string? breefWallabagUsername = Environment.GetEnvironmentVariable("breef_Wallabag__Username");
+            string? breefWallabagPassword = Environment.GetEnvironmentVariable("breef_Wallabag__Password");
+            string? breefWallabagClientId = Environment.GetEnvironmentVariable("breef_Wallabag__ClientId");
+            string? breefWallabagClientSecret = Environment.GetEnvironmentVariable("breef_Wallabag__ClientSecret");
+
+            Skip.If(string.IsNullOrWhiteSpace(breefAiServiceEndpointUrl),
+                "Skipped because no AI endpoint provided in breef_AiService__EndpointUrl environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefAiServiceModelId),
+                "Skipped because no AI model ID provided in breef_AiService__ModelId environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefAiServiceApiKey),
+                "Skipped because no AI API key provided in breef_AiService__ApiKey environment variable.");
+
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagBaseUrl),
+                "Skipped because no Wallabag URL provided in breef_Wallabag__BaseUrl environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagUsername),
+                "Skipped because no Wallabag username provided in breef_Wallabag__Username environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagPassword),
+                "Skipped because no Wallabag password provided in breef_Wallabag__Password environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagClientId),
+                "Skipped because no Wallabag client ID provided in breef_Wallabag__ClientId environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagClientSecret),
+                "Skipped because no Wallabag client secret provided in breef_Wallabag__ClientSecret environment variable.");
 
             var outputConsumer = Consume.RedirectStdoutAndStderrToStream(
                         new TestOutputHelperStream(_testOutputHelper),
@@ -48,10 +67,15 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
             _testContainer = new ContainerBuilder()
                 .WithImage(DockerImageName)
                 .WithPortBinding(8080, true)
-                .WithEnvironment("BREEF_API_KEY", ApiKey)
-                .WithEnvironment("BREEF_TESTS_AI_MODEL_ID", modelId)
-                .WithEnvironment("BREEF_TESTS_AI_ENDPOINT", endpoint)
-                .WithEnvironment("BREEF_TESTS_AI_API_KEY", apiKey)
+                .WithEnvironment("breef_BreefApi__ApiKey", ApiKey)
+                .WithEnvironment("breef_AiService__EndpointUrl", breefAiServiceEndpointUrl)
+                .WithEnvironment("breef_AiService__ModelId", breefAiServiceModelId)
+                .WithEnvironment("breef_AiService__ApiKey", breefAiServiceApiKey)
+                .WithEnvironment("breef_Wallabag__BaseUrl", breefWallabagBaseUrl)
+                .WithEnvironment("breef_Wallabag__Username", breefWallabagUsername)
+                .WithEnvironment("breef_Wallabag__Password", breefWallabagPassword)
+                .WithEnvironment("breef_Wallabag__ClientId", breefWallabagClientId)
+                .WithEnvironment("breef_Wallabag__ClientSecret", breefWallabagClientSecret)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8080))
                 .WithOutputConsumer(outputConsumer)
                 .Build();

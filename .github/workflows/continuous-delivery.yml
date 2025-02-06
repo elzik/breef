@@ -13,8 +13,8 @@ jobs:
   check-release-requirement:
     runs-on: ubuntu-latest
     outputs:
-      needs-release: ${{ steps.release-check.outputs.needs-release }}
-      semantic-version: ${{ steps.get-semver.outputs.semantic-version }}
+      needs-release: ${{ steps.release-check.outputs.needs-release }}"
+      semantic-version: ${{ steps.get-semver.outputs.semantic-version }}"
     steps:
     - uses: actions/checkout@v4
       with:
@@ -74,14 +74,23 @@ jobs:
       run: pwsh build/api/build-docker.ps1
     - name: Run tests
       run: |
-        export BREEF_TESTS_AI_MODEL_ID=${{ secrets.BREEF_TESTS_AI_MODEL_ID }}
-        export BREEF_TESTS_AI_ENDPOINT=${{ secrets.BREEF_TESTS_AI_ENDPOINT }}
-        export BREEF_TESTS_AI_API_KEY=${{ secrets.BREEF_TESTS_AI_API_KEY }}
-        export BREEF_TESTS_WALLABAG_URL=${{ secrets.BREEF_TESTS_WALLABAG_URL }}
-        export BREEF_TESTS_WALLABAG_CLIENT_ID=${{ secrets.BREEF_TESTS_WALLABAG_CLIENT_ID }}
-        export BREEF_TESTS_WALLABAG_CLIENT_SECRET=${{ secrets.BREEF_TESTS_WALLABAG_CLIENT_SECRET }}
-        export BREEF_TESTS_WALLABAG_USERNAME=${{ secrets.BREEF_TESTS_WALLABAG_USERNAME }}
-        export BREEF_TESTS_WALLABAG_PASSWORD=${{ secrets.BREEF_TESTS_WALLABAG_PASSWORD }}
+        export BREEF_TESTS_AI_MODEL_ID="${{ secrets.BREEF_TESTS_AI_MODEL_ID }}"
+        export BREEF_TESTS_AI_ENDPOINT="${{ secrets.BREEF_TESTS_AI_ENDPOINT }}"
+        export BREEF_TESTS_AI_API_KEY="${{ secrets.BREEF_TESTS_AI_API_KEY }}"
+        export BREEF_TESTS_WALLABAG_URL="${{ secrets.BREEF_TESTS_WALLABAG_URL }}"
+        export BREEF_TESTS_WALLABAG_CLIENT_ID="${{ secrets.BREEF_TESTS_WALLABAG_CLIENT_ID }}"
+        export BREEF_TESTS_WALLABAG_CLIENT_SECRET="${{ secrets.BREEF_TESTS_WALLABAG_CLIENT_SECRET }}"
+        export BREEF_TESTS_WALLABAG_USERNAME="${{ secrets.BREEF_TESTS_WALLABAG_USERNAME }}"
+        export BREEF_TESTS_WALLABAG_PASSWORD="${{ secrets.BREEF_TESTS_WALLABAG_PASSWORD }}"
+        export breef_BreefApi__ApiKey="${{ secrets.BREEF_BREEFAPI__APIKEY }}"
+        export breef_Wallabag__BaseUrl="${{ secrets.BREEF_WALLABAG__BASEURL }}"
+        export breef_Wallabag__ClientId="${{ secrets.BREEF_WALLABAG__CLIENTID }}"
+        export breef_Wallabag__ClientSecret="${{ secrets.BREEF_WALLABAG__CLIENTSECRET }}"
+        export breef_Wallabag__Username="${{ secrets.BREEF_WALLABAG__USERNAME }}"
+        export breef_Wallabag__Password="${{ secrets.BREEF_WALLABAG__PASSWORD }}"
+        export breef_AiService__ModelId="${{ secrets.BREEF_AISERVICE__MODELID }}"
+        export breef_AiService__EndpointUrl="${{ secrets.BREEF_AISERVICE__ENDPOINTURL }}"
+        export breef_AiService__ApiKey="${{ secrets.BREEF_AISERVICE__APIKEY }}"
         pwsh build/api/test.ps1
     - name: Test report
       uses: dorny/test-reporter@v1
@@ -93,7 +102,7 @@ jobs:
       if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
       uses: exuanbo/actions-deploy-gist@v1
       with:
-        token: ${{ secrets.CODE_COVERAGE_AUTH_TOKEN }}
+        token: "${{ secrets.CODE_COVERAGE_AUTH_TOKEN }}"
         gist_id: 527882e89a938dc78f61a08c300edec4
         gist_description: "code-coverage-${{ github.ref_name }}"
         gist_file_name: breef-code-coverage-${{ github.ref_name }}.svg

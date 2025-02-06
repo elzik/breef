@@ -100,7 +100,8 @@ namespace Elzik.Breef.Infrastructure.Wallabag
         public string? HttpStatus { get; set; }
 
         [JsonPropertyName("headers")]
-        public string? Headers { get; set; }
+        public required Dictionary<string, string> Headers { get; set; }
+
 
         [JsonPropertyName("_links")]
         public required Links Links { get; set; }

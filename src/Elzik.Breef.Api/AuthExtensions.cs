@@ -1,18 +1,22 @@
 ﻿using AspNetCore.Authentication.ApiKey;
+using Elzik.Breef.Infrastructure;
+using Microsoft.Extensions.Configuration;
 
 namespace Elzik.Breef.Api
 {
     public static class AuthExtensions
     {
-        public static void AddAuth(this WebApplicationBuilder builder)
+        public static void AddAuth(this IServiceCollection services, IConfigurationManager configurationManager)
         {
-            builder.Services.AddAuthentication(ApiKeyDefaults.AuthenticationScheme)
-                .AddApiKeyInHeader<EnvironmentApiKeyProvider>(options =>
+            services.Configure<BreefApiOptions>(configurationManager.GetSection("BreefApi"));
+
+            services.AddAuthentication(ApiKeyDefaults.AuthenticationScheme)
+                .AddApiKeyInHeader<BreefApiKeyProvider>(options =>
                 {
                     options.KeyName = "BREEF-API-KEY";
                     options.Realm = "BreefAPI";
                 });
-            builder.Services.AddAuthorization();
+            services.AddAuthorization();
         }
 
         public static void UseAuth(this WebApplication app)

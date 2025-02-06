@@ -1,7 +1,14 @@
 using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Application;
+using Elzik.Breef.Domain;
+using Elzik.Breef.Infrastructure;
+using Elzik.Breef.Infrastructure.Wallabag;
+using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Refit;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Elzik.Breef.Api;
 
@@ -14,7 +21,13 @@ public class Program
 
     public static async Task Main(string[] args)
     {
+
         var builder = WebApplication.CreateSlimBuilder(args);
+        var configuration = builder.Configuration;
+        configuration.AddEnvironmentVariables("breef_");
+
+        builder.Logging.AddFilter("Default", LogLevel.Warning);
+        builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 
         builder.Services.ConfigureHttpJsonOptions(options =>
         {
@@ -35,23 +48,16 @@ public class Program
         {
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
         });
-        builder.AddAuth();
+        builder.Services.AddAuth(configuration);
 
+        builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
+        builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
+
+        builder.Services.AddTransient<IContentSummariser, ContentSummariser>();
+
+        AddAiService(builder.Services, configuration);
+        AddWallabagBreefPublisher(builder.Services, configuration);
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
-
-        var modelId = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_MODEL_ID") 
-            ?? throw new InvalidOperationException("BREEF_TESTS_AI_MODEL_ID must contain a model ID.");
-        var endpoint = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_ENDPOINT")
-            ?? throw new InvalidOperationException("BREEF_TESTS_AI_ENDPOINT must contain an endpoint URL.");
-        var apiKey = Environment.GetEnvironmentVariable("BREEF_TESTS_AI_API_KEY")
-            ?? throw new InvalidOperationException("BREEF_TESTS_AI_API_KEY must contain an API key.");
-        var kernelBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
-        kernelBuilder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Trace));
-        var kernel = kernelBuilder.Build();
-        builder.Services.AddSingleton(kernel);
-        builder.Services.AddScoped(sp => sp.GetRequiredService<Kernel>().GetRequiredService<IChatCompletionService>());
-
-
 
         var app = builder.Build();
         app.UseCors();
@@ -60,5 +66,65 @@ public class Program
         app.AddBreefEndpoints();
 
         await app.RunAsync();
+    }
+
+    private static void AddAiService(IServiceCollection services, IConfigurationManager configuration)
+    {
+        services.Configure<AiServiceOptions>(configuration.GetSection("AiService"));
+
+        var aiServiceOptions = services.BuildServiceProvider()
+            .GetRequiredService<IOptions<AiServiceOptions>>().Value;
+
+        var kernelBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(
+            aiServiceOptions.ModelId, aiServiceOptions.EndpointUrl, aiServiceOptions.ApiKey);
+        kernelBuilder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Trace));
+        var kernel = kernelBuilder.Build();
+        services.AddSingleton(kernel);
+        services.AddScoped(sp => sp.GetRequiredService<Kernel>().GetRequiredService<IChatCompletionService>());
+    }
+
+    private static void AddWallabagBreefPublisher(IServiceCollection services, IConfigurationManager configuration)
+    {
+        services.AddRefitClient<IWallabagAuthClient>();
+        services.Configure<WallabagOptions>(configuration.GetSection("Wallabag"));
+
+        var wallabagOptions = services.BuildServiceProvider()
+            .GetRequiredService<IOptions<WallabagOptions>>().Value;
+
+        var refitSettings = new RefitSettings
+        {
+            AuthorizationHeaderValueGetter = async (request, cancellationToken) =>
+            {
+                var wallabagClient = RestService.For<IWallabagAuthClient>(wallabagOptions.BaseUrl);
+
+                var tokenRequest = new TokenRequest
+                {
+                    ClientId = wallabagOptions.ClientId,
+                    ClientSecret = wallabagOptions.ClientSecret,
+                    Username = wallabagOptions.Username,
+                    Password = wallabagOptions.Password
+                };
+
+                var tokenResponse = await wallabagClient.GetTokenAsync(tokenRequest);
+                return tokenResponse.AccessToken;
+            },
+            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            })
+        };
+
+#if DEBUG
+        refitSettings.HttpMessageHandlerFactory = () => new HttpMessageDebugLoggingHandler();
+#endif
+
+        services.AddRefitClient<IWallabagClient>(refitSettings)
+            .ConfigureHttpClient(client =>
+            {
+                client.BaseAddress = new Uri(wallabagOptions.BaseUrl);
+            });
+
+        services.AddTransient<IBreefPublisher, WallabagBreefPublisher>();
     }
 }

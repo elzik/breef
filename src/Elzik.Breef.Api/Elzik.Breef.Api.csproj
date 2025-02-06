@@ -12,6 +12,8 @@
     <PackageReference Include="AspNetCore.Authentication.ApiKey" Version="8.0.1" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.36.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Refit" Version="8.0.0" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="10.6.0.109712">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Elzik.Breef.Application\Elzik.Breef.Application.csproj" />
     <ProjectReference Include="..\Elzik.Breef.Domain\Elzik.Breef.Domain.csproj" />
+    <ProjectReference Include="..\Elzik.Breef.Infrastructure\Elzik.Breef.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

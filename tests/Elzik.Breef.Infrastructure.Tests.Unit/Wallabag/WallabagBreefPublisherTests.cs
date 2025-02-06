@@ -12,14 +12,20 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
         {
             // Arrange
             var wallabagClient = Substitute.For<IWallabagClient>();
-            var options = Options.Create(new WallabagOptions(
-                "https://test.com",
-                "test-client-id",
-                "test-client-secret",
-                "test-username",
-                "test-password"));
+            var options = Options.Create(new WallabagOptions
+            {
+                BaseUrl = "https://test.com",
+                ClientId = "test-client-id",
+                ClientSecret = "test-client-secret",
+                Username = "test-username",
+                Password = "test-password"
+            });
             var wallabagBreefPublisher = new WallabagBreefPublisher(wallabagClient, options);
-            var breef = new Domain.Breef("https://test.com", "test-title", "test-content");
+            var breef = new Domain.Breef(
+                "https://test.com", 
+                "test-title", 
+                "test-content", 
+                "https://wallabag.elzik.co.uk/img/logo-wallabag.svg");
             var wallabagEntryCreateRequest = new WallabagEntryCreateRequest
             {
                 Content = "test-content",
@@ -54,7 +60,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
                     {
                         Href = "/entry/1"
                     }
-                }
+                },
+                Headers = []
             };
             wallabagClient.PostEntryAsync(Arg.Is<WallabagEntryCreateRequest>(r =>
                 r.Content == "test-content" &&

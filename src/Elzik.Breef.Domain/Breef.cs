@@ -3,5 +3,6 @@
     public record Breef(
         string OrigUrl, 
         string Title, 
-        string Content);
+        string Content,
+        string? PreviewImageUrl);
 }

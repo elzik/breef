@@ -11,8 +11,10 @@ namespace Elzik.Breef.Infrastructure.Wallabag
             WallabagEntryCreateRequest wallabagEntryCreateRequest = new()
             {
                 Content = breef.Content,
+                Title = breef.Title,
                 Url = breef.OrigUrl,
-                Tags = "breef"
+                Tags = "breef",
+                PreviewPicture = breef.PreviewImageUrl
             };
 
             var wallabagEntry = await WallabagClient.PostEntryAsync(wallabagEntryCreateRequest);
