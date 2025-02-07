@@ -13,22 +13,22 @@ updates:
         exclude-patterns:
         - "AutoFixture*"
         - "coverlet*"
-        - "FluentAssertions*"
         - "GitVersion*"
         - "Microsoft.AspNetCore.Mvc.Testing"
         - "Microsoft.NET.Test*"
         - "NSubstitute*"
         - "Polly.Testing*"
+        - "Shouldly*"
         - "xunit*"
       test-dependencies:
         patterns:
         - "AutoFixture*"
         - "coverlet*"
-        - "FluentAssertions*"
         - "Microsoft.AspNetCore.Mvc.Testing"
         - "Microsoft.NET.Test*"
         - "NSubstitute*"
         - "Polly.Testing*"
+        - "Shouldly*"
         - "xunit*"
       build-dependencies:
         patterns:
