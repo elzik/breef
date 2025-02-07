@@ -12,7 +12,15 @@
       "commandName": "Docker",
       "environmentVariables": {
         "ASPNETCORE_HTTP_PORTS": "8080",
-        "BREEF_API_KEY": "test-key"
+        "breef_BreefApi__ApiKey": "",
+        "breef_Wallabag__BaseUrl": "",
+        "breef_Wallabag__ClientId": "",
+        "breef_Wallabag__ClientSecret": "",
+        "breef_Wallabag__Username": "",
+        "breef_Wallabag__Password": "",
+        "breef_AiService__ModelId": "",
+        "breef_AiService__EndpointUrl": "",
+        "breef_AiService__ApiKey": ""
       },
       "publishAllPorts": true,
       "useSSL": false
