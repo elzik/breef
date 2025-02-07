@@ -7,8 +7,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Refit;
-using System.Text.Json.Serialization;
+using Serilog;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Elzik.Breef.Api;
 
@@ -21,13 +22,17 @@ public class Program
 
     public static async Task Main(string[] args)
     {
-
         var builder = WebApplication.CreateSlimBuilder(args);
         var configuration = builder.Configuration;
         configuration.AddEnvironmentVariables("breef_");
 
-        builder.Logging.AddFilter("Default", LogLevel.Warning);
-        builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateLogger();
+        builder.Host.UseSerilog();
+        builder.Services.AddSerilog();
 
         builder.Services.ConfigureHttpJsonOptions(options =>
         {
@@ -77,7 +82,7 @@ public class Program
 
         var kernelBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(
             aiServiceOptions.ModelId, aiServiceOptions.EndpointUrl, aiServiceOptions.ApiKey);
-        kernelBuilder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Trace));
+        kernelBuilder.Services.AddSerilog();
         var kernel = kernelBuilder.Build();
         services.AddSingleton(kernel);
         services.AddScoped(sp => sp.GetRequiredService<Kernel>().GetRequiredService<IChatCompletionService>());
