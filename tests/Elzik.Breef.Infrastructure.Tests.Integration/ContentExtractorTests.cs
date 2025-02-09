@@ -1,8 +1,9 @@
+using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure;
 using NSubstitute;
 using Shouldly;
 
-namespace Elzik.Breef.Domain.Tests.Integration
+namespace Elzik.Breef.Infrastructure.Tests.Integration
 {
     public class ContentExtractorTests
     {

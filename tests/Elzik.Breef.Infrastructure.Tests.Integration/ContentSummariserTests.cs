@@ -1,17 +1,21 @@
 ﻿using Elzik.Breef.Infrastructure;
-using Elzik.Breef.Infrastructure.Wallabag;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Shouldly;
 using Xunit.Abstractions;
 
-namespace Elzik.Breef.Domain.Tests.Integration;
+namespace Elzik.Breef.Infrastructure.Tests.Integration;
 
-public partial class ContentSummariserTests(ITestOutputHelper TestOutputHelper)
+public class ContentSummariserTests(ITestOutputHelper testOutputHelper)
 {
+    private readonly ITestOutputHelper _testOutputHelper = testOutputHelper
+            ?? throw new ArgumentNullException(nameof(testOutputHelper));
+    private readonly FakeLogger<ContentSummariser> _fakeLogger = new();
+
     [Theory]
     [InlineData("TestHtmlPage-ExpectedContent.txt")]
     [InlineData("BbcNewsPage-ExpectedContent.txt")]
@@ -30,7 +34,7 @@ public partial class ContentSummariserTests(ITestOutputHelper TestOutputHelper)
             aiServiceOptions.ModelId, aiServiceOptions.EndpointUrl, aiServiceOptions.ApiKey);
         builder.Services.AddLogging(loggingBuilder =>
         {
-            loggingBuilder.AddProvider(new TestOutputLoggerProvider(TestOutputHelper));
+            loggingBuilder.AddProvider(new TestOutputLoggerProvider(_testOutputHelper));
             loggingBuilder.SetMinimumLevel(LogLevel.Information);
         });
 
@@ -38,11 +42,11 @@ public partial class ContentSummariserTests(ITestOutputHelper TestOutputHelper)
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
         // Act
-        var contentSummariser = new ContentSummariser(chatCompletionService);
+        var contentSummariser = new ContentSummariser(_fakeLogger, chatCompletionService);
         var summary = await contentSummariser.SummariseAsync(testContent);
 
         // Assert
-        TestOutputHelper.WriteLine(summary);
+        _testOutputHelper.WriteLine(summary);
         summary.Length.ShouldBeGreaterThan(100, "because this is the minimum acceptable summary length");
     }
 }

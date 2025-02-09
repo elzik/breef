@@ -23,7 +23,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             lineEndingNormalisedResult.ShouldBe(lineEndingNormalisedExpected);
         }
 
-        private string NormaliseLineEndings(string text)
+        private static string NormaliseLineEndings(string text)
         {
             return text.Replace("\r\n", "\n");
         }

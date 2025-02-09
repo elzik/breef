@@ -1,6 +1,7 @@
-﻿using HtmlAgilityPack;
+﻿using Elzik.Breef.Domain;
+using HtmlAgilityPack;
 
-namespace Elzik.Breef.Domain;
+namespace Elzik.Breef.Infrastructure;
 
 public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
 {
