@@ -9,37 +9,41 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit
 {
     public class ContentSummariserTests
     {
+        private readonly string _testSummary;
         private readonly FakeLogger<ContentSummariser> _logger;
         private readonly IChatCompletionService _chatCompletionService;
         private readonly ContentSummariser _contentSummariser;
+        private readonly string _testContent;
+        private readonly ChatMessageContent? _testSummaryResult;
 
         public ContentSummariserTests()
         {
             _logger = new FakeLogger<ContentSummariser>();
             _chatCompletionService = Substitute.For<IChatCompletionService>();
             _contentSummariser = new ContentSummariser(_logger, _chatCompletionService);
+
+            _testContent = "This is a test content.";
+            _testSummary = "Test summary.";
+
+            var testChatHistory = new ChatHistory("system prompt");
+            testChatHistory.AddMessage(AuthorRole.Assistant, _testContent);
+            _testSummaryResult = new ChatMessageContent(AuthorRole.Assistant, _testSummary);
+
+            _chatCompletionService.GetChatMessageContentsAsync(
+                Arg.Is<ChatHistory>(ch => ch.Any(m =>
+                    m.Content == _testContent && m.Role == AuthorRole.Assistant)),
+                Arg.Any<PromptExecutionSettings>(),
+                Arg.Any<Kernel>(),
+                Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult<IReadOnlyList<ChatMessageContent>>(
+                    [_testSummaryResult]));
         }
 
         [Fact]
         public async Task SummariseAsync_ValidContent_ReturnsSummary()
         {
-            // Arrange
-            var testContent = "This is a test content.";
-            var testChatHistory = new ChatHistory("system prompt");
-            testChatHistory.AddMessage(AuthorRole.Assistant, testContent);
-            var testSummaryResult = new ChatMessageContent(AuthorRole.Assistant, "Test summary.");
-
-            _chatCompletionService.GetChatMessageContentsAsync(
-                Arg.Is<ChatHistory>(ch => ch.Any(m => 
-                    m.Content == testContent && m.Role == AuthorRole.Assistant)), 
-                Arg.Any<PromptExecutionSettings>(),
-                Arg.Any<Kernel>(),
-                Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<IReadOnlyList<ChatMessageContent>>(
-                    [testSummaryResult]));
-
             // Act
-            var result = await _contentSummariser.SummariseAsync(testContent);
+            var result = await _contentSummariser.SummariseAsync(_testContent);
 
             // Assert
             result.ShouldBe("Test summary.");
@@ -48,23 +52,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit
         [Fact]
         public async Task SummariseAsync_ValidContent_ProvidesModelInstructions()
         {
-            // Arrange
-            var testContent = "This is a test content.";
-            var testChatHistory = new ChatHistory("system prompt");
-            testChatHistory.AddMessage(AuthorRole.Assistant, testContent);
-            var testSummaryResult = new ChatMessageContent(AuthorRole.Assistant, "Test summary.");
-
-            _chatCompletionService.GetChatMessageContentsAsync(
-                Arg.Is<ChatHistory>(ch => ch.Any(m =>
-                    m.Content == testContent && m.Role == AuthorRole.Assistant)),
-                Arg.Any<PromptExecutionSettings>(),
-                Arg.Any<Kernel>(),
-                Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<IReadOnlyList<ChatMessageContent>>(
-                    [testSummaryResult]));
-
             // Act
-            var result = await _contentSummariser.SummariseAsync(testContent);
+            var result = await _contentSummariser.SummariseAsync(_testContent);
 
             // Assert
             var systemPrompt = @"
@@ -89,28 +78,15 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit
         [Fact]
         public async Task SummariseAsync_ValidContent_Logs()
         {
-            // Arrange
-            var testContent = "This is a test content.";
-            var testChatHistory = new ChatHistory("system prompt");
-            testChatHistory.AddMessage(AuthorRole.Assistant, testContent);
-            var testSummaryResult = new ChatMessageContent(AuthorRole.Assistant, "Test summary.");
-
-            _chatCompletionService.GetChatMessageContentsAsync(
-                Arg.Any<ChatHistory>(),
-                Arg.Any<PromptExecutionSettings>(),
-                Arg.Any<Kernel>(),
-                Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<IReadOnlyList<ChatMessageContent>>(
-                    [testSummaryResult]));
-
             // Act
-            await _contentSummariser.SummariseAsync(testContent);
+            await _contentSummariser.SummariseAsync(_testContent);
 
             // Assert
             _logger.Collector.Count.ShouldBe(1);
             _logger.LatestRecord.Level.ShouldBe(LogLevel.Information);
+            double ratio = 0.565;
             _logger.LatestRecord.Message.ShouldBe(
-                "Summary generated in 2 words, 56.5% of original content.");
+                $"Summary generated in 2 words, {ratio.ToString("P1")} of original content.");
         }
     }
 }
