@@ -86,7 +86,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit
             _logger.LatestRecord.Level.ShouldBe(LogLevel.Information);
             double ratio = 0.565;
             _logger.LatestRecord.Message.ShouldBe(
-                $"Summary generated in 2 words, {ratio.ToString("P1")} of original content.");
+                string.Format("Summary generated in 2 words, {0} of original content.", 
+                ratio.ToString("P1")));
         }
     }
 }
