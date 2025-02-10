@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Shouldly;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration
@@ -9,9 +10,10 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
         {
             // Arrange
             var testUrl = "https://elzik.github.io/test-web/test.html";
+            var defaultOptions = Options.Create(new WebPageDownLoaderOptions());
 
             // Act
-            var httpClient = new WebPageDownloader();
+            var httpClient = new WebPageDownloader(defaultOptions);
             var result = await httpClient.DownloadAsync(testUrl);
 
             // Assert
@@ -23,7 +25,24 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             lineEndingNormalisedResult.ShouldBe(lineEndingNormalisedExpected);
         }
 
-        private string NormaliseLineEndings(string text)
+        [Theory]
+        [InlineData("https://reddit.com")]
+        [InlineData("https://stackoverflow.com/")]
+        public async Task DownloadAsync_ForBlockedSites_ThwartsBlock(string testUrl)
+        {
+            // Arrange
+            var defaultOptions = Options.Create(new WebPageDownLoaderOptions());
+
+            // Act
+            var httpClient = new WebPageDownloader(defaultOptions);
+            var result = await httpClient.DownloadAsync(testUrl);
+
+            // Assert
+            result.ShouldNotBeNull();
+        }
+
+
+        private static string NormaliseLineEndings(string text)
         {
             return text.Replace("\r\n", "\n");
         }
