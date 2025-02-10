@@ -1,8 +1,8 @@
-﻿using Elzik.Breef.Infrastructure;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
+using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Shouldly;
@@ -10,11 +10,11 @@ using Xunit.Abstractions;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration;
 
-public class ContentSummariserTests(ITestOutputHelper testOutputHelper)
+public class AiContentSummariserTests(ITestOutputHelper testOutputHelper)
 {
     private readonly ITestOutputHelper _testOutputHelper = testOutputHelper
             ?? throw new ArgumentNullException(nameof(testOutputHelper));
-    private readonly FakeLogger<ContentSummariser> _fakeLogger = new();
+    private readonly FakeLogger<AiContentSummariser> _fakeLogger = new();
 
     [Theory]
     [InlineData("TestHtmlPage-ExpectedContent.txt")]
@@ -41,8 +41,14 @@ public class ContentSummariserTests(ITestOutputHelper testOutputHelper)
         var kernel = builder.Build();
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
+        var summariserOptions = Options.Create(new AiContentSummariserOptions
+        {
+            TargetSummaryLengthPercentage = 10,
+            TargetSummaryMaxWordCount = 200
+        });
+
         // Act
-        var contentSummariser = new ContentSummariser(_fakeLogger, chatCompletionService);
+        var contentSummariser = new AiContentSummariser(_fakeLogger, chatCompletionService, summariserOptions);
         var summary = await contentSummariser.SummariseAsync(testContent);
 
         // Assert
