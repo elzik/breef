@@ -19,6 +19,7 @@ updates:
         - "NSubstitute*"
         - "Polly.Testing*"
         - "Shouldly*"
+        - "Testcontainers"
         - "xunit*"
       test-dependencies:
         patterns:
@@ -29,6 +30,7 @@ updates:
         - "NSubstitute*"
         - "Polly.Testing*"
         - "Shouldly*"
+        - "Testcontainers"
         - "xunit*"
       build-dependencies:
         patterns:
