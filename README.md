@@ -46,10 +46,10 @@ The AI model will use these settings when generating summaries. Although the mod
 
 Example:
 
-```json
+```jsonc
 "AiContentSummariser": {
-    TargetSummaryLengthPercentage: 10,        // breef_AiContentSummariser__TargetSummaryLengthPercentage
-    TargetSummaryMaxWordCount: 200            // breef_AiContentSummariser__TargetSummaryMaxWordCount
+    "TargetSummaryLengthPercentage": 10,        // breef_AiContentSummariser__TargetSummaryLengthPercentage
+    "TargetSummaryMaxWordCount": 200            // breef_AiContentSummariser__TargetSummaryMaxWordCount
 }
 ```
 
@@ -61,8 +61,8 @@ These settings affect how pages are downloaded prior to being summarised.
 
 Example:
 
-```json
+```jsonc
 "WebPageDownLoader" : {
-    "UserAgent": "custom agent"               // breef_WebPageDownLoader__UserAgent
+    "UserAgent": "custom agent"                 // breef_WebPageDownLoader__UserAgent
 }
 ```
