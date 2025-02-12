@@ -1,4 +1,5 @@
 ﻿using Elzik.Breef.Domain;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Elzik.Breef.Infrastructure
@@ -7,10 +8,14 @@ namespace Elzik.Breef.Infrastructure
     {
         private readonly HttpClient _httpClient;
 
-        public WebPageDownloader(IOptions<WebPageDownLoaderOptions> WebPageDownLoaderOptions)
+        public WebPageDownloader(ILogger<WebPageDownloader> logger,  
+            IOptions<WebPageDownLoaderOptions> WebPageDownLoaderOptions)
         {
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.Add("User-Agent", WebPageDownLoaderOptions.Value.UserAgent);
+
+            logger.LogInformation("Downloads will be made using the User-Agent: {UserAgent}", 
+                _httpClient.DefaultRequestHeaders.UserAgent);
         }
 
         public async Task<string> DownloadAsync(string url)
