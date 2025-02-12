@@ -52,3 +52,17 @@ Example:
     TargetSummaryMaxWordCount: 200            // breef_AiContentSummariser__TargetSummaryMaxWordCount
 }
 ```
+
+#### Web Page Downloader
+
+These settings affect how pages are downloaded prior to being summarised.
+
+  - **UserAgent** - The user agent used when downloading pages. By default this is set to `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36` but can be overidden here.
+
+Example:
+
+```json
+"WebPageDownLoader" : {
+    "UserAgent": "custom agent"               // breef_WebPageDownLoader__UserAgent
+}
+```
