@@ -68,7 +68,6 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             result.ShouldNotBeNull();
         }
 
-
         private static string NormaliseLineEndings(string text)
         {
             return text.Replace("\r\n", "\n");

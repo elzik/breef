@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace Elzik.Breef.Domain.Tests.Integration
+namespace Elzik.Breef.Infrastructure.Tests.Integration
 {
     public class TestOutputLoggerProvider(ITestOutputHelper testOutputHelper) : ILoggerProvider
     {

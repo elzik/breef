@@ -60,7 +60,8 @@ public class Program
 
         builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
 
-        builder.Services.AddTransient<IContentSummariser, ContentSummariser>();
+        builder.Services.Configure<AiContentSummariserOptions>(configuration.GetSection("AiContentSummariser"));
+        builder.Services.AddTransient<IContentSummariser, AiContentSummariser>();
 
         AddAiService(builder.Services, configuration);
         AddWallabagBreefPublisher(builder.Services, configuration);
