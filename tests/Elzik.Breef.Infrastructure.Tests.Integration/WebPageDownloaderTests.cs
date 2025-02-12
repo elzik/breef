@@ -57,7 +57,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
         {
             // Arrange
             Skip.If(IsRunningInGitHubWorkflow && testUrl == "https://reddit.com", 
-                "Requests to reddit.com from GitHub workflows are always blocked.");
+                "Skipped because requests to reddit.com from GitHub workflows are always " +
+                "blocked meaning this test case always fails. This must be run locally instead.");
 
             // Act
             var httpClient = new WebPageDownloader(_testOutputFakeLogger, _defaultOptions);
