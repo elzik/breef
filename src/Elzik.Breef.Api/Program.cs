@@ -55,7 +55,9 @@ public class Program
         });
         builder.Services.AddAuth(configuration);
 
+        builder.Services.Configure<WebPageDownLoaderOptions>(configuration.GetSection("WebPageDownLoader"));
         builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
+
         builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
 
         builder.Services.Configure<AiContentSummariserOptions>(configuration.GetSection("AiContentSummariser"));
