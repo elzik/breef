@@ -6,7 +6,7 @@ namespace Elzik.Breef.Api.Presentation
     {
         public static PublishedBreefResponse ToPublishedBreefResponse(this PublishedBreef breef)
         {
-            return new PublishedBreefResponse(breef.PublishedUrl);
+            return new PublishedBreefResponse(breef.ResourceUrl, breef.PublishedUrl);
         }
     }
 }

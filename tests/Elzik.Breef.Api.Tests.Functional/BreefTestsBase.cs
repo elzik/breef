@@ -56,7 +56,8 @@ namespace Elzik.Breef.Api.Tests.Functional
             var publishedBreef = JsonSerializer
                 .Deserialize<PublishedBreefResponse>(responseString, JsonSerializerOptions);
             publishedBreef.ShouldNotBeNull();
-            publishedBreef.Url.ShouldStartWith($"{_wallabagOptions.BaseUrl}/api/entries/");
+            publishedBreef.ResourceUrl.ShouldStartWith($"{_wallabagOptions.BaseUrl}/api/entries/");
+            publishedBreef.PublishedUrl.ShouldStartWith($"{_wallabagOptions.BaseUrl}/view/");
         }
 
         [SkippableFact]

@@ -16,7 +16,17 @@ chrome.action.onClicked.addListener((tab) => {
                         type: 'basic',
                         iconUrl: 'Images/breef-48.png',
                         title: 'Request Successful',
-                        message: 'The URL was sent successfully.'
+                        message: 'The summarised article was successfully created.',
+                        buttons: [
+                            { title: 'Open in Wallabag' }
+                        ],
+                        requireInteraction: true
+                    }, (notificationId) => {
+                        chrome.notifications.onButtonClicked.addListener((notifId, btnIdx) => {
+                            if (notifId === notificationId && btnIdx === 0) {
+                                chrome.tabs.create({ url: data.publishedUrl });
+                            }
+                        });
                     });
                 })
                 .catch((error) => {
