@@ -25,7 +25,10 @@ namespace Elzik.Breef.Infrastructure.Wallabag
                 Port = -1
             };
 
-            var publishedBreef = new PublishedBreef(publishedUriBuilder.ToString());
+            var resourceUrl = publishedUriBuilder.ToString();
+            var publishedUrl = resourceUrl.Replace("/api/entries/", "/view/");
+
+            var publishedBreef = new PublishedBreef(resourceUrl, publishedUrl);
 
             return publishedBreef;
         }

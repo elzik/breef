@@ -32,6 +32,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
                 Url = "https://test.com",
                 Tags = "breef"
             };
+            var wallabagEntryID = 123;
             var wallabagEntry = new WallabagEntry
             {
                 IsArchived = 0,
@@ -41,7 +42,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
                 UserId = 1,
                 Tags = [],
                 IsPublic = false,
-                Id = 1,
+                Id = wallabagEntryID,
                 Title = "test-title",
                 Url = "https://test.com",
                 HashedUrl = "hashed-url",
@@ -58,7 +59,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
                 {
                     Self = new Self
                     {
-                        Href = "/entry/1"
+                        Href = $"/api/entries/{wallabagEntryID}"
                     }
                 },
                 Headers = []
@@ -72,7 +73,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
             var result = await wallabagBreefPublisher.PublishAsync(breef);
 
             // Assert
-            result.PublishedUrl.ShouldBe($"{options.Value.BaseUrl}{wallabagEntry.Links.Self.Href}");
+            result.PublishedUrl.ShouldBe($"{options.Value.BaseUrl}/view/{wallabagEntry.Id}");
+            result.ResourceUrl.ShouldBe($"{options.Value.BaseUrl}{wallabagEntry.Links.Self.Href}");
         }
     }
 }
