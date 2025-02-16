@@ -65,11 +65,14 @@ jobs:
       with:
         dotnet-version: 8.x.x
     - name: Restore dependencies
-      run: pwsh build/api/restore.ps1
+      run: build/api/restore.ps1
+      shell: pwsh
     - name: Build
-      run: pwsh build/api/build.ps1
+      run: build/api/build.ps1 ${{ needs.check-release-requirement.outputs.semantic-version }}
+      shell: pwsh
     - name: Build Docker image
       run: pwsh build/api/build-docker.ps1
+      shell: pwsh
     - name: Run tests
       run: |
         export BREEF_TESTS_AI_MODEL_ID="${{ secrets.BREEF_TESTS_AI_MODEL_ID }}"
