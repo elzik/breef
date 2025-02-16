@@ -24,7 +24,7 @@ jobs:
       run: |
         $semver = build/api/get-semver.ps1 | Select-Object -Last 1
         Write-Output "Semantic version: $semver"
-        Write-Output "semantic-version=$semver" >> $GITHUB_OUTPUT
+        Write-Output "semantic-version=$semver" >> $env:GITHUB_OUTPUT
       shell: pwsh
     - name: Check for Release Requirement
       id: release-check
