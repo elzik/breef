@@ -75,14 +75,6 @@ jobs:
       shell: pwsh
     - name: Run tests
       run: |
-        export BREEF_TESTS_AI_MODEL_ID="${{ secrets.BREEF_TESTS_AI_MODEL_ID }}"
-        export BREEF_TESTS_AI_ENDPOINT="${{ secrets.BREEF_TESTS_AI_ENDPOINT }}"
-        export BREEF_TESTS_AI_API_KEY="${{ secrets.BREEF_TESTS_AI_API_KEY }}"
-        export BREEF_TESTS_WALLABAG_URL="${{ secrets.BREEF_TESTS_WALLABAG_URL }}"
-        export BREEF_TESTS_WALLABAG_CLIENT_ID="${{ secrets.BREEF_TESTS_WALLABAG_CLIENT_ID }}"
-        export BREEF_TESTS_WALLABAG_CLIENT_SECRET="${{ secrets.BREEF_TESTS_WALLABAG_CLIENT_SECRET }}"
-        export BREEF_TESTS_WALLABAG_USERNAME="${{ secrets.BREEF_TESTS_WALLABAG_USERNAME }}"
-        export BREEF_TESTS_WALLABAG_PASSWORD="${{ secrets.BREEF_TESTS_WALLABAG_PASSWORD }}"
         export breef_BreefApi__ApiKey="${{ secrets.BREEF_BREEFAPI__APIKEY }}"
         export breef_Wallabag__BaseUrl="${{ secrets.BREEF_WALLABAG__BASEURL }}"
         export breef_Wallabag__ClientId="${{ secrets.BREEF_WALLABAG__CLIENTID }}"
