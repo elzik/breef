@@ -68,7 +68,7 @@ jobs:
       run: build/api/restore.ps1
       shell: pwsh
     - name: Build
-      run: build/api/build.ps1 ${{ needs.check-release-requirement.outputs.semantic-version }}
+      run: build/api/build.ps1 -Version "${{ needs.check-release-requirement.outputs.semantic-version }}"
       shell: pwsh
     - name: Build Docker image
       run: pwsh build/api/build-docker.ps1
