@@ -13,8 +13,8 @@ jobs:
   check-release-requirement:
     runs-on: ubuntu-latest
     outputs:
-      needs-release: ${{ steps.release-check.outputs.needs-release }}"
-      semantic-version: ${{ steps.get-semver.outputs.semantic-version }}"
+      needs-release: ${{ steps.release-check.outputs.needs-release }}
+      semantic-version: ${{ steps.get-semver.outputs.semantic-version }}
     steps:
     - uses: actions/checkout@v4
       with:
