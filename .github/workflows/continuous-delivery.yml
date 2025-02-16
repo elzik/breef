@@ -71,9 +71,7 @@ jobs:
       run: build/api/build.ps1 -Version "${{ needs.check-release-requirement.outputs.semantic-version }}"
       shell: pwsh
     - name: Build Docker image
-      run: |
-        echo "Version: ${{ needs.check-release-requirement.outputs.semantic-version }}"
-        build/api/build-docker.ps1 -Version "${{ needs.check-release-requirement.outputs.semantic-version }}"
+      run: build/api/build-docker.ps1 -Version "${{ needs.check-release-requirement.outputs.semantic-version }}"
       shell: pwsh
     - name: Run tests
       run: |
