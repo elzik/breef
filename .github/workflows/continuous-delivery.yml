@@ -19,6 +19,15 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: GetSemVerBash
+      id: get-semver-bash
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 6.1.0
+        output=$(dotnet-gitversion)
+        semver=$(echo $output | grep -oP '"SemVer"\s*:\s*"\K[^"]+')
+        echo $output
+        echo "Semantic version: $semver"
+        echo "semantic-version=$semver" >> $GITHUB_OUTPUT
     - name: GetSemVer
       id: get-semver
       run: |
