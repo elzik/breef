@@ -1,7 +1,14 @@
+param (
+    [Parameter(Mandatory=$true)]
+    [string]$Version
+)
+
+Write-Output "Will be built as version: $Version"
+
 $repoRoot =  Resolve-Path "$PSScriptRoot/../.."
 
 docker build `
-    -t ghcr.io/elzik/elzik-breef-api:latest `
+    -t "ghcr.io/elzik/elzik-breef-api:$version" `
         -f "$repoRoot/src/Elzik.Breef.Api/Dockerfile" `
     "$repoRoot/src"
 
