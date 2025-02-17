@@ -89,7 +89,7 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
         var processStartInfo = new ProcessStartInfo
         {
             FileName = "pwsh",
-            Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{dockerScriptPath}\"",
+            Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{dockerScriptPath}\" -Version latest",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
