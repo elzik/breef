@@ -9,7 +9,7 @@ $repoRoot =  Resolve-Path "$PSScriptRoot/../.."
 
 docker build `
     -t "ghcr.io/elzik/elzik-breef-api:$Version" `
-        -f "$repoRoot/src/Elzik.Breef.Api/Dockerfile" `
+    -f "$repoRoot/src/Elzik.Breef.Api/Dockerfile" `
     "$repoRoot/src"
 
 if ($LASTEXITCODE -ne 0) {

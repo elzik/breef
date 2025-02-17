@@ -111,3 +111,23 @@ jobs:
       run: |
         git tag "v${{ needs.check-release-requirement.outputs.semantic-version }}"
         git push --tags
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Tag Docker image
+      run: |
+        docker tag `
+          ghcr.io/elzik/elzik-breef-api:${{ needs.check-release-requirement.outputs.semantic-version }}
+        if ($env:GITHUB_REF -ne "refs/heads/main")
+        {            
+              docker tag `
+                ghcr.io/elzik/elzik-breef-api:latest 
+        }
+      shell: pwsh
+    - name: Push Docker image
+      run: |
+        docker push --all-tags ghcr.io/elzik/elzik-breef-api
+      shell: pwsh
