@@ -121,12 +121,11 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Tag Docker image
       run: |
-        docker tag `
-          ghcr.io/elzik/elzik-breef-api:${{ needs.check-release-requirement.outputs.semantic-version }}
         if ($env:GITHUB_REF -ne "refs/heads/main")
         {            
-              docker tag `
-                ghcr.io/elzik/elzik-breef-api:latest 
+          docker tag `
+            ghcr.io/elzik/elzik-breef-api:${{ needs.check-release-requirement.outputs.semantic-version }} `
+            ghcr.io/elzik/elzik-breef-api:latest 
         }
       shell: pwsh
     - name: Push Docker image
