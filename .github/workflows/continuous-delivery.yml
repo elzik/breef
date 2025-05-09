@@ -85,6 +85,17 @@ jobs:
         export breef_AiService__EndpointUrl="${{ secrets.BREEF_AISERVICE__ENDPOINTURL }}"
         export breef_AiService__ApiKey="${{ secrets.BREEF_AISERVICE__APIKEY }}"
         pwsh build/api/test.ps1
+    - name: Save Docker Image
+      run: |
+        docker save `
+            ghcr.io/elzik/elzik-breef-api:${{ needs.check-release-requirement.outputs.semantic-version }} `
+            -o breef-api.tar
+      shell: pwsh
+    - name: Upload Docker Image Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: breef-api-image
+        path: breef-api.tar
     - name: Test report
       uses: dorny/test-reporter@v1
       with:
@@ -109,6 +120,13 @@ jobs:
     if: needs.check-release-requirement.outputs.needs-release == 'true'
     steps:
     - uses: actions/checkout@v4
+    - name: Download Docker Image Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: breef-api-image
+    - name: Load Docker Image
+      run: docker load -i breef-api.tar
+      shell: pwsh
     - name: Tag With SemVer
       run: |
         git tag "v${{ needs.check-release-requirement.outputs.semantic-version }}"
