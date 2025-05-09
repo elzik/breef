@@ -116,6 +116,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
     needs: [check-release-requirement, build-ubuntu]
     if: needs.check-release-requirement.outputs.needs-release == 'true'
     steps:
