@@ -20,7 +20,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.15" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.7" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.48.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.49.0" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="10.9.0.115408">
       <PrivateAssets>all</PrivateAssets>
