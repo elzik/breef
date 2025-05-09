@@ -92,7 +92,7 @@ jobs:
             -o breef-api.tar
       shell: pwsh
     - name: Upload Docker Image Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: breef-api-image
         path: breef-api.tar
@@ -121,7 +121,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download Docker Image Artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: breef-api-image
     - name: Load Docker Image
