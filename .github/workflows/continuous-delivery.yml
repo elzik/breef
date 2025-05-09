@@ -96,7 +96,7 @@ jobs:
       with:
         name: breef-api-image
         path: breef-api.tar
-    - name: Test report
+    - name: Generate Test Report
       uses: dorny/test-reporter@v1
       with:
         name: Test report
@@ -138,7 +138,7 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Tag Docker image
+    - name: Tag With Latest
       run: |
         if ($env:GITHUB_REF -eq "refs/heads/main")
         {            
