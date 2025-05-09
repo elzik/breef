@@ -140,7 +140,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Tag Docker image
       run: |
-        if ($env:GITHUB_REF -ne "refs/heads/main")
+        if ($env:GITHUB_REF -eq "refs/heads/main")
         {            
           docker tag `
             ghcr.io/elzik/elzik-breef-api:${{ needs.check-release-requirement.outputs.semantic-version }} `
