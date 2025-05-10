@@ -13,8 +13,8 @@ jobs:
   check-release-requirement:
     runs-on: ubuntu-latest
     outputs:
-      needs-release: ${{ steps.release-check.outputs.needs-release }}"
-      semantic-version: ${{ steps.get-semver.outputs.semantic-version }}"
+      needs-release: ${{ steps.release-check.outputs.needs-release }}
+      semantic-version: ${{ steps.get-semver.outputs.semantic-version }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -22,12 +22,10 @@ jobs:
     - name: GetSemVer
       id: get-semver
       run: |
-        dotnet tool install --global GitVersion.Tool --version 6.1.0
-        output=$(dotnet-gitversion)
-        semver=$(echo $output | grep -oP '"SemVer"\s*:\s*"\K[^"]+')
-        echo $output
-        echo "Semantic version: $semver"
-        echo "semantic-version=$semver" >> $GITHUB_OUTPUT
+        $semver = build/api/get-semver.ps1 | Select-Object -Last 1
+        Write-Output "Semantic version: $semver"
+        Write-Output "semantic-version=$semver" >> $env:GITHUB_OUTPUT
+      shell: pwsh
     - name: Check for Release Requirement
       id: release-check
       run: |
@@ -67,21 +65,16 @@ jobs:
       with:
         dotnet-version: 8.x.x
     - name: Restore dependencies
-      run: pwsh build/api/restore.ps1
+      run: build/api/restore.ps1
+      shell: pwsh
     - name: Build
-      run: pwsh build/api/build.ps1
+      run: build/api/build.ps1 -Version "${{ needs.check-release-requirement.outputs.semantic-version }}"
+      shell: pwsh
     - name: Build Docker image
-      run: pwsh build/api/build-docker.ps1
+      run: build/api/build-docker.ps1 -Version "${{ needs.check-release-requirement.outputs.semantic-version }}"
+      shell: pwsh
     - name: Run tests
       run: |
-        export BREEF_TESTS_AI_MODEL_ID="${{ secrets.BREEF_TESTS_AI_MODEL_ID }}"
-        export BREEF_TESTS_AI_ENDPOINT="${{ secrets.BREEF_TESTS_AI_ENDPOINT }}"
-        export BREEF_TESTS_AI_API_KEY="${{ secrets.BREEF_TESTS_AI_API_KEY }}"
-        export BREEF_TESTS_WALLABAG_URL="${{ secrets.BREEF_TESTS_WALLABAG_URL }}"
-        export BREEF_TESTS_WALLABAG_CLIENT_ID="${{ secrets.BREEF_TESTS_WALLABAG_CLIENT_ID }}"
-        export BREEF_TESTS_WALLABAG_CLIENT_SECRET="${{ secrets.BREEF_TESTS_WALLABAG_CLIENT_SECRET }}"
-        export BREEF_TESTS_WALLABAG_USERNAME="${{ secrets.BREEF_TESTS_WALLABAG_USERNAME }}"
-        export BREEF_TESTS_WALLABAG_PASSWORD="${{ secrets.BREEF_TESTS_WALLABAG_PASSWORD }}"
         export breef_BreefApi__ApiKey="${{ secrets.BREEF_BREEFAPI__APIKEY }}"
         export breef_Wallabag__BaseUrl="${{ secrets.BREEF_WALLABAG__BASEURL }}"
         export breef_Wallabag__ClientId="${{ secrets.BREEF_WALLABAG__CLIENTID }}"
@@ -92,7 +85,18 @@ jobs:
         export breef_AiService__EndpointUrl="${{ secrets.BREEF_AISERVICE__ENDPOINTURL }}"
         export breef_AiService__ApiKey="${{ secrets.BREEF_AISERVICE__APIKEY }}"
         pwsh build/api/test.ps1
-    - name: Test report
+    - name: Save Docker Image
+      run: |
+        docker save `
+            ghcr.io/elzik/elzik-breef-api:${{ needs.check-release-requirement.outputs.semantic-version }} `
+            -o breef-api.tar
+      shell: pwsh
+    - name: Upload Docker Image Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: breef-api-image
+        path: breef-api.tar
+    - name: Generate Test Report
       uses: dorny/test-reporter@v1
       with:
         name: Test report
@@ -107,3 +111,43 @@ jobs:
         gist_description: "code-coverage-${{ github.ref_name }}"
         gist_file_name: breef-code-coverage-${{ github.ref_name }}.svg
         file_path: tests/TestResults/badge_shieldsio_linecoverage_green.svg
+
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    needs: [check-release-requirement, build-ubuntu]
+    if: needs.check-release-requirement.outputs.needs-release == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download Docker Image Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: breef-api-image
+    - name: Load Docker Image
+      run: docker load -i breef-api.tar
+      shell: pwsh
+    - name: Tag With SemVer
+      run: |
+        git tag "v${{ needs.check-release-requirement.outputs.semantic-version }}"
+        git push --tags
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Tag With Latest
+      run: |
+        if ($env:GITHUB_REF -eq "refs/heads/main")
+        {            
+          docker tag `
+            ghcr.io/elzik/elzik-breef-api:${{ needs.check-release-requirement.outputs.semantic-version }} `
+            ghcr.io/elzik/elzik-breef-api:latest 
+        }
+      shell: pwsh
+    - name: Push Docker image
+      run: |
+        docker push --all-tags ghcr.io/elzik/elzik-breef-api
+      shell: pwsh
