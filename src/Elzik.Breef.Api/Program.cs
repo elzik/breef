@@ -8,6 +8,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Refit;
 using Serilog;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -33,6 +34,8 @@ public class Program
             .CreateLogger();
         builder.Host.UseSerilog();
         builder.Services.AddSerilog();
+
+        Log.Information("Starting breef API v{Version}", GetProductVersion());
 
         builder.Services.ConfigureHttpJsonOptions(options =>
         {
@@ -134,5 +137,19 @@ public class Program
             });
 
         services.AddTransient<IBreefPublisher, WallabagBreefPublisher>();
+    }
+
+    private static string GetProductVersion()
+    {
+        var assemblyAttributes = Assembly.GetExecutingAssembly()
+            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false);
+
+        if (assemblyAttributes.Length == 0)
+        {
+            throw new InvalidOperationException("No custom assembly attributes found; " +
+                "unable to get informational version.");
+        }
+
+        return ((AssemblyInformationalVersionAttribute)assemblyAttributes[0]).InformationalVersion;
     }
 }
