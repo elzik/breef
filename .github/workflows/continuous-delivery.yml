@@ -81,6 +81,7 @@ jobs:
         export breef_Wallabag__ClientSecret="${{ secrets.BREEF_WALLABAG__CLIENTSECRET }}"
         export breef_Wallabag__Username="${{ secrets.BREEF_WALLABAG__USERNAME }}"
         export breef_Wallabag__Password="${{ secrets.BREEF_WALLABAG__PASSWORD }}"
+        export breef_AiService__Provider="${{ secrets.BREEF_AISERVICE__PROVIDER }}"
         export breef_AiService__ModelId="${{ secrets.BREEF_AISERVICE__MODELID }}"
         export breef_AiService__EndpointUrl="${{ secrets.BREEF_AISERVICE__ENDPOINTURL }}"
         export breef_AiService__ApiKey="${{ secrets.BREEF_AISERVICE__APIKEY }}"
