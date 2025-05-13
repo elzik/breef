@@ -30,31 +30,37 @@ These config items relate to the Wallabag service. Refer to the [Wallabag docume
 
 #### AiService
 
-These config items relate to the AI service used for generating summaries. Currently, only Azure OpenAI is supported.
+These config items relate to the AI service used for generating summaries.
 
-- **ModelId** - The model ID to be used for generating summaries.
+- **Provider** - The AI service provider. [`AzureOpenAI`](https://ai.azure.com/) and [`OpenAI`](https://platform.openai.com/) are supported.
+- **ModelId** - The model ID to be used for generating summaries. A chat-completion model should be used.
+  - AzureOpenAI - This is given as the 'Name' in the 'Deployment info' in Azure.
+  - OpenAI - This is given as the 'model' in OpenAI.
 - **EndpointUrl** - The endpoint URL for the AI service.
+  - AzureOpenAI - This is given as the 'Azure OpenAI endpoint' in Azure and typically takes the form `https://<tenant-specific>.openai.azure.com` It should not include any model-specific routing.
+  - OpenAI - Typically `https://api.openai.com/v1` It should not include any model-specific routing.
 - **ApiKey** - The API key used to authenticate with the AI service.
 
 Example
 ```jsonc
 {
   "BreefApi": {
-    "ApiKey": ""               // breef_BreefApi__ApiKey
+    "ApiKey": "<wallabag-generaged-key>"                     // breef_BreefApi__ApiKey
   },
 
   "Wallabag": {
-    "BaseUrl": "",             // breef_Wallabag__BaseUrl
-    "ClientId": "",            // breef_Wallabag__ClientId
-    "ClientSecret": "",        // breef_Wallabag__ClientSecret
-    "Username": "",            // breef_Wallabag__Username
-    "Password": ""             // breef_Wallabag__Password
+    "BaseUrl": "https://<wallabag-host>",                    // breef_Wallabag__BaseUrl
+    "ClientId": "<wallabag-generaged-client-id>",            // breef_Wallabag__ClientId
+    "ClientSecret": "<wallabag-generaged-client-secrect>",   // breef_Wallabag__ClientSecret
+    "Username": "<wallabag-username>",                       // breef_Wallabag__Username
+    "Password": "<wallabag-password>"                        // breef_Wallabag__Password
   },
 
   "AiService": {
-    "ModelId": "",             // breef_AiService__ModelId
-    "EndpointUrl": "",         // breef_AiService__EndpointUrl
-    "ApiKey": ""               // breef_AiService__ApiKey
+    "Provider": "OpenAi",                                    // breef_AiService__Provider
+    "ModelId": "https://api.openai.com/v1",                  // breef_AiService__ModelId
+    "EndpointUrl": "gpt-4o-mini",                            // breef_AiService__EndpointUrl
+    "ApiKey": "<open-ai-api-key>"                            // breef_AiService__ApiKey
   }
 }
 ```
@@ -72,8 +78,8 @@ Example:
 
 ```jsonc
 "AiContentSummariser": {
-    "TargetSummaryLengthPercentage": 10,        // breef_AiContentSummariser__TargetSummaryLengthPercentage
-    "TargetSummaryMaxWordCount": 200            // breef_AiContentSummariser__TargetSummaryMaxWordCount
+    "TargetSummaryLengthPercentage": 10,   // breef_AiContentSummariser__TargetSummaryLengthPercentage
+    "TargetSummaryMaxWordCount": 200       // breef_AiContentSummariser__TargetSummaryMaxWordCount
 }
 ```
 
@@ -87,6 +93,6 @@ Example:
 
 ```jsonc
 "WebPageDownLoader" : {
-    "UserAgent": "custom agent"        // breef_WebPageDownLoader__UserAgent
+    "UserAgent": "<custom-agent>"   // breef_WebPageDownLoader__UserAgent
 }
 ```
