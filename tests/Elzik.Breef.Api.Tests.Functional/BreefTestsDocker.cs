@@ -32,6 +32,7 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
         {
             BuildDockerImage();
 
+            string? breefAiServiceProvider = Environment.GetEnvironmentVariable("breef_AiService__Provider");
             string? breefAiServiceEndpointUrl = Environment.GetEnvironmentVariable("breef_AiService__EndpointUrl");
             string? breefAiServiceModelId = Environment.GetEnvironmentVariable("breef_AiService__ModelId");
             string? breefAiServiceApiKey = Environment.GetEnvironmentVariable("breef_AiService__ApiKey");
@@ -42,6 +43,8 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
             string? breefWallabagClientId = Environment.GetEnvironmentVariable("breef_Wallabag__ClientId");
             string? breefWallabagClientSecret = Environment.GetEnvironmentVariable("breef_Wallabag__ClientSecret");
 
+            Skip.If(string.IsNullOrWhiteSpace(breefAiServiceProvider),
+                "Skipped because no AI service provider provided in breef_AiService__Provider environment variable.");
             Skip.If(string.IsNullOrWhiteSpace(breefAiServiceEndpointUrl),
                 "Skipped because no AI endpoint provided in breef_AiService__EndpointUrl environment variable.");
             Skip.If(string.IsNullOrWhiteSpace(breefAiServiceModelId),
@@ -68,6 +71,7 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
                 .WithImage(DockerImageName)
                 .WithPortBinding(8080, true)
                 .WithEnvironment("breef_BreefApi__ApiKey", ApiKey)
+                .WithEnvironment("breef_AiService__Provider", breefAiServiceProvider)
                 .WithEnvironment("breef_AiService__EndpointUrl", breefAiServiceEndpointUrl)
                 .WithEnvironment("breef_AiService__ModelId", breefAiServiceModelId)
                 .WithEnvironment("breef_AiService__ApiKey", breefAiServiceApiKey)
