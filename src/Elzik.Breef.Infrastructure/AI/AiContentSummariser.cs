@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel.ChatCompletion;
 
-namespace Elzik.Breef.Infrastructure;
+namespace Elzik.Breef.Infrastructure.AI;
 
 public class AiContentSummariser(
     ILogger<AiContentSummariser> logger, 

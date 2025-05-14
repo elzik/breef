@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Elzik.Breef.Infrastructure.AI;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;

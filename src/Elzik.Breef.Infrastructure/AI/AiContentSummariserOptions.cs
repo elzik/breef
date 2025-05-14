@@ -1,4 +1,4 @@
-﻿namespace Elzik.Breef.Infrastructure;
+﻿namespace Elzik.Breef.Infrastructure.AI;
 
 public class AiContentSummariserOptions
 {

@@ -3,6 +3,7 @@ using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Application;
 using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure;
+using Elzik.Breef.Infrastructure.AI;
 using Elzik.Breef.Infrastructure.Wallabag;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
@@ -65,11 +66,11 @@ public class Program
 
         builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
 
-        builder.Services.Configure<AiContentSummariserOptions>(configuration.GetSection("AiContentSummariser"));
-        builder.Services.AddTransient<IContentSummariser, AiContentSummariser>();
-
         builder.Services.Configure<AiServiceOptions>(configuration.GetSection("AiService"));
-        AddAiService(builder.Services);
+        builder.Services.Configure<AiContentSummariserOptions>(configuration.GetSection("AiContentSummariser"));
+
+
+        builder.Services.AddAiContentSummariser();
 
         builder.Services.Configure<WallabagOptions>(configuration.GetSection("Wallabag"));
         AddWallabagBreefPublisher(builder.Services);
@@ -83,29 +84,6 @@ public class Program
         app.AddBreefEndpoints();
 
         await app.RunAsync();
-    }
-
-    private static void AddAiService(IServiceCollection services)
-    {
-        var aiServiceOptions = services.BuildServiceProvider()
-            .GetRequiredService<IOptions<AiServiceOptions>>().Value;
-
-        var kernelBuilder = aiServiceOptions.Provider switch
-        {
-            AiServiceProviders.OpenAI => 
-                Kernel.CreateBuilder().AddOpenAIChatCompletion(aiServiceOptions.ModelId, new Uri(aiServiceOptions.EndpointUrl), aiServiceOptions.ApiKey),
-            AiServiceProviders.AzureOpenAI => 
-                Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(aiServiceOptions.ModelId, aiServiceOptions.EndpointUrl, aiServiceOptions.ApiKey), 
-            AiServiceProviders.NotSet => 
-                throw new InvalidOperationException("AiService provider is not set."),
-            _ => 
-                throw new InvalidOperationException($"Unsupported AiService provider: {aiServiceOptions.Provider}"),
-        };
-
-        kernelBuilder.Services.AddSerilog();
-        var kernel = kernelBuilder.Build();
-        services.AddSingleton(kernel);
-        services.AddScoped(sp => sp.GetRequiredService<Kernel>().GetRequiredService<IChatCompletionService>());
     }
 
     private static void AddWallabagBreefPublisher(IServiceCollection services)

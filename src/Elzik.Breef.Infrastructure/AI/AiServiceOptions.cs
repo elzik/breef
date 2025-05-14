@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elzik.Breef.Infrastructure
+namespace Elzik.Breef.Infrastructure.AI
 {
     public class AiServiceOptions
     {
