@@ -1,3 +1,4 @@
+using Elzik.Breef.Api.Auth;
 using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Application;
 using Elzik.Breef.Domain;
@@ -56,7 +57,8 @@ public class Program
         {
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
         });
-        builder.Services.AddAuth(configuration);
+        builder.Services.Configure<BreefApiOptions>(configuration.GetSection("BreefApi"));
+        builder.Services.AddAuth();
 
         builder.Services.Configure<WebPageDownLoaderOptions>(configuration.GetSection("WebPageDownLoader"));
         builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
@@ -66,8 +68,12 @@ public class Program
         builder.Services.Configure<AiContentSummariserOptions>(configuration.GetSection("AiContentSummariser"));
         builder.Services.AddTransient<IContentSummariser, AiContentSummariser>();
 
-        AddAiService(builder.Services, configuration);
-        AddWallabagBreefPublisher(builder.Services, configuration);
+        builder.Services.Configure<AiServiceOptions>(configuration.GetSection("AiService"));
+        AddAiService(builder.Services);
+
+        builder.Services.Configure<WallabagOptions>(configuration.GetSection("Wallabag"));
+        AddWallabagBreefPublisher(builder.Services);
+
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
 
         var app = builder.Build();
@@ -79,10 +85,8 @@ public class Program
         await app.RunAsync();
     }
 
-    private static void AddAiService(IServiceCollection services, IConfigurationManager configuration)
+    private static void AddAiService(IServiceCollection services)
     {
-        services.Configure<AiServiceOptions>(configuration.GetSection("AiService"));
-
         var aiServiceOptions = services.BuildServiceProvider()
             .GetRequiredService<IOptions<AiServiceOptions>>().Value;
 
@@ -104,10 +108,9 @@ public class Program
         services.AddScoped(sp => sp.GetRequiredService<Kernel>().GetRequiredService<IChatCompletionService>());
     }
 
-    private static void AddWallabagBreefPublisher(IServiceCollection services, IConfigurationManager configuration)
+    private static void AddWallabagBreefPublisher(IServiceCollection services)
     {
         services.AddRefitClient<IWallabagAuthClient>();
-        services.Configure<WallabagOptions>(configuration.GetSection("Wallabag"));
 
         var wallabagOptions = services.BuildServiceProvider()
             .GetRequiredService<IOptions<WallabagOptions>>().Value;
