@@ -64,12 +64,10 @@ public class Program
 
         builder.Services.Configure<AiServiceOptions>(configuration.GetSection("AiService"));
         builder.Services.Configure<AiContentSummariserOptions>(configuration.GetSection("AiContentSummariser"));
-
-
         builder.Services.AddAiContentSummariser();
 
         builder.Services.Configure<WallabagOptions>(configuration.GetSection("Wallabag"));
-        AddWallabagBreefPublisher(builder.Services);
+        builder.Services.AddWallabagBreefPublisher();
 
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
 
@@ -80,50 +78,6 @@ public class Program
         app.AddBreefEndpoints();
 
         await app.RunAsync();
-    }
-
-    private static void AddWallabagBreefPublisher(IServiceCollection services)
-    {
-        services.AddRefitClient<IWallabagAuthClient>();
-
-        var wallabagOptions = services.BuildServiceProvider()
-            .GetRequiredService<IOptions<WallabagOptions>>().Value;
-
-        var refitSettings = new RefitSettings
-        {
-            AuthorizationHeaderValueGetter = async (request, cancellationToken) =>
-            {
-                var wallabagClient = RestService.For<IWallabagAuthClient>(wallabagOptions.BaseUrl);
-
-                var tokenRequest = new TokenRequest
-                {
-                    ClientId = wallabagOptions.ClientId,
-                    ClientSecret = wallabagOptions.ClientSecret,
-                    Username = wallabagOptions.Username,
-                    Password = wallabagOptions.Password
-                };
-
-                var tokenResponse = await wallabagClient.GetTokenAsync(tokenRequest);
-                return tokenResponse.AccessToken;
-            },
-            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            })
-        };
-
-#if DEBUG
-        refitSettings.HttpMessageHandlerFactory = () => new HttpMessageDebugLoggingHandler();
-#endif
-
-        services.AddRefitClient<IWallabagClient>(refitSettings)
-            .ConfigureHttpClient(client =>
-            {
-                client.BaseAddress = new Uri(wallabagOptions.BaseUrl);
-            });
-
-        services.AddTransient<IBreefPublisher, WallabagBreefPublisher>();
     }
 
     private static string GetProductVersion()
