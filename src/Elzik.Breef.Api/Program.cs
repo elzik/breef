@@ -54,10 +54,6 @@ public class Program
             });
         });
 
-        builder.Services.ConfigureHttpJsonOptions(options =>
-        {
-            options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-        });
         builder.Services.Configure<BreefApiOptions>(configuration.GetSection("BreefApi"));
         builder.Services.AddAuth();
 
