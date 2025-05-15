@@ -54,19 +54,34 @@ public class Program
             });
         });
 
-        builder.Services.Configure<BreefApiOptions>(configuration.GetSection("BreefApi"));
+        builder.Services.AddOptions<BreefApiOptions>()
+            .Bind(configuration.GetSection("BreefApi"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         builder.Services.AddAuth();
 
-        builder.Services.Configure<WebPageDownLoaderOptions>(configuration.GetSection("WebPageDownLoader"));
+        builder.Services.AddOptions<WebPageDownLoaderOptions>()
+            .Bind(configuration.GetSection("WebPageDownLoader"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
 
         builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
 
-        builder.Services.Configure<AiServiceOptions>(configuration.GetSection("AiService"));
-        builder.Services.Configure<AiContentSummariserOptions>(configuration.GetSection("AiContentSummariser"));
+        builder.Services.AddOptions<AiServiceOptions>()
+            .Bind(configuration.GetSection("AiService"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        builder.Services.AddOptions<AiContentSummariserOptions>()
+            .Bind(configuration.GetSection("AiContentSummariser"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         builder.Services.AddAiContentSummariser();
 
-        builder.Services.Configure<WallabagOptions>(configuration.GetSection("Wallabag"));
+        builder.Services.AddOptions<WallabagOptions>()
+            .Bind(configuration.GetSection("Wallabag"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         builder.Services.AddWallabagBreefPublisher();
 
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();

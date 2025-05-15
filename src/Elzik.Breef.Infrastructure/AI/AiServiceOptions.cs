@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Elzik.Breef.Infrastructure.AI
+namespace Elzik.Breef.Infrastructure.AI;
+
+public class AiServiceOptions
 {
-    public class AiServiceOptions
-    {
-        public required AiServiceProviders Provider { get; set; }
-        public required string ModelId { get; set; }
-        public required string EndpointUrl { get; set; }
-        public required string ApiKey { get; set; }
-    }
+    [Required]
+    public required AiServiceProviders Provider { get; set; }
+    
+    [Required]
+    public required string ModelId { get; set; }
+
+    [Required, Url]
+    public required string EndpointUrl { get; set; }
+
+    [Required]
+    public required string ApiKey { get; set; }
 }
