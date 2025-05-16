@@ -1,8 +1,7 @@
-using System;
+using Elzik.Breef.Infrastructure.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Xunit;
-using Elzik.Breef.Infrastructure.AI;
+using Shouldly;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration;
 
@@ -28,8 +27,8 @@ public class AiContentSummariserOptionsTests
         var ex = Assert.Throws<OptionsValidationException>(() => options.Value);
 
         // Assert
-        Assert.Contains("'TargetSummaryMaxWordCount' with the error: 'The field TargetSummaryMaxWordCount " +
-            "must be between 1 and 2147483647", ex.Message);
+        ex.Message.ShouldContain("'TargetSummaryMaxWordCount' with the error: 'The field TargetSummaryMaxWordCount " +
+            "must be between 1 and 2147483647");
     }
 
     [Theory]
@@ -54,8 +53,8 @@ public class AiContentSummariserOptionsTests
         var ex = Assert.Throws<OptionsValidationException>(() => options.Value);
 
         // Assert
-        Assert.Contains("'TargetSummaryLengthPercentage' with the error: " +
-            "'The field TargetSummaryLengthPercentage must be between 1 and 100.'", ex.Message);
+        ex.Message.ShouldContain("'TargetSummaryLengthPercentage' with the error: " +
+            "'The field TargetSummaryLengthPercentage must be between 1 and 100.'");
     }
 
     [Fact]
@@ -78,7 +77,7 @@ public class AiContentSummariserOptionsTests
         var value = options.Value;
 
         // Assert
-        Assert.Equal(150, value.TargetSummaryMaxWordCount);
-        Assert.Equal(25, value.TargetSummaryLengthPercentage);
+        value.TargetSummaryMaxWordCount.ShouldBe(150);
+        value.TargetSummaryLengthPercentage.ShouldBe(25);
     }
 }

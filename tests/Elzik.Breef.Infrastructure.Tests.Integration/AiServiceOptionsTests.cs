@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Shouldly;
 using Elzik.Breef.Infrastructure.AI;
-using Xunit;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration;
 
@@ -125,5 +124,32 @@ public class AiServiceOptionsTests
 
         // Assert
         ex.Message.ShouldContain("'ApiKey' with the error: 'The ApiKey field is required.'");
+    }
+    [Fact]
+    public void WhenValidated_AllFieldsValid_ShouldPassValidation()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddOptions<AiServiceOptions>()
+            .Configure(o =>
+            {
+                o.Provider = AiServiceProviders.OpenAI;
+                o.ModelId = "gpt-4";
+                o.EndpointUrl = "https://api.example.com";
+                o.ApiKey = "key";
+            })
+            .ValidateDataAnnotations();
+
+        var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<AiServiceOptions>>();
+
+        // Act
+        var value = options.Value;
+
+        // Assert
+        value.Provider.ShouldBe(AiServiceProviders.OpenAI);
+        value.ModelId.ShouldBe("gpt-4");
+        value.EndpointUrl.ShouldBe("https://api.example.com");
+        value.ApiKey.ShouldBe("key");
     }
 }

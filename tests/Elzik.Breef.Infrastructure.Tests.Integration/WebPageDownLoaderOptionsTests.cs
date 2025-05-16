@@ -23,6 +23,22 @@ public class WebPageDownLoaderOptionsTests
         // Assert
         ex.Message.ShouldBe("DataAnnotation validation failed for 'WebPageDownLoaderOptions' members: " +
             "'UserAgent' with the error: 'The UserAgent field is required.'.");
+    }
+    [Fact]
+    public void WhenValidated_WithValidUserAgent_ShouldPassValidation()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddOptions<WebPageDownLoaderOptions>()
+            .Configure(o => o.UserAgent = "TestAgent/1.0")
+            .ValidateDataAnnotations();
+        var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<WebPageDownLoaderOptions>>();
 
+        // Act
+        var value = options.Value;
+
+        // Assert
+        value.UserAgent.ShouldBe("TestAgent/1.0");
     }
 }
