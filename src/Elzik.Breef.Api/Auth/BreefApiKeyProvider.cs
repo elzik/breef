@@ -1,7 +1,7 @@
 ﻿using AspNetCore.Authentication.ApiKey;
 using Microsoft.Extensions.Options;
 
-namespace Elzik.Breef.Api;
+namespace Elzik.Breef.Api.Auth;
 
 public class BreefApiKeyProvider(IOptions<BreefApiOptions> breefOptions) : IApiKeyProvider
 {

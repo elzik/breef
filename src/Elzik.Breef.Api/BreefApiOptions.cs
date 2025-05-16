@@ -1,7 +1,9 @@
-﻿namespace Elzik.Breef.Api
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Elzik.Breef.Api;
+
+public class BreefApiOptions
 {
-    public class BreefApiOptions
-    {
-        public required string ApiKey { get; set; }
-    }
+    [Required]
+    public required string ApiKey { get; set; }
 }

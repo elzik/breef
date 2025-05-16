@@ -1,7 +1,9 @@
+using Elzik.Breef.Api.Auth;
 using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Application;
 using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure;
+using Elzik.Breef.Infrastructure.AI;
 using Elzik.Breef.Infrastructure.Wallabag;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
@@ -52,22 +54,36 @@ public class Program
             });
         });
 
-        builder.Services.ConfigureHttpJsonOptions(options =>
-        {
-            options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-        });
-        builder.Services.AddAuth(configuration);
+        builder.Services.AddOptions<BreefApiOptions>()
+            .Bind(configuration.GetSection("BreefApi"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        builder.Services.AddAuth();
 
-        builder.Services.Configure<WebPageDownLoaderOptions>(configuration.GetSection("WebPageDownLoader"));
+        builder.Services.AddOptions<WebPageDownLoaderOptions>()
+            .Bind(configuration.GetSection("WebPageDownLoader"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
 
         builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
 
-        builder.Services.Configure<AiContentSummariserOptions>(configuration.GetSection("AiContentSummariser"));
-        builder.Services.AddTransient<IContentSummariser, AiContentSummariser>();
+        builder.Services.AddOptions<AiServiceOptions>()
+            .Bind(configuration.GetSection("AiService"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        builder.Services.AddOptions<AiContentSummariserOptions>()
+            .Bind(configuration.GetSection("AiContentSummariser"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        builder.Services.AddAiContentSummariser();
 
-        AddAiService(builder.Services, configuration);
-        AddWallabagBreefPublisher(builder.Services, configuration);
+        builder.Services.AddOptions<WallabagOptions>()
+            .Bind(configuration.GetSection("Wallabag"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        builder.Services.AddWallabagBreefPublisher();
+
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
 
         var app = builder.Build();
@@ -77,76 +93,6 @@ public class Program
         app.AddBreefEndpoints();
 
         await app.RunAsync();
-    }
-
-    private static void AddAiService(IServiceCollection services, IConfigurationManager configuration)
-    {
-        services.Configure<AiServiceOptions>(configuration.GetSection("AiService"));
-
-        var aiServiceOptions = services.BuildServiceProvider()
-            .GetRequiredService<IOptions<AiServiceOptions>>().Value;
-
-        var kernelBuilder = aiServiceOptions.Provider switch
-        {
-            AiServiceProviders.OpenAI => 
-                Kernel.CreateBuilder().AddOpenAIChatCompletion(aiServiceOptions.ModelId, new Uri(aiServiceOptions.EndpointUrl), aiServiceOptions.ApiKey),
-            AiServiceProviders.AzureOpenAI => 
-                Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(aiServiceOptions.ModelId, aiServiceOptions.EndpointUrl, aiServiceOptions.ApiKey), 
-            AiServiceProviders.NotSet => 
-                throw new InvalidOperationException("AiService provider is not set."),
-            _ => 
-                throw new InvalidOperationException($"Unsupported AiService provider: {aiServiceOptions.Provider}"),
-        };
-
-        kernelBuilder.Services.AddSerilog();
-        var kernel = kernelBuilder.Build();
-        services.AddSingleton(kernel);
-        services.AddScoped(sp => sp.GetRequiredService<Kernel>().GetRequiredService<IChatCompletionService>());
-    }
-
-    private static void AddWallabagBreefPublisher(IServiceCollection services, IConfigurationManager configuration)
-    {
-        services.AddRefitClient<IWallabagAuthClient>();
-        services.Configure<WallabagOptions>(configuration.GetSection("Wallabag"));
-
-        var wallabagOptions = services.BuildServiceProvider()
-            .GetRequiredService<IOptions<WallabagOptions>>().Value;
-
-        var refitSettings = new RefitSettings
-        {
-            AuthorizationHeaderValueGetter = async (request, cancellationToken) =>
-            {
-                var wallabagClient = RestService.For<IWallabagAuthClient>(wallabagOptions.BaseUrl);
-
-                var tokenRequest = new TokenRequest
-                {
-                    ClientId = wallabagOptions.ClientId,
-                    ClientSecret = wallabagOptions.ClientSecret,
-                    Username = wallabagOptions.Username,
-                    Password = wallabagOptions.Password
-                };
-
-                var tokenResponse = await wallabagClient.GetTokenAsync(tokenRequest);
-                return tokenResponse.AccessToken;
-            },
-            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            })
-        };
-
-#if DEBUG
-        refitSettings.HttpMessageHandlerFactory = () => new HttpMessageDebugLoggingHandler();
-#endif
-
-        services.AddRefitClient<IWallabagClient>(refitSettings)
-            .ConfigureHttpClient(client =>
-            {
-                client.BaseAddress = new Uri(wallabagOptions.BaseUrl);
-            });
-
-        services.AddTransient<IBreefPublisher, WallabagBreefPublisher>();
     }
 
     private static string GetProductVersion()
