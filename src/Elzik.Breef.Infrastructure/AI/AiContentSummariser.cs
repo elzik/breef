@@ -25,7 +25,7 @@ public class AiContentSummariser(
     - Aim to enhance readability.";
 
         var chatHistory = new ChatHistory(systemPrompt);
-        chatHistory.AddMessage(AuthorRole.Assistant, content);
+        chatHistory.AddMessage(AuthorRole.User, content);
 
         var result = await Chat.GetChatMessageContentAsync(chatHistory);
 
