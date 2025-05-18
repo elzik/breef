@@ -33,7 +33,6 @@ public static class DependencyInjection
 
             static IKernelBuilder AddPreviewOllamaAIChatCompletion(AiServiceOptions aiServiceOptions)
             {
-#pragma warning disable SKEXP0070
                 Log.Warning("Ollama provider is for evaluation purposes only and is subject to change or removal in future updates.");
                 if(aiServiceOptions.ApiKey != null)
                 {
@@ -42,17 +41,17 @@ public static class DependencyInjection
                 var httpClient = new HttpClient
                 {
                     BaseAddress = new Uri(aiServiceOptions.EndpointUrl),
-                    Timeout = TimeSpan.FromSeconds(300)
+                    Timeout = TimeSpan.FromSeconds(600)
                 };
+#pragma warning disable SKEXP0070
                 return Kernel.CreateBuilder().AddOllamaChatCompletion(
                     aiServiceOptions.ModelId, httpClient);
 #pragma warning restore SKEXP0070
             }
 
-            // Ideally, logging configuration should be centralized in the service layer.
-            // However, due to SemanticKernel’s separate DI container, this is currently required here for logging support.
-            // Without it SemanticKernel does not appear to log at all.
-            kernelBuilder.Services.AddSerilog();
+            // Since SemanticKernel has its own DI container, logging must be added separately.
+            // Adding the same Serilog logger registered for the rest of the application means configuration is only made in one place.
+            kernelBuilder.Services.AddSerilog(Log.Logger);
 
             return kernelBuilder.Build();
         });
