@@ -22,7 +22,7 @@
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.10" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.51.0" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.9.0.115408">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.10.0.116381">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
