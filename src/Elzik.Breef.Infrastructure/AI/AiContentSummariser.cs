@@ -18,8 +18,8 @@ You are an expert summarizer. Your task is to summarize the provided text:
   - Limit summaries to {summariserOptions.Value.TargetSummaryLengthPercentage}% of the original length but never more then {summariserOptions.Value.TargetSummaryMaxWordCount} words.
   - Ensure accurate attribution of information to the correct entities.
   - Do not include a link to the original articles.
-  - Do not include teh title in the response.
-  - Do not include any metadata n the response.
+  - Do not include the title in the response.
+  - Do not include any metadata in the response.
   - Do not include a code block in the response.";
         
         var formattingInstructions = "Summarise this content in an HTML format using paragraphs and " +
