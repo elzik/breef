@@ -34,14 +34,16 @@ These config items relate to the Wallabag service. Refer to the [Wallabag docume
 
 These config items relate to the AI service used for generating summaries.
 
-- **Provider** - The AI service provider. [`AzureOpenAI`](https://ai.azure.com/) and [`OpenAI`](https://platform.openai.com/) are supported.
+- **Provider** - The AI service provider. [`AzureOpenAI`](https://ai.azure.com/), [`OpenAI`](https://platform.openai.com/) and [`Ollama`](https://ollama.com/) are supported. The Microsoft SematicKernel connector for Ollama is in preview and a warning will be logged to make this clear.
 - **ModelId** - The model ID to be used for generating summaries. A chat-completion model should be used.
   - AzureOpenAI - This is given as the 'Name' in the 'Deployment info' in Azure.
   - OpenAI - This is given as the 'model' in OpenAI.
+  - Ollama - This is given as the 'model' in Ollama and must also include the tag.
 - **EndpointUrl** - The endpoint URL for the AI service.
   - AzureOpenAI - This is given as the 'Azure OpenAI endpoint' in Azure and typically takes the form `https://<tenant-specific>.openai.azure.com` It should not include any model-specific routing.
   - OpenAI - Typically `https://api.openai.com/v1` It should not include any model-specific routing.
-- **ApiKey** - The API key used to authenticate with the AI service.
+  - Ollama - By default this is `http://<host>:11434`.
+- **ApiKey** - The API key used to authenticate with the AI service. Ollama does not support an API key and should be left blank. If a key is provided for Ollama, a warning will be logged and the key will be ignored.
 
 Example
 ```jsonc
