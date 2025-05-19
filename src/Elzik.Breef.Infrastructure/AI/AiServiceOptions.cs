@@ -15,4 +15,7 @@ public class AiServiceOptions
 
     [Required]
     public required string ApiKey { get; set; }
+
+    [Required, Range(1, int.MaxValue)]
+    public required int Timeout { get; set; } = 100;
 }

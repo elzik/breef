@@ -15,34 +15,35 @@ public static class DependencyInjection
         {
             var aiServiceOptions = sp.GetRequiredService<IOptions<AiServiceOptions>>().Value;
 
+            var httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(aiServiceOptions.EndpointUrl),
+                Timeout = TimeSpan.FromSeconds(aiServiceOptions.Timeout)
+            };
+
             var kernelBuilder = aiServiceOptions.Provider switch
             {
                 AiServiceProviders.OpenAI =>
                     Kernel.CreateBuilder().AddOpenAIChatCompletion(
-                        aiServiceOptions.ModelId, new Uri(aiServiceOptions.EndpointUrl), aiServiceOptions.ApiKey),
+                        aiServiceOptions.ModelId, new Uri(aiServiceOptions.EndpointUrl), aiServiceOptions.ApiKey, httpClient: httpClient),
                 AiServiceProviders.AzureOpenAI =>
                     Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(
-                        aiServiceOptions.ModelId, aiServiceOptions.EndpointUrl, aiServiceOptions.ApiKey),
+                        aiServiceOptions.ModelId, aiServiceOptions.EndpointUrl, aiServiceOptions.ApiKey, httpClient: httpClient),
                 AiServiceProviders.Ollama =>
-                    AddPreviewOllamaAIChatCompletion(aiServiceOptions),
+                    AddPreviewOllamaAIChatCompletion(aiServiceOptions, httpClient),
                 AiServiceProviders.NotSet =>
                     throw new InvalidOperationException("AiService provider is not set."),
                 _ =>
                     throw new InvalidOperationException($"Unsupported AiService provider: {aiServiceOptions.Provider}"),
             };
 
-            static IKernelBuilder AddPreviewOllamaAIChatCompletion(AiServiceOptions aiServiceOptions)
+            static IKernelBuilder AddPreviewOllamaAIChatCompletion(AiServiceOptions aiServiceOptions, HttpClient httpClient)
             {
                 Log.Warning("Ollama provider is for evaluation purposes only and is subject to change or removal in future updates.");
                 if(aiServiceOptions.ApiKey != null)
                 {
                     Log.Warning("Ollama provider does not support API keys. A key has been supplied but it will not be used.");
                 }
-                var httpClient = new HttpClient
-                {
-                    BaseAddress = new Uri(aiServiceOptions.EndpointUrl),
-                    Timeout = TimeSpan.FromSeconds(600)
-                };
 #pragma warning disable SKEXP0070
                 return Kernel.CreateBuilder().AddOllamaChatCompletion(
                     aiServiceOptions.ModelId, httpClient);
