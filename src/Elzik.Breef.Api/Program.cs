@@ -33,6 +33,7 @@ public class Program
             .MinimumLevel.Information()
             .Enrich.FromLogContext()
             .WriteTo.Console()
+            .ReadFrom.Configuration(configuration)
             .CreateLogger();
         builder.Host.UseSerilog();
         builder.Services.AddSerilog();

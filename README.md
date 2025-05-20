@@ -10,6 +10,8 @@ Use LLMs to generate summaries of web content for reading later.
 
 Configuration can be via an appsettings.json file or environment variables. These two configuration schemes can be mixed. If a setting is configured in both appsettings.json and as an environment variable, the environment variable will take precedence.
 
+In the following examples, the JSON comments show the environment variable name which corresponds to the setting in appsettings.json.
+
 ### Required
 
 #### BreefApi
@@ -32,14 +34,16 @@ These config items relate to the Wallabag service. Refer to the [Wallabag docume
 
 These config items relate to the AI service used for generating summaries.
 
-- **Provider** - The AI service provider. [`AzureOpenAI`](https://ai.azure.com/) and [`OpenAI`](https://platform.openai.com/) are supported.
+- **Provider** - The AI service provider. [`AzureOpenAI`](https://ai.azure.com/), [`OpenAI`](https://platform.openai.com/) and [`Ollama`](https://ollama.com/) are supported. The Microsoft SematicKernel connector for Ollama is in preview and a warning will be logged to make this clear.
 - **ModelId** - The model ID to be used for generating summaries. A chat-completion model should be used.
   - AzureOpenAI - This is given as the 'Name' in the 'Deployment info' in Azure.
   - OpenAI - This is given as the 'model' in OpenAI.
+  - Ollama - This is given as the 'model' in Ollama and must also include the tag.
 - **EndpointUrl** - The endpoint URL for the AI service.
   - AzureOpenAI - This is given as the 'Azure OpenAI endpoint' in Azure and typically takes the form `https://<tenant-specific>.openai.azure.com` It should not include any model-specific routing.
   - OpenAI - Typically `https://api.openai.com/v1` It should not include any model-specific routing.
-- **ApiKey** - The API key used to authenticate with the AI service.
+  - Ollama - By default this is `http://<host>:11434`.
+- **ApiKey** - The API key used to authenticate with the AI service. Ollama does not support an API key and should be left blank. If a key is provided for Ollama, a warning will be logged and the key will be ignored.
 
 Example
 ```jsonc
@@ -67,12 +71,24 @@ Example
 
 ### Optional
 
+#### AiService
+
+- **TimeOut** - Sets the number of seconds before the AiService used will time out. The default used if not set is 100 seconds. This may need to be increased where Ollama is used with limiting hardware.
+
+Example:
+
+```jsonc
+"AiService": {
+    "Timeout": 100,                        // breef_AiService__Timeout
+}
+```
+
 #### AI Content Summariser
 
 The AI model will use these settings when generating summaries. Although the model may not adhere to these settings, they will influence the resulting summary.
 
-- **TargetSummaryLengthPercentage** - Sets the size of the summary with respect to the size of the original article.
-- **TargetSummaryMaxWordCount** - Sets the maximum number of words for the summary generated.
+- **TargetSummaryLengthPercentage** - Sets the size of the summary with respect to the size of the original article. The default used if not set is 10%.
+- **TargetSummaryMaxWordCount** - Sets the maximum number of words for the summary generated. The default used if not set is 200 words.
 
 Example:
 
@@ -94,5 +110,17 @@ Example:
 ```jsonc
 "WebPageDownLoader" : {
     "UserAgent": "<custom-agent>"   // breef_WebPageDownLoader__UserAgent
+}
+```
+
+#### Logging
+
+Logging is handled by Serilog and configuration is documented [here](https://github.com/serilog/serilog-settings-configuration/blob/dev/README.md). This example shows how to change the default log level:
+
+```jsonc
+"Serilog": {
+  "MinimumLevel": {
+    "Default": "Debug"   // breef_Serilog__MinimumLevel__Default
+  }
 }
 ```

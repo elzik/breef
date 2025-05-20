@@ -36,9 +36,11 @@ public class ContentSummariserTests
         testChatHistory.AddMessage(AuthorRole.Assistant, _testContent);
         _testSummaryResult = new ChatMessageContent(AuthorRole.Assistant, _testSummary);
 
-        _chatCompletionService.GetChatMessageContentsAsync(
-            Arg.Is<ChatHistory>(ch => ch.Any(m =>
-                m.Content == _testContent && m.Role == AuthorRole.Assistant)),
+        _ = _chatCompletionService.GetChatMessageContentsAsync(
+            Arg.Is<ChatHistory>(ch => ch.Any(
+                m => m.Content != null && 
+                m.Content.EndsWith(_testContent) && 
+                m.Role == AuthorRole.User)),
             Arg.Any<PromptExecutionSettings>(),
             Arg.Any<Kernel>(),
             Arg.Any<CancellationToken>())
@@ -63,17 +65,15 @@ public class ContentSummariserTests
         var result = await _contentSummariser.SummariseAsync(_testContent);
 
         // Assert
-        var systemPrompt = @"
-1. Summary Goal:
-    - Summarise text, including HTML entities.
-    - Limit summaries to 10% of the original length but never more then 200 words.
-    - Ensure accurate attribution of information to the correct entities.
-    - Do not include a link to the original articles.
-2. Formatting:
-    - Utilize HTML text formatting, such as:
-        - Paragraphs
-        - Bullet points
-    - Aim to enhance readability.";
+        var systemPrompt = @$"
+You are an expert summarizer. Your task is to summarize the provided text:
+  - Summarise text, including HTML entities.
+  - Limit summaries to 10% of the original length but never more then 200 words.
+  - Ensure accurate attribution of information to the correct entities.
+  - Do not include a link to the original articles.
+  - Do not include the title in the response.
+  - Do not include any metadata in the response.
+  - Do not include a code block in the response.";
         await _chatCompletionService.Received(1).GetChatMessageContentsAsync(
             Arg.Is<ChatHistory>(ch => ch.Any(m =>
                 m.Content == systemPrompt && m.Role == AuthorRole.System)),

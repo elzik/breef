@@ -4,6 +4,7 @@
     {
         NotSet,
         OpenAI,
-        AzureOpenAI
+        AzureOpenAI,
+        Ollama
     }
 }
