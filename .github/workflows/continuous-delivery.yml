@@ -115,16 +115,16 @@ jobs:
     - name: Install SonarQube Cloud Scanner
       shell: pwsh
       run: |
-        New-Item -Path .\.sonar\scanner -ItemType Directory
-        dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-    - name: Perform SonarQube analysis
+        New-Item -Path .sonar/scanner -ItemType Directory
+        dotnet tool update dotnet-sonarscanner --tool-path .sonar/scanner
+    - name: Perform SonarQube Analysis
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       shell: pwsh
       run: |
-        .\.sonar\scanner\dotnet-sonarscanner begin /k:"elzik_breef" /o:"elzik" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+        .sonar/scanner/dotnet-sonarscanner begin -k:"elzik_breef" -o:"elzik" -d:sonar.token="${{ secrets.SONAR_TOKEN }}" -d:sonar.host.url="https://sonarcloud.io"
         dotnet build
-        .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        .sonar/scanner/dotnet-sonarscanner end -d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
   release:
     runs-on: ubuntu-latest
