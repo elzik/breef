@@ -29,8 +29,8 @@ You are an expert summarizer. Your task is to summarize the provided text:
         chatHistory.AddMessage(AuthorRole.User, $"{formattingInstructions}{content}");
 
         var result = await Chat.GetChatMessageContentAsync(chatHistory);
-
-        if(result.Content is null)
+        
+        if (string.IsNullOrWhiteSpace(result.Content))
         {
             throw new InvalidOperationException("Chat completion returned no result.");
         }
