@@ -40,7 +40,7 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
             .SelectSingleNode("//meta[@property='og:title']");
         if (titleMetaTag != null)
         {
-            title = HtmlEntity.DeEntitize(titleMetaTag.GetAttributeValue("content", null));
+            title = HtmlEntity.DeEntitize(titleMetaTag.GetAttributeValue("content", string.Empty));
         }
 
         if (string.IsNullOrEmpty(title))
@@ -51,6 +51,8 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
                 ? HtmlEntity.DeEntitize(titleNode.InnerText)
                 : defaultWhenMissing;
         }
+
+        title = string.IsNullOrWhiteSpace(title) ? defaultWhenMissing : title;
 
         return title;
     }
@@ -68,12 +70,12 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
             {
                 Node = node,
                 Width = int.TryParse(node.GetAttributeValue("width", "0"), out var width) ? width : 0,
-                Height = int.TryParse(node.GetAttributeValue("height", "0"), out var height) ? height : 0
+                Height = int.TryParse(node.GetAttributeValue("height", "0"), out var height) ? height : 0,
+                ImageUrl = node.GetAttributeValue("src", string.Empty)
             })
+            .Where(n => !string.IsNullOrWhiteSpace(n.ImageUrl))
             .OrderByDescending(img => img.Width * img.Height);
 
-        var largestImageNode = imageNodesSortedBySize.FirstOrDefault()?.Node;
-
-        return largestImageNode?.GetAttributeValue("src", null);
+        return imageNodesSortedBySize.FirstOrDefault()?.ImageUrl;
     }
 }
