@@ -7,7 +7,8 @@ dotnet test $repoRoot `
     --logger 'trx;LogFileName=test-results.trx' `
     -p:CollectCoverage=true `
     -p:CoverletOutput=TestResults/coverage.opencover.xml `
-    -p:CoverletOutputFormat=opencover
+    -p:CoverletOutputFormat=opencover `
+    -p:Exclude="[*.Tests*]*"
 dotnet tool update `
     --global dotnet-reportgenerator-globaltool `
     --version 5.*
