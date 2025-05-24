@@ -12,7 +12,7 @@ dotnet tool update `
     --global dotnet-reportgenerator-globaltool `
     --version 5.*
 reportgenerator `
-    "-reports:$repoRoot/tests/Elzik.Breef.Api.Tests.Functional/TestResults/coverage.opencover.xml" `
+    "-reports:$repoRoot/**/coverage.opencover.xml" `
     "-targetdir:$repoRoot/tests/TestResults" `
     "-reporttypes:Badges;Cobertura" `
     "-filefilters:-*.g.cs" # https://github.com/danielpalme/ReportGenerator/issues/457
