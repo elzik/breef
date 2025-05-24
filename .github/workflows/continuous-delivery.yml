@@ -127,7 +127,7 @@ jobs:
             -o:"elzik" `
             -d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             -d:sonar.host.url="https://sonarcloud.io" `
-            -d:sonar.cs.cobertura.reportsPaths="tests/TestResults/Cobertura.xml"
+            -d:sonar.cs.cobertura.reportsPaths="tests/TestResults/coverage.opencover.xml"
         dotnet build
         .sonar/scanner/dotnet-sonarscanner end `
             -d:sonar.token="${{ secrets.SONAR_TOKEN }}"
