@@ -85,6 +85,17 @@ public class ContentExtractorStrategyTests
     }
 
     [Fact]
+    public void CanHandle_AnyString_CanHandle()
+    {
+        // Act
+        var defaultOnlyContentExtractorStrategy = new ContentExtractorStrategy([], defaultExtractor);
+        var canHandleAnyString = defaultOnlyContentExtractorStrategy.CanHandle("Any string.");
+
+        // Assert
+        canHandleAnyString.ShouldBeTrue();
+    }
+
+    [Fact]
     public void Instantiated_DefaultExtractorInSpecificExtractors_Throws()
     {
         // Arrange
