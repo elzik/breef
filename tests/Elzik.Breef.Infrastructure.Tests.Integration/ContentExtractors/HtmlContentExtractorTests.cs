@@ -18,12 +18,12 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
         {
             // Arrange
             var mockTestUrl = "https://mock.url";
-            var mockWebPageDownloader = Substitute.For<IWebPageDownloader>();
+            var mockHttpDownloader = Substitute.For<IHttpDownloader>();
             var testHtml = await File.ReadAllTextAsync(Path.Join("../../../../TestData", testFileName));
-            mockWebPageDownloader.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
+            mockHttpDownloader.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
 
             // Act
-            var extractor = new HtmlContentExtractor(mockWebPageDownloader);
+            var extractor = new HtmlContentExtractor(mockHttpDownloader);
             var result = await extractor.ExtractAsync(mockTestUrl);
 
             // Assert
@@ -41,10 +41,10 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
         public void CanHandle_AnyString_CanHandle()
         {
             // Arrange
-            var mockWebPageDownloader = Substitute.For<IWebPageDownloader>();
+            var mockHttpDownloader = Substitute.For<IHttpDownloader>();
 
             // Act
-            var defaultOnlyContentExtractorStrategy = new HtmlContentExtractor(mockWebPageDownloader);
+            var defaultOnlyContentExtractorStrategy = new HtmlContentExtractor(mockHttpDownloader);
             var canHandleAnyString = defaultOnlyContentExtractorStrategy.CanHandle("Any string.");
 
             // Assert

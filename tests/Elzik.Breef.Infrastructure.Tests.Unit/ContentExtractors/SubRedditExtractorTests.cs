@@ -7,12 +7,12 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
 {
     public class SubRedditExtractorTests
     {
-        private readonly IWebPageDownloader _mockWebPageDownloader;
+        private readonly IHttpDownloader _mockHttpDownloader;
 
         public SubRedditExtractorTests()
         {
-            _mockWebPageDownloader = Substitute.For<IWebPageDownloader>();
-            _mockWebPageDownloader.DownloadAsync(Arg.Any<string>())
+            _mockHttpDownloader = Substitute.For<IHttpDownloader>();
+            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
                 .Returns(Task.FromResult("<html><body>Mocked content</body></html>"));
         }
 
@@ -24,7 +24,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
         public void CanHandle_ValidSubRedditUrl_ReturnsTrue(string url)
         {
             // Arrange
-            var extractor = new SubRedditContentExtractor(_mockWebPageDownloader);
+            var extractor = new SubRedditContentExtractor(_mockHttpDownloader);
 
             // Act
             var canHandle = extractor.CanHandle(url);
@@ -43,7 +43,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
         public void CanHandle_InvalidSubRedditUrl_ReturnsFalse(string url)
         {
             // Arrange
-            var extractor = new SubRedditContentExtractor(_mockWebPageDownloader);
+            var extractor = new SubRedditContentExtractor(_mockHttpDownloader);
 
             // Act
             var canHandle = extractor.CanHandle(url);

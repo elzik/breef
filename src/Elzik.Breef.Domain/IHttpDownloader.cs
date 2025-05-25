@@ -1,6 +1,6 @@
 namespace Elzik.Breef.Domain
 {
-    public interface IWebPageDownloader
+    public interface IHttpDownloader
     {
         Task<string> DownloadAsync(string url);
     }
