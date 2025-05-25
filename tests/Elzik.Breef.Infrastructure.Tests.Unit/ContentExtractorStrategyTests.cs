@@ -1,4 +1,5 @@
 using Elzik.Breef.Domain;
+using Elzik.Breef.Infrastructure.ContentExtractors;
 using NSubstitute;
 using Shouldly;
 
