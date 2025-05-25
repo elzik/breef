@@ -1,6 +1,15 @@
 # breef
 
-![Coverage](https://gist.githubusercontent.com/elzik/527882e89a938dc78f61a08c300edec4/raw/c93a0d914e1219520529a650f0dac24d809bee53/breef-code-coverage-main.svg)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=elzik_breef)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=bugs)](https://sonarcloud.io/summary/new_code?id=elzik_breef)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=elzik_breef)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=coverage)](https://sonarcloud.io/summary/new_code?id=elzik_breef)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=elzik_breef)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=elzik_breef)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=elzik_breef)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=elzik_breef)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=elzik_breef)
 
 ## Introduction
 
