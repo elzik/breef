@@ -3,7 +3,7 @@ using Elzik.Breef.Infrastructure.ContentExtractors;
 using NSubstitute;
 using Shouldly;
 
-namespace Elzik.Breef.Infrastructure.Tests.Unit;
+namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors;
 
 public class ContentExtractorStrategyTests
 {
