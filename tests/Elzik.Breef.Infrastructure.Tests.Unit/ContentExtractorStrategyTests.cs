@@ -78,7 +78,7 @@ public class ContentExtractorStrategyTests
     {
         // Act
         var defaultOnlyContentExtractorStrategy = new ContentExtractorStrategy([], defaultExtractor);
-        var extract = await contentExtractorStrategy.ExtractAsync("http://test");
+        var extract = await defaultOnlyContentExtractorStrategy.ExtractAsync("http://test");
 
         // Assert
         extract.ShouldBe(extractedByDefaultExtractor);
