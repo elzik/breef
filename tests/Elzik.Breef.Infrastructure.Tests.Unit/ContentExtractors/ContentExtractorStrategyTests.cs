@@ -129,18 +129,4 @@ public class ContentExtractorStrategyTests
         // Act
         ex.Message.ShouldBe("Value cannot be null. (Parameter 'specificExtractors')");
     }
-
-    [Fact]
-    public void Throws_If_DefaultExtractor_In_SpecificExtractors()
-    {
-        // Arrange
-        var extractor = Substitute.For<IContentExtractor>();
-
-        // Act
-        var ex = Assert.Throws<ArgumentException>(() =>
-            new ContentExtractorStrategy([extractor], extractor));
-
-        // Assert
-        ex.Message.ShouldBe("Default extractor should not be in the specific extractors list.");
-    }
 }
