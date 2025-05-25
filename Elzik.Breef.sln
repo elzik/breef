@@ -41,6 +41,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{7F
 		tests\TestData\TestHtmlPage.html = tests\TestData\TestHtmlPage.html
 		tests\TestData\TestHtmlPageNoContent-ExpectedContent.txt = tests\TestData\TestHtmlPageNoContent-ExpectedContent.txt
 		tests\TestData\TestHtmlPageNoContent.html = tests\TestData\TestHtmlPageNoContent.html
+		tests\TestData\TestHtmlPageNoImages.html = tests\TestData\TestHtmlPageNoImages.html
 		tests\TestData\TestHtmlPageNoTitle.html = tests\TestData\TestHtmlPageNoTitle.html
 	EndProjectSection
 EndProject
