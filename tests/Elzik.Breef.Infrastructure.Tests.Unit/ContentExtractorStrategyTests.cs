@@ -105,8 +105,10 @@ public class ContentExtractorStrategyTests
         var extractor = Substitute.For<IContentExtractor>();
 
         // Act
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var ex = Assert.Throws<ArgumentNullException>(() => 
             new ContentExtractorStrategy([extractor], null));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         // Act
         ex.Message.ShouldBe("Value cannot be null. (Parameter 'defaultExtractor')");
@@ -119,8 +121,10 @@ public class ContentExtractorStrategyTests
         var defaultExtractor = Substitute.For<IContentExtractor>();
 
         // Act
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var ex = Assert.Throws<ArgumentNullException>(() => 
             new ContentExtractorStrategy(null, defaultExtractor));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         // Act
         ex.Message.ShouldBe("Value cannot be null. (Parameter 'specificExtractors')");
