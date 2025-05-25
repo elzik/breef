@@ -1,6 +1,6 @@
 ﻿using Elzik.Breef.Domain;
 
-namespace Elzik.Breef.Infrastructure
+namespace Elzik.Breef.Infrastructure.ContentExtractors
 {
     public class ContentExtractorStrategy : IContentExtractor
     {
