@@ -67,10 +67,10 @@ public class Program
             .ValidateOnStart();
         builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
 
-        builder.Services.AddTransient<ContentExtractor>();
+        builder.Services.AddTransient<HtmlContentExtractor>();
         builder.Services.AddTransient<IContentExtractor>(provider =>
         {
-            var defaultContentExtractor = provider.GetRequiredService<ContentExtractor>();
+            var defaultContentExtractor = provider.GetRequiredService<HtmlContentExtractor>();
             return new ContentExtractorStrategy([], defaultContentExtractor);
         });
 
