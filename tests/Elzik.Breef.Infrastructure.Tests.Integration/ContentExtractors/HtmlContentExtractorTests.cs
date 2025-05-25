@@ -18,12 +18,12 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
         {
             // Arrange
             var mockTestUrl = "https://mock.url";
-            var mockHttpClient = Substitute.For<IWebPageDownloader>();
+            var mockWebPageDownloader = Substitute.For<IWebPageDownloader>();
             var testHtml = await File.ReadAllTextAsync(Path.Join("../../../../TestData", testFileName));
-            mockHttpClient.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
+            mockWebPageDownloader.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
 
             // Act
-            var extractor = new HtmlContentExtractor(mockHttpClient);
+            var extractor = new HtmlContentExtractor(mockWebPageDownloader);
             var result = await extractor.ExtractAsync(mockTestUrl);
 
             // Assert
@@ -35,6 +35,20 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
             lineEndingNormalisedContent.ShouldBe(lineEndingNormalisedExpected);
             result.Title.ShouldBe(expectedTitle);
             result.PreviewImageUrl.ShouldBe(expectedPreviewImageUrl);
+        }
+
+        [Fact]
+        public void CanHandle_AnyString_CanHandle()
+        {
+            // Arrange
+            var mockWebPageDownloader = Substitute.For<IWebPageDownloader>();
+
+            // Act
+            var defaultOnlyContentExtractorStrategy = new HtmlContentExtractor(mockWebPageDownloader);
+            var canHandleAnyString = defaultOnlyContentExtractorStrategy.CanHandle("Any string.");
+
+            // Assert
+            canHandleAnyString.ShouldBeTrue();
         }
 
         private static string NormaliseLineEndings(string text)
