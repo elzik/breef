@@ -67,7 +67,12 @@ public class Program
             .ValidateOnStart();
         builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
 
-        builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
+        builder.Services.AddTransient<ContentExtractor>();
+        builder.Services.AddTransient<IContentExtractor>(provider =>
+        {
+            var defaultContentExtractor = provider.GetRequiredService<ContentExtractor>();
+            return new ContentExtractorStrategy([], defaultContentExtractor);
+        });
 
         builder.Services.AddOptions<AiServiceOptions>()
             .Bind(configuration.GetSection("AiService"))
