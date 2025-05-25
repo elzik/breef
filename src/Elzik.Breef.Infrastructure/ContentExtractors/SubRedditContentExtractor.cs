@@ -2,7 +2,7 @@
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors
 {
-    public class SubRedditContentExtractor(IWebPageDownloader httpDownloader) : IContentExtractor
+    public class SubRedditContentExtractor(IHttpDownloader httpDownloader) : IContentExtractor
     {
         public bool CanHandle(string webPageUrl)
         {

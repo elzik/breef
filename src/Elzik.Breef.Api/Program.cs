@@ -62,11 +62,11 @@ public class Program
             .ValidateOnStart();
         builder.Services.AddAuth();
 
-        builder.Services.AddOptions<WebPageDownLoaderOptions>()
-            .Bind(configuration.GetSection("WebPageDownLoader"))
+        builder.Services.AddOptions<HttpDownloaderOptions>()
+            .Bind(configuration.GetSection("HttpDownloader"))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
+        builder.Services.AddTransient<IHttpDownloader, HttpDownloader>();
 
         builder.Services.AddTransient<HtmlContentExtractor>();
         builder.Services.AddTransient<IContentExtractor>(provider =>
