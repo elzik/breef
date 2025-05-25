@@ -23,7 +23,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             mockHttpClient.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
 
             // Act
-            var extractor = new ContentExtractor(mockHttpClient);
+            var extractor = new HtmlContentExtractor(mockHttpClient);
             var result = await extractor.ExtractAsync(mockTestUrl);
 
             // Assert

@@ -3,7 +3,7 @@ using HtmlAgilityPack;
 
 namespace Elzik.Breef.Infrastructure;
 
-public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
+public class HtmlContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
 {
     public async Task<Extract> ExtractAsync(string webPageUrl)
     {
