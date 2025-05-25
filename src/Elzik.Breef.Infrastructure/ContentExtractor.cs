@@ -78,4 +78,6 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
 
         return imageNodesSortedBySize.FirstOrDefault()?.ImageUrl;
     }
+
+    public bool CanHandle(string webPageUrl) => true;
 }
