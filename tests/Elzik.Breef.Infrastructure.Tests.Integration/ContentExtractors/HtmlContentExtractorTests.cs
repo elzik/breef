@@ -3,9 +3,9 @@ using Elzik.Breef.Infrastructure.ContentExtractors;
 using NSubstitute;
 using Shouldly;
 
-namespace Elzik.Breef.Infrastructure.Tests.Integration
+namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
 {
-    public class ContentExtractorTests
+    public class HtmlContentExtractorTests
     {
         [Theory]
         [InlineData("TestHtmlPage.html", "TestHtmlPage-ExpectedContent.txt", "Test HTML Page", "https://test-large-image.jpg")]
