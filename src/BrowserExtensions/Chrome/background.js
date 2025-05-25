@@ -10,34 +10,44 @@ chrome.action.onClicked.addListener((tab) => {
                 body: JSON.stringify({ url: tab.url })
             })
                 .then(response => response.json())
-                .then(data => {
-                    console.log('Success:', data);
-                    chrome.notifications.create({
-                        type: 'basic',
-                        iconUrl: 'Images/breef-48.png',
-                        title: 'Request Successful',
-                        message: 'The summarised article was successfully created.',
-                        buttons: [
-                            { title: 'Open in Wallabag' }
-                        ],
-                        requireInteraction: true
-                    }, (notificationId) => {
-                        chrome.notifications.onButtonClicked.addListener((notifId, btnIdx) => {
-                            if (notifId === notificationId && btnIdx === 0) {
-                                chrome.tabs.create({ url: data.publishedUrl });
-                            }
-                        });
-                    });
-                })
+                .then(data => showSuccessNotification(data))
                 .catch((error) => {
-                    console.error('Error:', error);
-                    chrome.notifications.create({
-                        type: 'basic',
-                        iconUrl: 'Images/breef-48.png',
-                        title: 'Request Failed',
-                        message: 'There was an error sending the URL.'
-                    });
+                    showErrorNotification(error);
                 });
         });
     }
 });
+
+function showSuccessNotification(data) {
+    console.log('Success:', data);
+    chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'Images/breef-48.png',
+        title: 'Request Successful',
+        message: 'The summarised article was successfully created.',
+        buttons: [
+            { title: 'Open in Wallabag' }
+        ],
+        requireInteraction: true
+    }, (notificationId) => {
+        handleNotificationButtonClick(notificationId, data);
+    });
+}
+
+function handleNotificationButtonClick(notificationId, data) {
+    chrome.notifications.onButtonClicked.addListener((notifId, btnIdx) => {
+        if (notifId === notificationId && btnIdx === 0) {
+            chrome.tabs.create({ url: data.publishedUrl });
+        }
+    });
+}
+
+function showErrorNotification(error) {
+    console.error('Error:', error);
+    chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'Images/breef-48.png',
+        title: 'Request Failed',
+        message: 'There was an error sending the URL.'
+    });
+}
