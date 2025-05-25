@@ -73,7 +73,18 @@ public class ContentExtractorStrategyTests
     }
 
     [Fact]
-    public void Throws_If_DefaultExtractor_In_SpecificExtractors()
+    public async Task ExtractAsync_OnlyDefaultExtractorExists_UsesDefaultExtractor()
+    {
+        // Act
+        var defaultOnlyContentExtractorStrategy = new ContentExtractorStrategy([], defaultExtractor);
+        var extract = await contentExtractorStrategy.ExtractAsync("http://test");
+
+        // Assert
+        extract.ShouldBe(extractedByDefaultExtractor);
+    }
+
+    [Fact]
+    public void Instantiated_DefaultExtractorInSpecificExtractors_Throws()
     {
         // Arrange
         var extractor = Substitute.For<IContentExtractor>();
@@ -87,14 +98,44 @@ public class ContentExtractorStrategyTests
     }
 
     [Fact]
-    public void CanHandle_Always_Returns_True()
+    public void Instantiated_NullDefaultExtractor_Throws()
     {
         // Arrange
         var extractor = Substitute.For<IContentExtractor>();
-        var defaultExtractor = Substitute.For<IContentExtractor>();
-        var strategy = new ContentExtractorStrategy([extractor], defaultExtractor);
 
-        // Act & Assert
-        Assert.True(strategy.CanHandle("http://any-url"));
+        // Act
+        var ex = Assert.Throws<ArgumentNullException>(() => 
+            new ContentExtractorStrategy([extractor], null));
+
+        // Act
+        ex.Message.ShouldBe("Value cannot be null. (Parameter 'defaultExtractor')");
+    }
+
+    [Fact]
+    public void Instantiated_NullSpecificExtractors_Throws()
+    {
+        // Arrange
+        var defaultExtractor = Substitute.For<IContentExtractor>();
+
+        // Act
+        var ex = Assert.Throws<ArgumentNullException>(() => 
+            new ContentExtractorStrategy(null, defaultExtractor));
+
+        // Act
+        ex.Message.ShouldBe("Value cannot be null. (Parameter 'specificExtractors')");
+    }
+
+    [Fact]
+    public void Throws_If_DefaultExtractor_In_SpecificExtractors()
+    {
+        // Arrange
+        var extractor = Substitute.For<IContentExtractor>();
+
+        // Act
+        var ex = Assert.Throws<ArgumentException>(() =>
+            new ContentExtractorStrategy([extractor], extractor));
+
+        // Assert
+        ex.Message.ShouldBe("Default extractor should not be in the specific extractors list.");
     }
 }
