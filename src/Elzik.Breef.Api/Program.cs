@@ -69,10 +69,13 @@ public class Program
         builder.Services.AddTransient<IHttpDownloader, HttpDownloader>();
 
         builder.Services.AddTransient<HtmlContentExtractor>();
+        builder.Services.AddTransient<SubRedditContentExtractor>();
         builder.Services.AddTransient<IContentExtractor>(provider =>
         {
+            var logger = provider.GetRequiredService<ILogger<ContentExtractorStrategy>>();
             var defaultContentExtractor = provider.GetRequiredService<HtmlContentExtractor>();
-            return new ContentExtractorStrategy([], defaultContentExtractor);
+            var subredditExtractor = provider.GetRequiredService<SubRedditContentExtractor>();
+            return new ContentExtractorStrategy(logger, [subredditExtractor], defaultContentExtractor);
         });
 
         builder.Services.AddOptions<AiServiceOptions>()
