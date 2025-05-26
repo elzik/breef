@@ -1,4 +1,5 @@
 ﻿using Elzik.Breef.Domain;
+using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors
 {
@@ -23,15 +24,39 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors
 
         public async Task<Extract> ExtractAsync(string webPageUrl)
         {
-            var jsonUri = new Uri(new Uri(webPageUrl), "new.json");
+            Uri webPageUri = new(webPageUrl);
+            Uri jsonUri = new(webPageUri, "new.json");
 
-            var json = await httpDownloader.DownloadAsync(jsonUri.AbsoluteUri);
+            var jsonContent = await httpDownloader.DownloadAsync(jsonUri.AbsoluteUri);
 
-            // Image
-            //https://www.reddit.com/r/{subreddit}/about.json
-            // The response will contain a community_icon or icon_img field, which usually holds the avatar URL.
 
-            return new Extract("TBA", json, "TBA");
+            var subredditName = webPageUri.AbsolutePath.Trim('/').Split('/').Last();
+            var imageUrl = await ExtractImageUrlAsync(jsonContent);
+
+
+            return new Extract($"New in r/{subredditName}", jsonContent, imageUrl);
+        }
+
+        private async Task<string> ExtractImageUrlAsync(string jsonContent)
+        {
+            string[] imageKeys = ["icon_img", "community_icon", "banner_background_image", "banner_img", "mobile_banner_image"];
+
+            using var doc = JsonDocument.Parse(jsonContent);
+            var data = doc.RootElement.GetProperty("data");
+
+            foreach (var imageKey in imageKeys)
+            {
+                if (data.TryGetProperty(imageKey, out var prop))
+                {
+                    var imageUrl = prop.GetString();
+                    if (imageUrl != null && await httpDownloader.TryGet(imageUrl))
+                    {
+                        return imageUrl;
+                    }
+                }
+            }
+
+            return "https://www.redditstatic.com/icon.png";
         }
     }
 }
