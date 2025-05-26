@@ -149,6 +149,25 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
             Assert.Equal(json, result.Content);
         }
 
+        [Theory]
+        [InlineData("https://www.reddit.com/r/testsubreddit")]
+        [InlineData("https://www.reddit.com/r/testsubreddit/")]
+        public async Task ExtractAsync_ValidUrl_CallsHttpDownloaderWithCorrectUrl(string subredditUrl)
+        {
+            // Arrange
+            var expectedApiUrl = "https://www.reddit.com/r/testsubreddit/new.json";
+            var json = JsonSerializer.Serialize(new { data = new { } });
+
+            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
+                .Returns(Task.FromResult(json));
+
+            // Act
+            await _extractor.ExtractAsync(subredditUrl);
+
+            // Assert
+            await _mockHttpDownloader.Received(1).DownloadAsync(expectedApiUrl);
+        }
+
         private static string CreateJsonWithImageKey(string key, string value)
         {
             return JsonSerializer.Serialize(new
