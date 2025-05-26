@@ -25,7 +25,10 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors
         public async Task<Extract> ExtractAsync(string webPageUrl)
         {
             Uri webPageUri = new(webPageUrl);
-            Uri jsonUri = new(webPageUri, "new.json");
+            var baseUri = webPageUri.ToString().EndsWith("/")
+                ? webPageUri
+                : new Uri(webPageUri.ToString() + "/");
+            Uri jsonUri = new(baseUri, "new.json");
 
             var jsonContent = await httpDownloader.DownloadAsync(jsonUri.AbsoluteUri);
 
