@@ -1,10 +1,10 @@
 ﻿using Elzik.Breef.Domain;
-using Elzik.Breef.Infrastructure.ContentExtractors;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using NSubstitute;
 using Shouldly;
 using System.Text.Json;
 
-namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
+namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
 {
     public class SubRedditExtractorTests
     {
@@ -62,7 +62,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
             var imageUrl = $"https://img.reddit.com/{imageKey}.png";
             var json = CreateJsonWithImageKey(imageKey, imageUrl);
 
-            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("new.json")))
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith(".json")))
                            .Returns(Task.FromResult(json));
             _mockHttpDownloader.TryGet(imageUrl).Returns(true);
 
@@ -86,7 +86,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
             var imageUrl = $"https://img.reddit.com/{imageKey}.png";
             var json = CreateJsonWithImageKey(imageKey, imageUrl);
 
-            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("new.json")))
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith(".json")))
                 .Returns(Task.FromResult(json));
             _mockHttpDownloader.TryGet(imageUrl).Returns(false);
 
@@ -94,7 +94,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            Assert.Equal("https://www.redditstatic.com/icon.png", result.PreviewImageUrl);
+            Assert.Equal("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg", result.PreviewImageUrl);
         }
 
         [Fact]
@@ -104,14 +104,14 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
             var url = $"https://www.reddit.com/r/subreddit";
             var json = JsonSerializer.Serialize(new { data = new { } });
 
-            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("new.json")))
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith(".json")))
                 .Returns(Task.FromResult(json));
 
             // Act
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            Assert.Equal("https://www.redditstatic.com/icon.png", result.PreviewImageUrl);
+            Assert.Equal("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg", result.PreviewImageUrl);
         }
 
         [Fact]
@@ -121,7 +121,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
             var url = $"https://www.reddit.com/r/subreddit";
             var json = JsonSerializer.Serialize(new { data = new { } });
 
-            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("new.json")))
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith(".json")))
                 .Returns(Task.FromResult(json));
 
             // Act
@@ -138,7 +138,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors
             var url = $"https://www.reddit.com/r/subreddit";
             var json = JsonSerializer.Serialize(new { data = new { } });
 
-            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("new.json")))
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith(".json")))
                 .Returns(Task.FromResult(json));
 
             // Act

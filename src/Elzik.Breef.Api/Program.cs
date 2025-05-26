@@ -5,6 +5,7 @@ using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure;
 using Elzik.Breef.Infrastructure.AI;
 using Elzik.Breef.Infrastructure.ContentExtractors;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.Wallabag;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;

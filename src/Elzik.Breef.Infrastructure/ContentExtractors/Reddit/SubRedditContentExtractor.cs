@@ -1,7 +1,7 @@
 ﻿using Elzik.Breef.Domain;
 using System.Text.Json;
 
-namespace Elzik.Breef.Infrastructure.ContentExtractors
+namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit
 {
     public class SubRedditContentExtractor(IHttpDownloader httpDownloader) : IContentExtractor
     {
@@ -25,24 +25,24 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors
         public async Task<Extract> ExtractAsync(string webPageUrl)
         {
             Uri webPageUri = new(webPageUrl);
-            var baseUri = webPageUri.ToString().EndsWith("/")
+            var subRedditBaseUri = webPageUri.ToString().EndsWith("/")
                 ? webPageUri
                 : new Uri(webPageUri.ToString() + "/");
-            Uri jsonUri = new(baseUri, "new.json");
-
-            var jsonContent = await httpDownloader.DownloadAsync(jsonUri.AbsoluteUri);
-
+            Uri subRedditNewPostsUri = new(subRedditBaseUri, "new.json");
 
             var subredditName = webPageUri.AbsolutePath.Trim('/').Split('/').Last();
-            var imageUrl = await ExtractImageUrlAsync(jsonContent);
-
+            var jsonContent = await httpDownloader.DownloadAsync(subRedditNewPostsUri.AbsoluteUri);
+            var imageUrl = await ExtractImageUrlAsync(subRedditBaseUri);
 
             return new Extract($"New in r/{subredditName}", jsonContent, imageUrl);
         }
 
-        private async Task<string> ExtractImageUrlAsync(string jsonContent)
+        private async Task<string> ExtractImageUrlAsync(Uri subRedditBaseUri)
         {
-            string[] imageKeys = ["icon_img", "community_icon", "banner_background_image", "banner_img", "mobile_banner_image"];
+            Uri subRedditAboutUri = new(subRedditBaseUri, "about.json");
+            var jsonContent = await httpDownloader.DownloadAsync(subRedditAboutUri.AbsoluteUri);
+
+            string[] imageKeys = ["banner_background_image", "banner_img", "mobile_banner_image", "icon_img", "community_icon"];
 
             using var doc = JsonDocument.Parse(jsonContent);
             var data = doc.RootElement.GetProperty("data");
@@ -59,7 +59,7 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors
                 }
             }
 
-            return "https://www.redditstatic.com/icon.png";
+            return "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg";
         }
     }
 }
