@@ -70,7 +70,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            Assert.Equal(imageUrl, result.PreviewImageUrl);
+            result.PreviewImageUrl.ShouldBe(imageUrl);
         }
 
         [Theory]
@@ -94,7 +94,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            Assert.Equal("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg", result.PreviewImageUrl);
+            result.PreviewImageUrl.ShouldBe("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg");
         }
 
         [Fact]
@@ -111,7 +111,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            Assert.Equal("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg", result.PreviewImageUrl);
+            result.PreviewImageUrl.ShouldBe("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg");
         }
 
         [Fact]
@@ -128,7 +128,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            Assert.Equal($"New in r/subreddit", result.Title);
+            result.Title.ShouldBe($"New in r/subreddit");
         }
 
         [Fact]
@@ -146,7 +146,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await extractor.ExtractAsync(url);
 
             // Assert
-            Assert.Equal(json, result.Content);
+            result.Content.ShouldBe(json);
         }
 
         [Theory]
