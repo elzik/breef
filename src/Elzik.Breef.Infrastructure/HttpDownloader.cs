@@ -23,6 +23,15 @@ namespace Elzik.Breef.Infrastructure
             return await _httpClient.GetStringAsync(url);
         }
 
+        public async Task<bool> TryGet(string url)
+        {
+            if(string.IsNullOrWhiteSpace(url)) return false;
+
+            var response = await _httpClient.GetAsync(url);
+
+            return response.IsSuccessStatusCode;
+        }
+
         public void Dispose()
         {
             _httpClient.Dispose();
