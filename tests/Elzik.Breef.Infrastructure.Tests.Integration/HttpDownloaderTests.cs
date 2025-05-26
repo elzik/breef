@@ -87,7 +87,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
         [InlineData(" ")]
         [InlineData("   ")]
         [InlineData("https://elzik.co.uk/does-not-exist.png")]
-        public async Task TryGet_WithInvalidUrl_ReturnsFalse(string? testUrl)
+        public async Task TryGet_WithInvalidUrl_ReturnsFalse(string testUrl)
         {
             // Arrange
             var httpClient = new HttpDownloader(_testOutputFakeLogger, _defaultOptions);

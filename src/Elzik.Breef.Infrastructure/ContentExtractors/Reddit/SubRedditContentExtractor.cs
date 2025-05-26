@@ -25,7 +25,7 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit
         public async Task<Extract> ExtractAsync(string webPageUrl)
         {
             Uri webPageUri = new(webPageUrl);
-            var subRedditBaseUri = webPageUri.ToString().EndsWith("/")
+            var subRedditBaseUri = webPageUri.ToString().EndsWith('/')
                 ? webPageUri
                 : new Uri(webPageUri.ToString() + "/");
             Uri subRedditNewPostsUri = new(subRedditBaseUri, "new.json");
