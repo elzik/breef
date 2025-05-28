@@ -32,6 +32,9 @@ public class PostData
     [JsonPropertyName("author")]
     public string? Author { get; set; }
 
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
     [JsonPropertyName("url")]
     public string? Url { get; set; }
 }
