@@ -1,25 +1,26 @@
-using System.Threading.Tasks;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Refit;
 using Shouldly;
-using Xunit;
 
-namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors.Reddit.Client
+namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors.Reddit.Client;
+
+public class RedditPostClientTests
 {
-    public class RedditPostClientTests
+    private static bool IsRunningInGitHubWorkflow => Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
+
+    [Fact]
+    public async Task GetPost_ValidPostId_ReturnsRedditPost()
     {
-        [Fact]
-        public async Task GetPost_ValidPostId_ReturnsRedditPost()
-        {
-            // Arrange
-            var client = RestService.For<IRedditPostClient>("https://www.reddit.com/");
-            var postId = "1dtr46l";
+        // Arrange
+        Skip.If(IsRunningInGitHubWorkflow, "Skipped because requests to reddit.com from GitHub workflows are " +
+            "always blocked meaning this test case always fails. This must be run locally instead.");
+        var client = RestService.For<IRedditPostClient>("https://www.reddit.com/");
+        var postId = "1dtr46l";
 
-            // Act
-            var redditPost = await client.GetPost(postId);
+        // Act
+        var redditPost = await client.GetPost(postId);
 
-            // Assert
-            redditPost.ShouldNotBeNull();
-        }
+        // Assert
+        redditPost.ShouldNotBeNull();
     }
 }
