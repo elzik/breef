@@ -8,4 +8,8 @@ public interface ISubredditClient
     [Get("/r/{subRedditName}/new.json")]
     [Headers("User-Agent: breef/1.0.0 (https://github.com/elzik/breef)")]
     Task<NewInSubreddit> GetNewInSubreddit(string subRedditName);
+
+    [Get("/r/{subRedditName}/about.json")]
+    [Headers("User-Agent: breef/1.0.0 (https://github.com/elzik/breef)")]
+    Task<AboutSubreddit> GetAboutSubreddit(string subRedditName);
 }
