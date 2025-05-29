@@ -8,7 +8,7 @@ public class RedditPostClientTests
 {
     private static bool IsRunningInGitHubWorkflow => Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
 
-    [Fact]
+    [SkippableFact]
     public async Task GetPost_ValidPostId_ReturnsRedditPost()
     {
         // Arrange
