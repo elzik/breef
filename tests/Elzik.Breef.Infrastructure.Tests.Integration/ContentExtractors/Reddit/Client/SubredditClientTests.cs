@@ -35,10 +35,12 @@ public class SubredditClientTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task GetAboutSubreddit_ValidSubreddit_ReturnsAboutSubreddit()
     {
         // Arrange
+        Skip.If(IsRunningInGitHubWorkflow, "Skipped because requests to reddit.com from GitHub workflows are " +
+            "always blocked meaning this test case always fails. This must be run locally instead.");
         var client = RestService.For<ISubredditClient>("https://www.reddit.com/");
 
         // Act
