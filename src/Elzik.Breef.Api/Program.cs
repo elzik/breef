@@ -4,6 +4,8 @@ using Elzik.Breef.Application;
 using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure;
 using Elzik.Breef.Infrastructure.AI;
+using Elzik.Breef.Infrastructure.ContentExtractors;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.Wallabag;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
@@ -61,13 +63,21 @@ public class Program
             .ValidateOnStart();
         builder.Services.AddAuth();
 
-        builder.Services.AddOptions<WebPageDownLoaderOptions>()
-            .Bind(configuration.GetSection("WebPageDownLoader"))
+        builder.Services.AddOptions<HttpDownloaderOptions>()
+            .Bind(configuration.GetSection("HttpDownloader"))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
+        builder.Services.AddTransient<IHttpDownloader, HttpDownloader>();
 
-        builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
+        builder.Services.AddTransient<HtmlContentExtractor>();
+        builder.Services.AddTransient<SubRedditContentExtractor>();
+        builder.Services.AddTransient<IContentExtractor>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<ContentExtractorStrategy>>();
+            var defaultContentExtractor = provider.GetRequiredService<HtmlContentExtractor>();
+            var subredditExtractor = provider.GetRequiredService<SubRedditContentExtractor>();
+            return new ContentExtractorStrategy(logger, [subredditExtractor], defaultContentExtractor);
+        });
 
         builder.Services.AddOptions<AiServiceOptions>()
             .Bind(configuration.GetSection("AiService"))

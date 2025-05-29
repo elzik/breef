@@ -1,9 +1,9 @@
 ﻿using Elzik.Breef.Domain;
 using HtmlAgilityPack;
 
-namespace Elzik.Breef.Infrastructure;
+namespace Elzik.Breef.Infrastructure.ContentExtractors;
 
-public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
+public class HtmlContentExtractor(IHttpDownloader httpClient) : IContentExtractor
 {
     public async Task<Extract> ExtractAsync(string webPageUrl)
     {
@@ -78,4 +78,6 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
 
         return imageNodesSortedBySize.FirstOrDefault()?.ImageUrl;
     }
+
+    public bool CanHandle(string webPageUrl) => true;
 }
