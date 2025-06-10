@@ -1,11 +1,11 @@
 using Elzik.Breef.Domain;
-using Elzik.Breef.Infrastructure;
+using Elzik.Breef.Infrastructure.ContentExtractors;
 using NSubstitute;
 using Shouldly;
 
-namespace Elzik.Breef.Infrastructure.Tests.Integration
+namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
 {
-    public class ContentExtractorTests
+    public class HtmlContentExtractorTests
     {
         [Theory]
         [InlineData("TestHtmlPage.html", "TestHtmlPage-ExpectedContent.txt", "Test HTML Page", "https://test-large-image.jpg")]
@@ -18,12 +18,12 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
         {
             // Arrange
             var mockTestUrl = "https://mock.url";
-            var mockHttpClient = Substitute.For<IWebPageDownloader>();
+            var mockHttpDownloader = Substitute.For<IHttpDownloader>();
             var testHtml = await File.ReadAllTextAsync(Path.Join("../../../../TestData", testFileName));
-            mockHttpClient.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
+            mockHttpDownloader.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
 
             // Act
-            var extractor = new ContentExtractor(mockHttpClient);
+            var extractor = new HtmlContentExtractor(mockHttpDownloader);
             var result = await extractor.ExtractAsync(mockTestUrl);
 
             // Assert
@@ -35,6 +35,20 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             lineEndingNormalisedContent.ShouldBe(lineEndingNormalisedExpected);
             result.Title.ShouldBe(expectedTitle);
             result.PreviewImageUrl.ShouldBe(expectedPreviewImageUrl);
+        }
+
+        [Fact]
+        public void CanHandle_AnyString_CanHandle()
+        {
+            // Arrange
+            var mockHttpDownloader = Substitute.For<IHttpDownloader>();
+
+            // Act
+            var defaultOnlyContentExtractorStrategy = new HtmlContentExtractor(mockHttpDownloader);
+            var canHandleAnyString = defaultOnlyContentExtractorStrategy.CanHandle("Any string.");
+
+            // Assert
+            canHandleAnyString.ShouldBeTrue();
         }
 
         private static string NormaliseLineEndings(string text)
