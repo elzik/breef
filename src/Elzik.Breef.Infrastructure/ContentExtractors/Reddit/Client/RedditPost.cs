@@ -1,55 +1,69 @@
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client
+namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
+
+public class RedditPost : List<RedditListing>
 {
-    public class RedditPost : List<RedditListing>
+}
+
+public class RedditListing
+{
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; }
+
+    [JsonPropertyName("data")]
+    public RedditListingData Data { get; set; }
+}
+
+public class RedditListingData
+{
+    [JsonPropertyName("after")]
+    public string After { get; set; }
+
+    [JsonPropertyName("before")]
+    public string Before { get; set; }
+
+    [JsonPropertyName("children")]
+    public List<RedditChild> Children { get; set; }
+}
+
+public class RedditChild
+{
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; }
+
+    [JsonPropertyName("data")]
+    public RedditCommentData Data { get; set; }
+}
+
+public class RedditCommentData
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
+
+    [JsonPropertyName("author")]
+    public string Author { get; set; }
+
+    [JsonPropertyName("body")]
+    public string Body { get; set; }
+
+    [JsonPropertyName("selftext")]
+    public string SelfText { get; set; }
+
+    [JsonPropertyName("created_utc")]
+    [JsonConverter(typeof(LinuxUtcDateTimeConverter))]
+    public DateTime CreatedUtc { get; set; }
+
+    [JsonPropertyName("replies")]
+    [JsonConverter(typeof(RedditRepliesConverter))]
+    public RedditListing Replies { get; set; } = new RedditListing
     {
-    }
+        Data = new RedditListingData
+        {
+            Children = new List<RedditChild>()
+        }
+    };
 
-    public class RedditListing
-    {
-        [JsonPropertyName("kind")]
-        public string Kind { get; set; }
-
-        [JsonPropertyName("data")]
-        public RedditListingData Data { get; set; }
-    }
-
-    public class RedditListingData
-    {
-        [JsonPropertyName("after")]
-        public string After { get; set; }
-
-        [JsonPropertyName("before")]
-        public string Before { get; set; }
-
-        [JsonPropertyName("children")]
-        public List<RedditChild> Children { get; set; }
-    }
-
-    public class RedditChild
-    {
-        [JsonPropertyName("kind")]
-        public string Kind { get; set; }
-
-        [JsonPropertyName("data")]
-        public RedditCommentData Data { get; set; }
-    }
-
-    public class RedditCommentData
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; set; }
-
-        [JsonPropertyName("author")]
-        public string Author { get; set; }
-
-        [JsonPropertyName("body")]
-        public string Body { get; set; }
-
-        [JsonPropertyName("replies")]
-        [JsonConverter(typeof(RedditRepliesConverter))]
-        public RedditListing Replies { get; set; }
-    }
+    [JsonIgnore]
+    public string Content => Body ?? SelfText;
 }
