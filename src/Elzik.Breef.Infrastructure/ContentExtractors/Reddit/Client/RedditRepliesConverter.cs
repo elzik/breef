@@ -1,27 +1,46 @@
-using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client
+namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
+
+public class RedditRepliesConverter : JsonConverter<RedditListing>
 {
-    public class RedditRepliesConverter : JsonConverter<RedditListing>
+    public override RedditListing Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        public override RedditListing Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        if (reader.TokenType == JsonTokenType.Null)
         {
-            if (reader.TokenType == JsonTokenType.String && reader.GetString() == "")
+            return new RedditListing
             {
-                return null;
-            }
-            if (reader.TokenType == JsonTokenType.StartObject)
-            {
-                return JsonSerializer.Deserialize<RedditListing>(ref reader, options);
-            }
-            return null;
+                Data = new RedditListingData
+                {
+                    Children = new List<RedditChild>()
+                }
+            };
         }
 
-        public override void Write(Utf8JsonWriter writer, RedditListing value, JsonSerializerOptions options)
+        if (reader.TokenType == JsonTokenType.String && reader.GetString() == "")
         {
-            JsonSerializer.Serialize(writer, value, options);
+            return new RedditListing
+            {
+                Data = new RedditListingData
+                {
+                    Children = new List<RedditChild>()
+                }
+            };
         }
+
+        var listing = JsonSerializer.Deserialize<RedditListing>(ref reader, options);
+        if (listing?.Data?.Children == null)
+        {
+            if (listing?.Data == null)
+                listing.Data = new RedditListingData();
+            listing.Data.Children = new List<RedditChild>();
+        }
+        return listing;
+    }
+
+    public override void Write(Utf8JsonWriter writer, RedditListing value, JsonSerializerOptions options)
+    {
+        JsonSerializer.Serialize(writer, value, options);
     }
 }
