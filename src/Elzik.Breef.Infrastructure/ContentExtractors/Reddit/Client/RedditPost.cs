@@ -9,46 +9,46 @@ public class RedditPost : List<RedditListing>
 public class RedditListing
 {
     [JsonPropertyName("kind")]
-    public string Kind { get; set; }
+    public string? Kind { get; set; }
 
     [JsonPropertyName("data")]
-    public RedditListingData Data { get; set; }
+    public RedditListingData Data { get; set; } = new();
 }
 
 public class RedditListingData
 {
     [JsonPropertyName("after")]
-    public string After { get; set; }
+    public string? After { get; set; }
 
     [JsonPropertyName("before")]
-    public string Before { get; set; }
+    public string? Before { get; set; }
 
     [JsonPropertyName("children")]
-    public List<RedditChild> Children { get; set; }
+    public List<RedditChild> Children { get; set; } = [];
 }
 
 public class RedditChild
 {
     [JsonPropertyName("kind")]
-    public string Kind { get; set; }
+    public string? Kind { get; set; }
 
     [JsonPropertyName("data")]
-    public RedditCommentData Data { get; set; }
+    public RedditCommentData Data { get; set; } = new();
 }
 
 public class RedditCommentData
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     [JsonPropertyName("author")]
-    public string Author { get; set; }
+    public string? Author { get; set; }
 
     [JsonPropertyName("body")]
-    public string Body { get; set; }
+    public string? Body { get; set; }
 
     [JsonPropertyName("selftext")]
-    public string SelfText { get; set; }
+    public string? SelfText { get; set; }
 
     [JsonPropertyName("created_utc")]
     [JsonConverter(typeof(LinuxUtcDateTimeConverter))]
@@ -60,10 +60,10 @@ public class RedditCommentData
     {
         Data = new RedditListingData
         {
-            Children = new List<RedditChild>()
+            Children = []
         }
     };
 
     [JsonIgnore]
-    public string Content => Body ?? SelfText;
+    public string? Content => Body ?? SelfText;
 }
