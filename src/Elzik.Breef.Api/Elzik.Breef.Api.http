@@ -4,5 +4,5 @@ Post {{Elzik.Breef.Api_HostAddress}}/breefs
 Content-Type: application/json
 BREEF-API-KEY: test-key
 {
-  "url":"https://www.bbc.co.uk/news/articles/cdedkr9439wo"
+  "url":"https://www.reddit.com/r/bbq"
 }
