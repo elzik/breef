@@ -13,7 +13,7 @@ public class RedditRepliesConverter : JsonConverter<RedditListing>
             {
                 Data = new RedditListingData
                 {
-                    Children = new List<RedditChild>()
+                    Children = []
                 }
             };
         }
@@ -24,18 +24,17 @@ public class RedditRepliesConverter : JsonConverter<RedditListing>
             {
                 Data = new RedditListingData
                 {
-                    Children = new List<RedditChild>()
+                    Children = []
                 }
             };
         }
 
-        var listing = JsonSerializer.Deserialize<RedditListing>(ref reader, options);
-        if (listing?.Data?.Children == null)
-        {
-            if (listing?.Data == null)
-                listing.Data = new RedditListingData();
-            listing.Data.Children = new List<RedditChild>();
-        }
+        var listing = JsonSerializer.Deserialize<RedditListing>(ref reader, options) 
+            ?? throw new InvalidOperationException("No Reddit listing was deserialized from the JSON.");
+
+        listing.Data ??= new RedditListingData();
+        listing.Data.Children ??= [];
+
         return listing;
     }
 
