@@ -10,12 +10,9 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client
             if (reader.TokenType == JsonTokenType.Null)
                 return default;
 
-            if (reader.TokenType == JsonTokenType.Number)
+            if (reader.TokenType == JsonTokenType.Number && reader.TryGetDouble(out double doubleSeconds))
             {
-                if (reader.TryGetDouble(out double doubleSeconds))
-                {
-                    return DateTimeOffset.FromUnixTimeSeconds((long)doubleSeconds).UtcDateTime;
-                }
+                return DateTimeOffset.FromUnixTimeSeconds((long)doubleSeconds).UtcDateTime;
             }
 
             throw new JsonException("Invalid Unix timestamp for DateTime.");
