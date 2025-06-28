@@ -4,11 +4,11 @@ using Xunit.Abstractions;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration
 {
-    public class WebPageDownloaderTests(ITestOutputHelper testOutputHelper)
+    public class HttpDownloaderTests(ITestOutputHelper testOutputHelper)
     {
 
-        private readonly IOptions<WebPageDownLoaderOptions> _defaultOptions = Options.Create(new WebPageDownLoaderOptions());
-        private readonly TestOutputFakeLogger<WebPageDownloader> _testOutputFakeLogger = new(testOutputHelper);
+        private readonly IOptions<HttpDownloaderOptions> _defaultOptions = Options.Create(new HttpDownloaderOptions());
+        private readonly TestOutputFakeLogger<HttpDownloader> _testOutputFakeLogger = new(testOutputHelper);
         private static bool IsRunningInGitHubWorkflow => Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
         
         [Fact]
@@ -18,7 +18,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             var testUrl = "https://elzik.github.io/test-web/test.html";
 
             // Act
-            var httpClient = new WebPageDownloader(_testOutputFakeLogger, _defaultOptions);
+            var httpClient = new HttpDownloader(_testOutputFakeLogger, _defaultOptions);
             var result = await httpClient.DownloadAsync(testUrl);
 
             // Assert
@@ -37,7 +37,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             var testUrl = "https://elzik.github.io/test-web/test.html";
 
             // Act
-            var httpClient = new WebPageDownloader(_testOutputFakeLogger, _defaultOptions);
+            var httpClient = new HttpDownloader(_testOutputFakeLogger, _defaultOptions);
             await httpClient.DownloadAsync(testUrl);
 
             // Assert
@@ -61,11 +61,56 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
                 "blocked meaning this test case always fails. This must be run locally instead.");
 
             // Act
-            var httpClient = new WebPageDownloader(_testOutputFakeLogger, _defaultOptions);
+            var httpClient = new HttpDownloader(_testOutputFakeLogger, _defaultOptions);
             var result = await httpClient.DownloadAsync(testUrl);
 
             // Assert
             result.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task TryGet_WithValidUrl_ReturnsTrue()
+        {
+            // Arrange
+            var testUrl = "https://sonarcloud.io/api/project_badges/measure?project=elzik_breef&metric=alert_status";
+            var httpClient = new HttpDownloader(_testOutputFakeLogger, _defaultOptions);
+
+            // Act
+            var result = await httpClient.TryGet(testUrl);
+
+            // Assert
+            result.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("   ")]
+        [InlineData("https://elzik.co.uk/does-not-exist.png")]
+        public async Task TryGet_WithInvalidUrl_ReturnsFalse(string testUrl)
+        {
+            // Arrange
+            var httpClient = new HttpDownloader(_testOutputFakeLogger, _defaultOptions);
+
+            // Act
+            var result = await httpClient.TryGet(testUrl);
+
+            // Assert
+            result.ShouldBeFalse();
+        }
+
+        [Fact]
+        public async Task TryGet_WithMalformedUrl_ThrowsException()
+        {
+            // Arrange
+            var testUrl = "not-a-valid-url";
+            var httpClient = new HttpDownloader(_testOutputFakeLogger, _defaultOptions);
+
+            // Act & Assert
+            await Should.ThrowAsync<InvalidOperationException>(async () =>
+            {
+                await httpClient.TryGet(testUrl);
+            });
         }
 
         private static string NormaliseLineEndings(string text)
