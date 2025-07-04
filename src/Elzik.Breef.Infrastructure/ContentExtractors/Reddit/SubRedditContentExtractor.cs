@@ -24,15 +24,12 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit
 
         public async Task<Extract> ExtractAsync(string webPageUrl)
         {
-            Uri webPageUri = new(webPageUrl);
-            var subRedditBaseUri = webPageUri.ToString().EndsWith('/')
-                ? webPageUri
-                : new Uri(webPageUri.ToString() + "/");
-            Uri subRedditNewPostsUri = new(subRedditBaseUri, "new.json");
-
-            var subredditName = webPageUri.AbsolutePath.Trim('/').Split('/').Last();
+            var webPageUri = new Uri(webPageUrl.EndsWith('/') ? webPageUrl : webPageUrl + "/", UriKind.Absolute);
+            var subRedditNewPostsUri = new Uri(webPageUri, "new.json");
+            var webPageParts = webPageUri.AbsolutePath.Trim('/').Split('/');
+            var subredditName = webPageParts[webPageParts.Length -1];
             var jsonContent = await httpDownloader.DownloadAsync(subRedditNewPostsUri.AbsoluteUri);
-            var imageUrl = await ExtractImageUrlAsync(subRedditBaseUri);
+            var imageUrl = await ExtractImageUrlAsync(webPageUri);
 
             return new Extract($"New in r/{subredditName}", jsonContent, imageUrl);
         }
