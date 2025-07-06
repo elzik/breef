@@ -27,7 +27,7 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit
             var webPageUri = new Uri(webPageUrl.EndsWith('/') ? webPageUrl : webPageUrl + "/", UriKind.Absolute);
             var subRedditNewPostsUri = new Uri(webPageUri, "new.json");
             var webPageParts = webPageUri.AbsolutePath.Trim('/').Split('/');
-            var subredditName = webPageParts[webPageParts.Length -1];
+            var subredditName = webPageParts[^1];
             var jsonContent = await httpDownloader.DownloadAsync(subRedditNewPostsUri.AbsoluteUri);
             var imageUrl = await ExtractImageUrlAsync(webPageUri);
 
