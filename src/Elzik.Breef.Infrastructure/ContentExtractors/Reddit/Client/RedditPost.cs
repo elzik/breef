@@ -51,7 +51,7 @@ public class RedditCommentData
     public string? SelfText { get; set; }
 
     [JsonPropertyName("created_utc")]
-    [JsonConverter(typeof(LinuxUtcDateTimeConverter))]
+    [JsonConverter(typeof(RedditDateTimeConverter))]
     public DateTime CreatedUtc { get; set; }
 
     [JsonPropertyName("replies")]

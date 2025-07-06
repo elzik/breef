@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client
 {
-    public class LinuxUtcDateTimeConverter : JsonConverter<DateTime>
+    public class RedditDateTimeConverter : JsonConverter<DateTime>
     {
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -20,8 +20,11 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            var unixTime = new DateTimeOffset(value).ToUnixTimeSeconds();
-            writer.WriteNumberValue(unixTime);
+            var unixTime = new DateTimeOffset(value)
+                .ToUnixTimeSeconds()
+                .ToString("0.0");
+
+            writer.WriteRawValue(unixTime);
         }
     }
 }
