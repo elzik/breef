@@ -1,20 +1,19 @@
 ﻿using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace Elzik.Breef.Infrastructure.Tests.Integration
+namespace Elzik.Breef.Infrastructure.Tests.Integration;
+
+public sealed class TestOutputLoggerProvider(ITestOutputHelper testOutputHelper) : ILoggerProvider
 {
-    public class TestOutputLoggerProvider(ITestOutputHelper testOutputHelper) : ILoggerProvider
+    private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
+
+    public ILogger CreateLogger(string categoryName)
     {
-        private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
+        return new TestOutputLogger(_testOutputHelper, categoryName);
+    }
 
-        public ILogger CreateLogger(string categoryName)
-        {
-            return new TestOutputLogger(_testOutputHelper, categoryName);
-        }
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-        }
+    public void Dispose()
+    {
+        // Nothing to dispose
     }
 }
