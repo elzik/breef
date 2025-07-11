@@ -29,9 +29,9 @@ public class RedditRepliesConverter : JsonConverter<RedditListing>
             };
         }
 
-        // Create new options without this converter to prevent infinite recursion
+        // Create new options without this converter to prevent infinite recursions
         var optionsWithoutThisConverter = new JsonSerializerOptions(options);
-        optionsWithoutThisConverter.Converters.Remove(optionsWithoutThisConverter.Converters.First(c => c is RedditRepliesConverter));
+        optionsWithoutThisConverter.Converters.Remove(optionsWithoutThisConverter.Converters.FirstOrDefault(c => c is RedditRepliesConverter));
 
         var listing = JsonSerializer.Deserialize<RedditListing>(ref reader, optionsWithoutThisConverter)
             ?? throw new InvalidOperationException("No Reddit listing was deserialized from the JSON.");
@@ -46,7 +46,7 @@ public class RedditRepliesConverter : JsonConverter<RedditListing>
     {
         // Create new options without this converter to prevent infinite recursion
         var optionsWithoutThisConverter = new JsonSerializerOptions(options);
-        optionsWithoutThisConverter.Converters.Remove(optionsWithoutThisConverter.Converters.First(c => c is RedditRepliesConverter));
+        optionsWithoutThisConverter.Converters.Remove(optionsWithoutThisConverter.Converters.FirstOrDefault(c => c is RedditRepliesConverter));
 
         JsonSerializer.Serialize(writer, value, optionsWithoutThisConverter);
     }
