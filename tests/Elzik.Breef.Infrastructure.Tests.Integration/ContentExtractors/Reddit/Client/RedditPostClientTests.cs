@@ -1,6 +1,7 @@
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Refit;
 using Shouldly;
+using System.Globalization;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors.Reddit.Client;
 
@@ -32,7 +33,7 @@ public class RedditPostClientTests
         var mainPost = redditPost[0].Data.Children[0].Data;
         mainPost.Id.ShouldBe("1kqiwzc");
         mainPost.Author.ShouldBe("melvman1");
-        mainPost.CreatedUtc.ShouldBe(DateTime.Parse("2025-05-19T18:18:05"));
+        mainPost.CreatedUtc.ShouldBe(DateTime.Parse("2025-05-19T18:18:05", CultureInfo.InvariantCulture));
         mainPost.SelfText.ShouldBe("I am just about to enter the programming world, and want to become a software " +
             "engineer. This work ready college in Sweden has a 2 year long .net developer program with internships " +
             "at real companies. They also have a similar program but with javascript.\n\nI am wondering if this " +
