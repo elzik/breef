@@ -1,40 +1,10 @@
 version: 2
 updates:
-  - package-ecosystem: "nuget"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    pull-request-branch-name:
-      separator: "-"
-    groups:
-      production-dependencies:
-        patterns:
+- package-ecosystem: nuget
+  directory: "/"
+  schedule:
+    interval: daily
+  groups:
+    all-dependencies:
+      patterns:
         - "*"
-        exclude-patterns:
-        - "AutoFixture*"
-        - "coverlet*"
-        - "GitVersion*"
-        - "Microsoft.AspNetCore.Mvc.Testing"
-        - "Microsoft.NET.Test*"
-        - "NSubstitute*"
-        - "Polly.Testing*"
-        - "Shouldly*"
-        - "Testcontainers"
-        - "xunit*"
-      test-dependencies:
-        patterns:
-        - "AutoFixture*"
-        - "coverlet*"
-        - "Microsoft.AspNetCore.Mvc.Testing"
-        - "Microsoft.NET.Test*"
-        - "NSubstitute*"
-        - "Polly.Testing*"
-        - "Shouldly*"
-        - "Testcontainers"
-        - "xunit*"
-      build-dependencies:
-        patterns:
-        - "GitVersion*"
-    allow:
-    - dependency-type: "all"
-  
