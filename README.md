@@ -117,8 +117,8 @@ These settings affect how pages are downloaded prior to being summarised.
 Example:
 
 ```jsonc
-"WebPageDownLoader" : {
-    "UserAgent": "<custom-agent>"   // breef_WebPageDownLoader__UserAgent
+"HttpDownloader" : {
+    "UserAgent": "<custom-agent>"   // breef_HttpDownloader__UserAgent
 }
 ```
 
