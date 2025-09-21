@@ -1,4 +1,5 @@
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
+using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 
@@ -35,7 +36,7 @@ public class RawRedditPostTransformer
         return redditPost;
     }
 
-    private List<RedditComment> TransformComments(List<RedditChild> children)
+    private List<RedditComment> TransformComments(List<RawRedditChild> children)
     {
         var comments = new List<RedditComment>();
 
@@ -50,7 +51,7 @@ public class RawRedditPostTransformer
                     Score = child.Data.Score,
                     Content = child.Data.Content ?? string.Empty,
                     CreatedUtc = child.Data.CreatedUtc,
-                    Replies = TransformComments(child.Data.Replies.Data.Children)
+                    Replies = TransformComments(child.Data.Replies)
                 };
 
                 comments.Add(comment);
@@ -58,5 +59,62 @@ public class RawRedditPostTransformer
         }
 
         return comments;
+    }
+
+    private List<RedditComment> TransformComments(object? replies)
+    {
+        // Handle null replies
+        if (replies == null)
+            return [];
+
+        // Handle empty string replies (Reddit API quirk)
+        if (replies is string stringReply && stringReply == "")
+            return [];
+
+        // Handle JsonElement (when deserialized as object)
+        if (replies is JsonElement jsonElement)
+        {
+            if (jsonElement.ValueKind == JsonValueKind.Null)
+                return [];
+
+            if (jsonElement.ValueKind == JsonValueKind.String && jsonElement.GetString() == "")
+                return [];
+
+            // Try to deserialize as RawRedditListing
+            try
+            {
+                var deserializedListing = JsonSerializer.Deserialize<RawRedditListing>(jsonElement.GetRawText());
+                return TransformComments(deserializedListing);
+            }
+            catch
+            {
+                return [];
+            }
+        }
+
+        // Handle direct RawRedditListing object
+        if (replies is RawRedditListing listing)
+            return TransformComments(listing);
+
+        // Unknown type, return empty list
+        return [];
+    }
+
+    private List<RedditComment> TransformComments(RawRedditListing? replies)
+    {
+        // Handle null replies
+        if (replies == null)
+            return [];
+
+        // Handle missing Data property
+        if (replies.Data == null)
+            return [];
+
+        // Handle missing Children property
+        if (replies.Data.Children == null)
+            return [];
+
+        // Transform the children
+        return TransformComments(replies.Data.Children);
     }
 }

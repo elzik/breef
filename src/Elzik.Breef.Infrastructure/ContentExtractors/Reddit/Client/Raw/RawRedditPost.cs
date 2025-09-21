@@ -12,10 +12,10 @@ public class RawRedditListing
     public string? Kind { get; set; }
 
     [JsonPropertyName("data")]
-    public RedditListingData Data { get; set; } = new();
+    public RawRedditListingData Data { get; set; } = new();
 }
 
-public class RedditListingData
+public class RawRedditListingData
 {
     [JsonPropertyName("after")]
     public string? After { get; set; }
@@ -24,19 +24,19 @@ public class RedditListingData
     public string? Before { get; set; }
 
     [JsonPropertyName("children")]
-    public List<RedditChild> Children { get; set; } = [];
+    public List<RawRedditChild> Children { get; set; } = [];
 }
 
-public class RedditChild
+public class RawRedditChild
 {
     [JsonPropertyName("kind")]
     public string? Kind { get; set; }
 
     [JsonPropertyName("data")]
-    public RedditCommentData Data { get; set; } = new();
+    public RawRedditCommentData Data { get; set; } = new();
 }
 
-public class RedditCommentData
+public class RawRedditCommentData
 {
     [JsonPropertyName("id")]
     public string? Id { get; set; }
@@ -64,14 +64,7 @@ public class RedditCommentData
     public DateTime CreatedUtc { get; set; }
 
     [JsonPropertyName("replies")]
-    [JsonConverter(typeof(RawRedditRepliesConverter))]
-    public RawRedditListing Replies { get; set; } = new RawRedditListing
-    {
-        Data = new RedditListingData
-        {
-            Children = []
-        }
-    };
+    public object? Replies { get; set; } // Use object to handle both RawRedditListing and empty string cases
 
     [JsonIgnore]
     public string? Content => Body ?? SelfText;
