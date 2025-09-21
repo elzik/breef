@@ -26,7 +26,7 @@ public class RedditPostClientTests
         var postId = "1kqiwzc";
         var rawRedditPost = CreateValidRawRedditPost();
 
-        _mockRawClient.GetPost(postId).Returns(rawRedditPost);
+        _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
 
         // Act
         var result = await _client.GetPost(postId);
@@ -75,7 +75,7 @@ public class RedditPostClientTests
         var postId = "test456";
         var rawRedditPost = CreateRawRedditPostWithEmptyStringReplies();
 
-        _mockRawClient.GetPost(postId).Returns(rawRedditPost);
+        _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
 
         // Act
         var result = await _client.GetPost(postId);
@@ -92,7 +92,7 @@ public class RedditPostClientTests
         var postId = "test789";
         var rawRedditPost = CreateRawRedditPostWithNullReplies();
 
-        _mockRawClient.GetPost(postId).Returns(rawRedditPost);
+        _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
 
         // Act
         var result = await _client.GetPost(postId);
@@ -109,7 +109,7 @@ public class RedditPostClientTests
         var postId = "testjson";
         var rawRedditPost = CreateRawRedditPostWithJsonElementReplies();
 
-        _mockRawClient.GetPost(postId).Returns(rawRedditPost);
+        _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
 
         // Act
         var result = await _client.GetPost(postId);
@@ -126,7 +126,7 @@ public class RedditPostClientTests
         var postId = "testmixed";
         var rawRedditPost = CreateRawRedditPostWithMixedCommentTypes();
 
-        _mockRawClient.GetPost(postId).Returns(rawRedditPost);
+        _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
 
         // Act
         var result = await _client.GetPost(postId);
@@ -144,7 +144,7 @@ public class RedditPostClientTests
         var postId = "testnulls";
         var rawRedditPost = CreateRawRedditPostWithNullFields();
 
-        _mockRawClient.GetPost(postId).Returns(rawRedditPost);
+        _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
 
         // Act
         var result = await _client.GetPost(postId);
@@ -168,7 +168,7 @@ public class RedditPostClientTests
         var postId = "notitle";
         var rawRedditPost = CreateRawRedditPostWithoutTitle();
 
-        _mockRawClient.GetPost(postId).Returns(rawRedditPost);
+        _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(() => _client.GetPost(postId));
@@ -194,7 +194,7 @@ public class RedditPostClientTests
         var postId = "nochildren";
         var rawRedditPost = CreateRawRedditPostWithNoChildren();
 
-        _mockRawClient.GetPost(postId).Returns(rawRedditPost);
+        _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
 
         // Act & Assert
         await Should.ThrowAsync<ArgumentException>(() => _client.GetPost(postId));
