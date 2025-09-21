@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Globalization;
-using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Shouldly;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 
 namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit.Client;
 

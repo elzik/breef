@@ -1,69 +1,28 @@
-using System.Text.Json.Serialization;
-
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 
-public class RedditPost : List<RedditListing>
+public class RedditPost
 {
+    public RedditPostContent Post { get; set; } = new();
+    public List<RedditComment> Comments { get; set; } = [];
 }
 
-public class RedditListing
+public class RedditPostContent
 {
-    [JsonPropertyName("kind")]
-    public string? Kind { get; set; }
-
-    [JsonPropertyName("data")]
-    public RedditListingData Data { get; set; } = new();
-}
-
-public class RedditListingData
-{
-    [JsonPropertyName("after")]
-    public string? After { get; set; }
-
-    [JsonPropertyName("before")]
-    public string? Before { get; set; }
-
-    [JsonPropertyName("children")]
-    public List<RedditChild> Children { get; set; } = [];
-}
-
-public class RedditChild
-{
-    [JsonPropertyName("kind")]
-    public string? Kind { get; set; }
-
-    [JsonPropertyName("data")]
-    public RedditCommentData Data { get; set; } = new();
-}
-
-public class RedditCommentData
-{
-    [JsonPropertyName("id")]
-    public string? Id { get; set; }
-
-    [JsonPropertyName("author")]
-    public string? Author { get; set; }
-
-    [JsonPropertyName("body")]
-    public string? Body { get; set; }
-
-    [JsonPropertyName("selftext")]
-    public string? SelfText { get; set; }
-
-    [JsonPropertyName("created_utc")]
-    [JsonConverter(typeof(RedditDateTimeConverter))]
+    public string Id { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public string Subreddit { get; set; } = string.Empty;
+    public int Score { get; set; }
+    public string Content { get; set; } = string.Empty;
     public DateTime CreatedUtc { get; set; }
+}
 
-    [JsonPropertyName("replies")]
-    [JsonConverter(typeof(RedditRepliesConverter))]
-    public RedditListing Replies { get; set; } = new RedditListing
-    {
-        Data = new RedditListingData
-        {
-            Children = []
-        }
-    };
-
-    [JsonIgnore]
-    public string? Content => Body ?? SelfText;
+public class RedditComment
+{
+    public string Id { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public int Score { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public DateTime CreatedUtc { get; set; }
+    public List<RedditComment> Replies { get; set; } = [];
 }

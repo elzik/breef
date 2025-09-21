@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client
+namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw
 {
     public class RedditDateTimeConverter : JsonConverter<DateTime>
     {
