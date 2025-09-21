@@ -20,10 +20,17 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            var unixSeconds = new DateTimeOffset(value
-                .ToUniversalTime()).ToUnixTimeSeconds();
+            var utc = value.Kind switch
+            {
+                DateTimeKind.Utc => value,
+                DateTimeKind.Local => value.ToUniversalTime(),
+                DateTimeKind.Unspecified => DateTime.SpecifyKind(value, DateTimeKind.Utc),
+                _ => value
+            };
 
-            writer.WriteNumberValue(unixSeconds);
+            writer.WriteNumberValue(new DateTimeOffset(utc).ToUnixTimeSeconds());
         }
+
+
     }
 }
