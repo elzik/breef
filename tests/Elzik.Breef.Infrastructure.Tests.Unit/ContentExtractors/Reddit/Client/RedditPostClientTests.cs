@@ -65,7 +65,7 @@ public class RedditPostClientTests
         reply.Replies.Count.ShouldBe(0);
 
         // Verify raw client was called correctly
-        await _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockRawClient.Received(1).GetPost(postId);
     }
 
     [Fact]
