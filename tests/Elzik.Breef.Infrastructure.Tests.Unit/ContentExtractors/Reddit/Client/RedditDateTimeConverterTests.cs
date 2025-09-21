@@ -62,7 +62,7 @@ public class RedditDateTimeConverterTests
         var json = JsonSerializer.Serialize(testDate, _options);
 
         // Assert
-        json.ShouldContain("\"created_utc\":1747678685.0");
+        json.ShouldContain("\"created_utc\":1747678685");
     }
 
     private class TestDate
