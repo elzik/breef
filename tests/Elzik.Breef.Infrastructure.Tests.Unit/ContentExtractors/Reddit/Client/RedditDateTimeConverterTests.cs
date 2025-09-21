@@ -50,7 +50,7 @@ public class RedditDateTimeConverterTests
     }
 
     [Fact]
-    public void Write_WritesUnixTimestamp()
+    public void Write_UtcDateTime_WritesCorrectUnixTimestamp()
     {
         // Arrange
         var testDate = new TestDate
@@ -63,6 +63,75 @@ public class RedditDateTimeConverterTests
 
         // Assert
         json.ShouldContain("\"created_utc\":1747678685");
+    }
+
+    [Fact]
+    public void Write_LocalDateTime_ConvertsToUtcAndWritesCorrectUnixTimestamp()
+    {
+        // Arrange
+        var localTime = new DateTime(2025, 5, 19, 18, 18, 5, DateTimeKind.Local);
+        var expectedUtcTime = localTime.ToUniversalTime();
+        var expectedUnixSeconds = new DateTimeOffset(expectedUtcTime).ToUnixTimeSeconds();
+
+        var testDate = new TestDate { Date = localTime };
+
+        // Act
+        var json = JsonSerializer.Serialize(testDate, _options);
+
+        // Assert
+        json.ShouldContain($"\"created_utc\":{expectedUnixSeconds}");
+    }
+
+    [Fact]
+    public void Write_UnspecifiedDateTime_TreatsAsUtcAndWritesCorrectUnixTimestamp()
+    {
+        // Arrange
+        var unspecifiedTime = new DateTime(2025, 5, 19, 18, 18, 5, DateTimeKind.Unspecified);
+        // When DateTimeKind.Unspecified, it's treated as UTC directly (SpecifyKind to UTC)
+        var utcTime = DateTime.SpecifyKind(unspecifiedTime, DateTimeKind.Utc);
+        var expectedUnixSeconds = new DateTimeOffset(utcTime).ToUnixTimeSeconds();
+
+        var testDate = new TestDate { Date = unspecifiedTime };
+
+        // Act
+        var json = JsonSerializer.Serialize(testDate, _options);
+
+        // Assert
+        json.ShouldContain($"\"created_utc\":{expectedUnixSeconds}");
+    }
+
+    [Theory]
+    [InlineData(DateTimeKind.Utc)]
+    [InlineData(DateTimeKind.Local)]
+    [InlineData(DateTimeKind.Unspecified)]
+    public void Write_AllDateTimeKinds_ProducesValidUnixTimestamp(DateTimeKind kind)
+    {
+        // Arrange
+        var baseTime = new DateTime(2025, 5, 19, 18, 18, 5, DateTimeKind.Unspecified);
+        var dateTime = kind switch
+        {
+            DateTimeKind.Utc => DateTime.SpecifyKind(baseTime, DateTimeKind.Utc),
+            DateTimeKind.Local => DateTime.SpecifyKind(baseTime, DateTimeKind.Local),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(baseTime, DateTimeKind.Unspecified),
+            _ => baseTime
+        };
+
+        var testDate = new TestDate { Date = dateTime };
+
+        // Act
+        var json = JsonSerializer.Serialize(testDate, _options);
+
+        // Assert
+        json.ShouldNotBeNull();
+        json.ShouldContain("\"created_utc\":");
+
+        // Extract the timestamp and verify it's a valid number
+        var startIndex = json.IndexOf("\"created_utc\":") + "\"created_utc\":".Length;
+        var endIndex = json.IndexOf("}", startIndex);
+        var timestampStr = json.Substring(startIndex, endIndex - startIndex);
+
+        long.TryParse(timestampStr, out var timestamp).ShouldBeTrue();
+        timestamp.ShouldBeGreaterThan(0);
     }
 
     private class TestDate
