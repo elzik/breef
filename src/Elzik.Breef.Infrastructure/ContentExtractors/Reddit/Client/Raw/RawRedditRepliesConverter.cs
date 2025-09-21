@@ -1,15 +1,15 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
+namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 
-public class RedditRepliesConverter : JsonConverter<RedditListing>
+public class RawRedditRepliesConverter : JsonConverter<RawRedditListing>
 {
-    public override RedditListing Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RawRedditListing Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null)
         {
-            return new RedditListing
+            return new RawRedditListing
             {
                 Data = new RedditListingData
                 {
@@ -20,7 +20,7 @@ public class RedditRepliesConverter : JsonConverter<RedditListing>
 
         if (reader.TokenType == JsonTokenType.String && reader.GetString() == "")
         {
-            return new RedditListing
+            return new RawRedditListing
             {
                 Data = new RedditListingData
                 {
@@ -31,9 +31,9 @@ public class RedditRepliesConverter : JsonConverter<RedditListing>
 
         // Create new options without this converter to prevent infinite recursions
         var optionsWithoutThisConverter = new JsonSerializerOptions(options);
-        optionsWithoutThisConverter.Converters.Remove(optionsWithoutThisConverter.Converters.FirstOrDefault(c => c is RedditRepliesConverter));
+        optionsWithoutThisConverter.Converters.Remove(optionsWithoutThisConverter.Converters.FirstOrDefault(c => c is RawRedditRepliesConverter));
 
-        var listing = JsonSerializer.Deserialize<RedditListing>(ref reader, optionsWithoutThisConverter)
+        var listing = JsonSerializer.Deserialize<RawRedditListing>(ref reader, optionsWithoutThisConverter)
             ?? throw new InvalidOperationException("No Reddit listing was deserialized from the JSON.");
 
         listing.Data ??= new RedditListingData();
@@ -42,11 +42,11 @@ public class RedditRepliesConverter : JsonConverter<RedditListing>
         return listing;
     }
 
-    public override void Write(Utf8JsonWriter writer, RedditListing value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RawRedditListing value, JsonSerializerOptions options)
     {
         // Create new options without this converter to prevent infinite recursion
         var optionsWithoutThisConverter = new JsonSerializerOptions(options);
-        optionsWithoutThisConverter.Converters.Remove(optionsWithoutThisConverter.Converters.FirstOrDefault(c => c is RedditRepliesConverter));
+        optionsWithoutThisConverter.Converters.Remove(optionsWithoutThisConverter.Converters.FirstOrDefault(c => c is RawRedditRepliesConverter));
 
         JsonSerializer.Serialize(writer, value, optionsWithoutThisConverter);
     }

@@ -1,4 +1,5 @@
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 using System.Text;
 using System.Text.Json;
 
@@ -13,7 +14,7 @@ public class RedditRepliesConverterTests
     {
         _deserializeOptions = new JsonSerializerOptions
         {
-            Converters = { new RedditRepliesConverter() }
+            Converters = { new RawRedditRepliesConverter() }
         };
         _serializeOptions = new JsonSerializerOptions(); // No custom converter
     }
@@ -22,12 +23,12 @@ public class RedditRepliesConverterTests
     public void Read_NullToken_ReturnsEmptyListing()
     {
         // Test the converter directly
-        var converter = new RedditRepliesConverter();
+        var converter = new RawRedditRepliesConverter();
         var json = "null";
         var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json));
         reader.Read(); // Advance to the null token
 
-        var result = converter.Read(ref reader, typeof(RedditListing), _deserializeOptions);
+        var result = converter.Read(ref reader, typeof(RawRedditListing), _deserializeOptions);
 
         Assert.NotNull(result);
         Assert.NotNull(result.Data);
@@ -39,7 +40,7 @@ public class RedditRepliesConverterTests
     public void Read_EmptyString_ReturnsEmptyListing()
     {
         var json = "\"\"";
-        var listing = JsonSerializer.Deserialize<RedditListing>(json, _deserializeOptions);
+        var listing = JsonSerializer.Deserialize<RawRedditListing>(json, _deserializeOptions);
 
         Assert.NotNull(listing);
         Assert.NotNull(listing.Data);
@@ -74,7 +75,7 @@ public class RedditRepliesConverterTests
         """;
 
         // Deserialize as a single RedditListing, not a List
-        var listing = JsonSerializer.Deserialize<RedditListing>(json, _deserializeOptions);
+        var listing = JsonSerializer.Deserialize<RawRedditListing>(json, _deserializeOptions);
 
         Assert.NotNull(listing);
         Assert.Equal("Listing", listing.Kind);
@@ -97,7 +98,7 @@ public class RedditRepliesConverterTests
     [Fact]
     public void Write_SerializesCorrectly()
     {
-        var listing = new RedditListing
+        var listing = new RawRedditListing
         {
             Kind = "Listing",
             Data = new RedditListingData
