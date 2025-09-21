@@ -24,10 +24,8 @@ public class RedditDateTimeConverterTests
     public void Read_ValidUnixTimestamp_ReturnsExpectedDateTime(object timestamp, string expectedUtc)
     {
         // Arrange
-        var json = timestamp is double
-            ? $"{timestamp:0.0}"
-            : $"{timestamp}";
-        var wrappedJson = $"{{\"created_utc\": {json} }}";
+        var wrappedJson = JsonSerializer
+            .Serialize(new { created_utc = timestamp });
 
         // Act
         var result = JsonSerializer.Deserialize<TestDate>(wrappedJson, _options);
