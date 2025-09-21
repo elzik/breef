@@ -1,4 +1,4 @@
-using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
