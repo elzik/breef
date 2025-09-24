@@ -2,7 +2,6 @@ using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure.ContentExtractors;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Shouldly;
 
 namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors;
@@ -43,8 +42,8 @@ public class ContentExtractorStrategyTests
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(true);
         _extractor2.CanHandle(Arg.Any<string>()).Returns(false);
-        _extractor2.ExtractAsync(Arg.Any<string>())
-            .ThrowsAsync(new InvalidOperationException("This extractor (2) should not be used."));
+        _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+            throw new InvalidOperationException("This extractor (2) should not be used."));
 
 
         // Act
@@ -63,8 +62,8 @@ public class ContentExtractorStrategyTests
     {
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(false);
-        _extractor1.ExtractAsync(Arg.Any<string>())
-            .ThrowsAsync(new InvalidOperationException("This extractor (1) should not be used."));
+        _extractor1.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+            throw new InvalidOperationException("This extractor (1) should not be used."));
         _extractor2.CanHandle(Arg.Any<string>()).Returns(true);
 
         // Act
@@ -83,11 +82,11 @@ public class ContentExtractorStrategyTests
     {
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(false);
-        _extractor1.ExtractAsync(Arg.Any<string>())
-            .ThrowsAsync(new InvalidOperationException("This extractor (1) should not be used."));
+        _extractor1.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+            throw new InvalidOperationException("This extractor (1) should not be used."));
         _extractor2.CanHandle(Arg.Any<string>()).Returns(false);
-        _extractor2.ExtractAsync(Arg.Any<string>())
-           .ThrowsAsync(new InvalidOperationException("This extractor (1) should not be used."));
+        _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+            throw new InvalidOperationException("This extractor (1) should not be used."));
 
         // Act
         var extract = await _contentExtractorStrategy.ExtractAsync("http://test");
@@ -105,11 +104,11 @@ public class ContentExtractorStrategyTests
     {
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(true);
-        _extractor1.ExtractAsync(Arg.Any<string>())
-           .ThrowsAsync(new InvalidOperationException("This extractor (1) should not be used."));
+        _extractor1.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+            throw new InvalidOperationException("This extractor (1) should not be used."));
         _extractor2.CanHandle(Arg.Any<string>()).Returns(true);
-        _extractor2.ExtractAsync(Arg.Any<string>())
-           .ThrowsAsync(new InvalidOperationException("This extractor (2) should not be used."));
+        _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+            throw new InvalidOperationException("This extractor (2) should not be used."));
 
         // Act
         var defaultOnlyContentExtractorStrategy = new ContentExtractorStrategy(_fakeLogger, [], _defaultExtractor);
