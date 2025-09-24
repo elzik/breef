@@ -13,10 +13,11 @@ public class RawRedditPostTransformer
         var postListing = rawRedditPost[0];
         var commentsListing = rawRedditPost[1];
 
-        if (postListing.Data.Children.Count == 0)
+        var postChildren = postListing.Data?.Children;
+        if (postChildren == null || postChildren.Count == 0)
             throw new ArgumentException("Post listing must contain at least one child", nameof(rawRedditPost));
 
-        var mainPostData = postListing.Data.Children[0].Data;
+        var mainPostData = postChildren[0].Data;
 
         var redditPost = new RedditPost
         {
@@ -30,7 +31,7 @@ public class RawRedditPostTransformer
                 Content = mainPostData.Content ?? string.Empty,
                 CreatedUtc = mainPostData.CreatedUtc
             },
-            Comments = TransformComments(commentsListing.Data.Children)
+            Comments = TransformComments(commentsListing)
         };
 
         return redditPost;
@@ -42,7 +43,7 @@ public class RawRedditPostTransformer
 
         foreach (var child in children)
         {
-            if (child.Kind == "t1") // Comment type
+            if (child.Kind == "t1")
             {
                 var comment = new RedditComment
                 {
@@ -63,15 +64,12 @@ public class RawRedditPostTransformer
 
     private List<RedditComment> TransformComments(object? replies)
     {
-        // Handle null replies
         if (replies == null)
             return [];
 
-        // Handle empty string replies (Reddit API quirk)
         if (replies is string stringReply && stringReply == "")
             return [];
 
-        // Handle JsonElement (when deserialized as object)
         if (replies is JsonElement jsonElement)
         {
             if (jsonElement.ValueKind == JsonValueKind.Null)
@@ -80,7 +78,6 @@ public class RawRedditPostTransformer
             if (jsonElement.ValueKind == JsonValueKind.String && jsonElement.GetString() == "")
                 return [];
 
-            // Try to deserialize as RawRedditListing
             try
             {
                 var deserializedListing = JsonSerializer.Deserialize<RawRedditListing>(jsonElement.GetRawText());
@@ -92,29 +89,23 @@ public class RawRedditPostTransformer
             }
         }
 
-        // Handle direct RawRedditListing object
         if (replies is RawRedditListing listing)
             return TransformComments(listing);
 
-        // Unknown type, return empty list
         return [];
     }
 
     private List<RedditComment> TransformComments(RawRedditListing? replies)
     {
-        // Handle null replies
         if (replies == null)
             return [];
 
-        // Handle missing Data property
         if (replies.Data == null)
             return [];
 
-        // Handle missing Children property
         if (replies.Data.Children == null)
             return [];
 
-        // Transform the children
         return TransformComments(replies.Data.Children);
     }
 }
