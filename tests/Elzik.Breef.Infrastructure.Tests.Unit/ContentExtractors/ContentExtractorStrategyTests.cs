@@ -2,6 +2,7 @@ using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure.ContentExtractors;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Shouldly;
 
 namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors;
@@ -42,7 +43,10 @@ public class ContentExtractorStrategyTests
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(true);
         _extractor2.CanHandle(Arg.Any<string>()).Returns(false);
-        
+        _extractor2.ExtractAsync(Arg.Any<string>())
+            .ThrowsAsync(new InvalidOperationException("This extractor (2) should not be used."));
+
+
         // Act
         var extract = await _contentExtractorStrategy.ExtractAsync("http://test");
 
@@ -59,6 +63,8 @@ public class ContentExtractorStrategyTests
     {
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(false);
+        _extractor1.ExtractAsync(Arg.Any<string>())
+            .ThrowsAsync(new InvalidOperationException("This extractor (1) should not be used."));
         _extractor2.CanHandle(Arg.Any<string>()).Returns(true);
 
         // Act
@@ -69,7 +75,7 @@ public class ContentExtractorStrategyTests
         _fakeLogger.Collector.Count.ShouldBe(1);
         _fakeLogger.Collector.LatestRecord.Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
         _fakeLogger.Collector.LatestRecord.Message.ShouldStartWith(
-            $"Extraction will be provided for by {_extractor1.GetType().Name}");
+            $"Extraction will be provided for by {_extractor2.GetType().Name}");
     }
 
     [Fact]
@@ -77,7 +83,11 @@ public class ContentExtractorStrategyTests
     {
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(false);
+        _extractor1.ExtractAsync(Arg.Any<string>())
+            .ThrowsAsync(new InvalidOperationException("This extractor (1) should not be used."));
         _extractor2.CanHandle(Arg.Any<string>()).Returns(false);
+        _extractor2.ExtractAsync(Arg.Any<string>())
+           .ThrowsAsync(new InvalidOperationException("This extractor (1) should not be used."));
 
         // Act
         var extract = await _contentExtractorStrategy.ExtractAsync("http://test");
@@ -87,7 +97,7 @@ public class ContentExtractorStrategyTests
         _fakeLogger.Collector.Count.ShouldBe(1);
         _fakeLogger.Collector.LatestRecord.Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
         _fakeLogger.Collector.LatestRecord.Message.ShouldStartWith(
-            $"Extraction will be provided for by {_extractor1.GetType().Name}");
+            $"Extraction will be provided for by {_defaultExtractor.GetType().Name}");
     }
 
     [Fact]
@@ -110,7 +120,7 @@ public class ContentExtractorStrategyTests
         _fakeLogger.Collector.Count.ShouldBe(1);
         _fakeLogger.Collector.LatestRecord.Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
         _fakeLogger.Collector.LatestRecord.Message.ShouldStartWith(
-            $"Extraction will be provided for by {_extractor1.GetType().Name}");
+            $"Extraction will be provided for by {_defaultExtractor.GetType().Name}");
     }
 
     [Fact]
