@@ -93,6 +93,14 @@ public class ContentExtractorStrategyTests
     [Fact]
     public async Task ExtractAsync_OnlyDefaultExtractorExists_UsesDefaultExtractor()
     {
+        // Arrange
+        _extractor1.CanHandle(Arg.Any<string>()).Returns(true);
+        _extractor1.ExtractAsync(Arg.Any<string>())
+           .ThrowsAsync(new InvalidOperationException("This extractor (1) should not be used."));
+        _extractor2.CanHandle(Arg.Any<string>()).Returns(true);
+        _extractor2.ExtractAsync(Arg.Any<string>())
+           .ThrowsAsync(new InvalidOperationException("This extractor (2) should not be used."));
+
         // Act
         var defaultOnlyContentExtractorStrategy = new ContentExtractorStrategy(_fakeLogger, [], _defaultExtractor);
         var extract = await defaultOnlyContentExtractorStrategy.ExtractAsync("http://test");
