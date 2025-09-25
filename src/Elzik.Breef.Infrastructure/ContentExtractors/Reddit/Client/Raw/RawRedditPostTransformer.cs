@@ -7,6 +7,7 @@ public class RawRedditPostTransformer
 {
     public RedditPost Transform(RawRedditPost rawRedditPost)
     {
+        ArgumentNullException.ThrowIfNull(rawRedditPost);
         if (rawRedditPost.Count < 2)
             throw new ArgumentException("Reddit post must have at least 2 listings (post and comments)", nameof(rawRedditPost));
 

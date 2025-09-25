@@ -908,4 +908,12 @@ public class RedditPostTransformerTests
         comment.Content.ShouldBe(string.Empty, "null Content becomes empty string");
         comment.Score.ShouldBe(50);
     }
+
+    [Fact]
+    public void Transform_NullRawRedditPost_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        Should.Throw<ArgumentNullException>(() => _transformer.Transform(null!))
+            .ParamName.ShouldBe("rawRedditPost");
+    }
 }
