@@ -8,3 +8,4 @@ updates:
     all-dependencies:
       patterns:
         - "*"
+  open-pull-requests-limit: 50
