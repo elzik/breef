@@ -86,7 +86,7 @@ public class ContentExtractorStrategyTests
             throw new InvalidOperationException("This extractor (1) should not be used."));
         _extractor2.CanHandle(Arg.Any<string>()).Returns(false);
         _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
-            throw new InvalidOperationException("This extractor (1) should not be used."));
+            throw new InvalidOperationException("This extractor (2) should not be used."));
 
         // Act
         var extract = await _contentExtractorStrategy.ExtractAsync("http://test");
