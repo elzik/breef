@@ -9,7 +9,7 @@ public class SubredditClientTests
     private static bool IsRunningInGitHubWorkflow => Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
 
     [SkippableFact]
-    public async Task GetNewInSubReddit_ValidSUbReddit_ReturnsNewInSubreddit()
+    public async Task GetNewInSubReddit_ValidSubreddit_ReturnsNewInSubreddit()
     {
         // Arrange
         Skip.If(IsRunningInGitHubWorkflow, "Skipped because requests to reddit.com from GitHub workflows are " +
