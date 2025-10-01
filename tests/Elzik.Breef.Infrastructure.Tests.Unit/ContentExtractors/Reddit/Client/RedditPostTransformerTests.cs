@@ -9,7 +9,7 @@ public class RedditPostTransformerTests
     private readonly RawRedditPostTransformer _transformer = new();
 
     [Fact]
-    public void Transform_ValidRedditPost_ReturnsExoectedStructure()
+    public void Transform_ValidRedditPost_ReturnsExpectedStructure()
     {
         // Arrange
         var redditPost = new RawRedditPost
