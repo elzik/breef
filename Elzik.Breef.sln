@@ -26,6 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{7F
 	ProjectSection(SolutionItems) = preProject
 		tests\TestData\BbcNewsPage-ExpectedContent.txt = tests\TestData\BbcNewsPage-ExpectedContent.txt
 		tests\TestData\BbcNewsPage.html = tests\TestData\BbcNewsPage.html
+		tests\TestData\SampleRedditPost-1kqiwzc.json = tests\TestData\SampleRedditPost-1kqiwzc.json
 		tests\TestData\StaticTestPage.html = tests\TestData\StaticTestPage.html
 		tests\TestData\TestHtmlPage-ExpectedContent.txt = tests\TestData\TestHtmlPage-ExpectedContent.txt
 		tests\TestData\TestHtmlPage.html = tests\TestData\TestHtmlPage.html

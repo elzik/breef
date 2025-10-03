@@ -26,12 +26,6 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.Wallabag
                 "test-title", 
                 "test-content", 
                 "https://wallabag.elzik.co.uk/img/logo-wallabag.svg");
-            var wallabagEntryCreateRequest = new WallabagEntryCreateRequest
-            {
-                Content = "test-content",
-                Url = "https://test.com",
-                Tags = "breef"
-            };
             var wallabagEntryID = 123;
             var wallabagEntry = new WallabagEntry
             {
