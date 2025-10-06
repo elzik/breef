@@ -1,9 +1,9 @@
-using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using System.Text.Json;
+using System.Web;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 
-public class RawRedditPostTransformer
+public class RawRedditPostTransformer : IRawRedditPostTransformer
 {
     public RedditPost Transform(RawRedditPost rawRedditPost)
     {
@@ -19,6 +19,7 @@ public class RawRedditPostTransformer
             throw new ArgumentException("Post listing must contain at least one child", nameof(rawRedditPost));
 
         var mainPostData = postChildren[0].Data;
+        var bestImage = ExtractBestImage(mainPostData);
 
         var redditPost = new RedditPost
         {
@@ -30,12 +31,77 @@ public class RawRedditPostTransformer
                 Subreddit = mainPostData.Subreddit ?? string.Empty,
                 Score = mainPostData.Score,
                 Content = mainPostData.Content ?? string.Empty,
-                CreatedUtc = mainPostData.CreatedUtc
+                CreatedUtc = mainPostData.CreatedUtc,
+                ImageUrl = bestImage
             },
             Comments = TransformComments(commentsListing)
         };
 
         return redditPost;
+    }
+
+    private string? ExtractBestImage(RawRedditCommentData postData)
+    {
+        // 1. Gallery images (highest priority) - pick the first/largest
+        if (postData.IsGallery && postData.GalleryData?.Items != null && postData.MediaMetadata != null)
+        {
+            var bestGalleryImage = postData.GalleryData.Items
+                .Where(item => item.MediaId != null && postData.MediaMetadata.ContainsKey(item.MediaId))
+                .Select(item => postData.MediaMetadata[item.MediaId!])
+                .Where(metadata => metadata.Status == "valid" && metadata.Source?.Url != null)
+                .OrderByDescending(metadata => metadata.Source!.Width * metadata.Source.Height)
+                .FirstOrDefault();
+
+            if (bestGalleryImage?.Source?.Url != null)
+            {
+                return HttpUtility.HtmlDecode(bestGalleryImage.Source.Url);
+            }
+        }
+
+        // 2. Preview images (high priority) - pick the largest
+        if (postData.Preview?.Images != null)
+        {
+            var bestPreviewImage = postData.Preview.Images
+                .Where(img => img.Source?.Url != null)
+                .OrderByDescending(img => img.Source!.Width * img.Source.Height)
+                .FirstOrDefault();
+
+            if (bestPreviewImage?.Source?.Url != null)
+            {
+                return HttpUtility.HtmlDecode(bestPreviewImage.Source.Url);
+            }
+        }
+
+        // 3. Direct image URL
+        var directUrl = postData.UrlOverriddenByDest ?? postData.Url;
+        if (IsImageUrl(directUrl))
+        {
+            return directUrl;
+        }
+
+        // 4. Thumbnail (last resort)
+        if (!string.IsNullOrEmpty(postData.Thumbnail) && 
+            postData.Thumbnail != "self" && 
+            postData.Thumbnail != "default" && 
+            postData.Thumbnail != "nsfw" &&
+            IsImageUrl(postData.Thumbnail))
+        {
+            return postData.Thumbnail;
+        }
+
+        return null;
+    }
+
+    private static bool IsImageUrl(string? url)
+    {
+        if (string.IsNullOrEmpty(url))
+            return false;
+
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return false;
+
+        var extension = Path.GetExtension(uri.AbsolutePath).ToLowerInvariant();
+        return extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp" or ".bmp" or ".svg";
     }
 
     private List<RedditComment> TransformComments(List<RawRedditChild> children)

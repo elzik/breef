@@ -22,38 +22,35 @@ public class RedditPostJsonExample
                 Content = "I am just about to enter the programming world, and want to become a software engineer...",
                 CreatedUtc = new DateTime(2025, 5, 19, 18, 18, 5, DateTimeKind.Utc)
             },
-            Comments = new List<RedditComment>
-            {
-                new RedditComment
-                {
+            Comments =
+            [
+                new() {
                     Id = "mt7aaf6",
                     Author = "CodeRadDesign",
                     Score = 125,
                     Content = "not really.\n\nas someone who's been freelance on and off for 30 years...",
                     CreatedUtc = new DateTime(2025, 5, 19, 19, 0, 0, DateTimeKind.Utc),
-                    Replies = new List<RedditComment>()
+                    Replies = []
                 },
-                new RedditComment
-                {
+                new() {
                     Id = "mt606l6",
                     Author = "[deleted]",
                     Score = 2,
                     Content = "[deleted]",
                     CreatedUtc = new DateTime(2025, 5, 19, 20, 0, 0, DateTimeKind.Utc),
-                    Replies = new List<RedditComment>
-                    {
-                        new RedditComment
-                        {
+                    Replies =
+                    [
+                        new() {
                             Id = "mt60jnv",
                             Author = "melvman1",
                             Score = 1,
                             Content = "I am willing to work at the company...",
                             CreatedUtc = new DateTime(2025, 5, 19, 20, 30, 0, DateTimeKind.Utc),
-                            Replies = new List<RedditComment>()
+                            Replies = []
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         // Act

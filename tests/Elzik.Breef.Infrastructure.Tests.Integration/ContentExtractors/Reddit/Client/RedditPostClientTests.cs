@@ -26,19 +26,14 @@ public class RedditPostClientTests
 
         // Assert
         redditPost.ShouldNotBeNull();
-
-        // Verify post structure
         redditPost.Post.ShouldNotBeNull();
         redditPost.Post.Id.ShouldBe("1kqiwzc");
         redditPost.Post.Author.ShouldBeOneOf("melvman1", "[deleted]");
         redditPost.Post.Title.ShouldNotBeNullOrWhiteSpace();
         redditPost.Post.Content.ShouldNotBeNullOrWhiteSpace();
-
-        // Verify comments structure
+        redditPost.Post.ImageUrl.ShouldBeNull();
         redditPost.Comments.ShouldNotBeNull();
         redditPost.Comments.Count.ShouldBe(5);
-
-        // Find and verify specific comments by ID
         var firstComment = redditPost.Comments.Single(c => c.Id == "mt7aaf6");
         firstComment.Author.ShouldBeOneOf("CodeRadDesign", "[deleted]");
         firstComment.Content.ShouldBeOneOf(
@@ -64,8 +59,6 @@ public class RedditPostClientTests
 
         var thirdComment = redditPost.Comments.Single(c => c.Id == "mt606l6");
         thirdComment.Author.ShouldBeOneOf("[deleted]");
-
-        // Verify nested replies
         thirdComment.Replies.ShouldNotBeNull();
         thirdComment.Replies.Count.ShouldBe(1);
         var nestedReply = thirdComment.Replies.Single(r => r.Id == "mt60jnv");

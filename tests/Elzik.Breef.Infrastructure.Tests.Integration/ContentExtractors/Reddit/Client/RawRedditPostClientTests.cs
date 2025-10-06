@@ -109,4 +109,41 @@ public class RawRedditPostClientTests
         // Testing nested replies structure is now handled in the transformer layer
         thirdReply.Data.Replies.ShouldNotBeNull("just verify replies exist in some form");
     }
+
+    [SkippableFact]
+    public async Task GetPost_PostWithGalleryDataNumericIds_HandlesDeserialization()
+    {
+        // Arrange
+        Skip.If(IsRunningInGitHubWorkflow, "Skipped because requests to reddit.com from GitHub workflows are " +
+            "always blocked meaning this test case always fails. This must be run locally instead.");
+        var client = RestService.For<IRawRedditPostClient>("https://www.reddit.com/");
+        var postId = "1nzkay2"; // https://www.reddit.com/r/aircrashinvestigation/comments/1nzkay2/why_i_think_those_two_crashes_will_never_be_in/
+
+        // Act
+        var redditPost = await client.GetPost(postId);
+
+        // Assert
+        redditPost.ShouldNotBeNull();
+        redditPost.Count.ShouldBe(2, "a reddit post is made up of two listings: one for the main post and one for the replies");
+        redditPost[0].Data.ShouldNotBeNull();
+        redditPost[0].Data.Children.ShouldNotBeNull();
+        redditPost[0].Data.Children.Count.ShouldBe(1, "there is only a single main post");
+        redditPost[0].Data.Children[0].Kind.ShouldBe("t3", "t3 represents the type of main post");
+        redditPost[0].Data.Children[0].Data.ShouldNotBeNull();
+
+        var mainPost = redditPost[0].Data.Children[0].Data;
+        mainPost.Id.ShouldBe("1nzkay2");
+        mainPost.Title.ShouldNotBeNullOrEmpty();
+        mainPost.Author.ShouldNotBeNullOrEmpty();
+        mainPost.Subreddit.ShouldBe("aircrashinvestigation");
+        
+        if (mainPost.IsGallery && mainPost.GalleryData?.Items != null)
+        {
+            foreach (var item in mainPost.GalleryData.Items)
+            {
+                item.Id.ShouldNotBeNull("Gallery item ID should be converted from number to string");
+                item.MediaId.ShouldNotBeNull("Media ID should be present");
+            }
+        }
+    }
 }

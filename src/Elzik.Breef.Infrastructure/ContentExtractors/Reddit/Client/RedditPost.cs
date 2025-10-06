@@ -15,6 +15,7 @@ public class RedditPostContent
     public int Score { get; set; }
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedUtc { get; set; }
+    public string? ImageUrl { get; set; }
 }
 
 public class RedditComment

@@ -5,9 +5,9 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 public class RedditPostClient : IRedditPostClient
 {
     private readonly IRawRedditPostClient _redditPostClient;
-    private readonly RawRedditPostTransformer _transformer;
+    private readonly IRawRedditPostTransformer _transformer;
 
-    public RedditPostClient(IRawRedditPostClient redditPostClient, RawRedditPostTransformer transformer)
+    public RedditPostClient(IRawRedditPostClient redditPostClient, IRawRedditPostTransformer transformer)
     {
         _redditPostClient = redditPostClient;
         _transformer = transformer;

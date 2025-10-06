@@ -6,15 +6,12 @@ using Elzik.Breef.Infrastructure;
 using Elzik.Breef.Infrastructure.AI;
 using Elzik.Breef.Infrastructure.ContentExtractors;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 using Elzik.Breef.Infrastructure.Wallabag;
-using Microsoft.Extensions.Options;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
 using Refit;
 using Serilog;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Elzik.Breef.Api;
 
@@ -69,14 +66,25 @@ public class Program
             .ValidateOnStart();
         builder.Services.AddTransient<IHttpDownloader, HttpDownloader>();
 
+        builder.Services.AddRefitClient<IRawRedditPostClient>()
+            .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://www.reddit.com"));
+
+        builder.Services.AddTransient<IRawRedditPostTransformer, RawRedditPostTransformer>();
+        builder.Services.AddTransient<IRedditPostClient, RedditPostClient>();
+
         builder.Services.AddTransient<HtmlContentExtractor>();
         builder.Services.AddTransient<SubRedditContentExtractor>();
+        builder.Services.AddTransient<RedditPostContentExtractor>();
+        builder.Services.AddTransient<ISubredditImageExtractor, SubRedditContentExtractor>();
         builder.Services.AddTransient<IContentExtractor>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<ContentExtractorStrategy>>();
             var defaultContentExtractor = provider.GetRequiredService<HtmlContentExtractor>();
             var subredditExtractor = provider.GetRequiredService<SubRedditContentExtractor>();
-            return new ContentExtractorStrategy(logger, [subredditExtractor], defaultContentExtractor);
+            var redditPostExtractor = provider.GetRequiredService<RedditPostContentExtractor>();
+            return new ContentExtractorStrategy(logger, 
+                [subredditExtractor, redditPostExtractor], 
+                defaultContentExtractor);
         });
 
         builder.Services.AddOptions<AiServiceOptions>()

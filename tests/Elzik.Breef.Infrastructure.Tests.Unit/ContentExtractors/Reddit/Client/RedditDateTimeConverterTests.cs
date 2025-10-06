@@ -125,8 +125,8 @@ public class RedditDateTimeConverterTests
 
         // Extract the timestamp and verify it's a valid number
         var startIndex = json.IndexOf("\"created_utc\":") + "\"created_utc\":".Length;
-        var endIndex = json.IndexOf("}", startIndex);
-        var timestampStr = json.Substring(startIndex, endIndex - startIndex);
+        var endIndex = json.IndexOf('}', startIndex);
+        var timestampStr = json[startIndex..endIndex];
 
         long.TryParse(timestampStr, out var timestamp).ShouldBeTrue();
         timestamp.ShouldBeGreaterThan(0);

@@ -9,14 +9,14 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit.Client;
 public class RedditPostClientTests
 {
     private readonly IRawRedditPostClient _mockRawClient;
-    private readonly RawRedditPostTransformer _transformer;
+    private readonly IRawRedditPostTransformer _mockTransformer;
     private readonly RedditPostClient _client;
 
     public RedditPostClientTests()
     {
         _mockRawClient = Substitute.For<IRawRedditPostClient>();
-        _transformer = new RawRedditPostTransformer();
-        _client = new RedditPostClient(_mockRawClient, _transformer);
+        _mockTransformer = Substitute.For<IRawRedditPostTransformer>();
+        _client = new RedditPostClient(_mockRawClient, _mockTransformer);
     }
 
     [Fact]
@@ -25,8 +25,10 @@ public class RedditPostClientTests
         // Arrange
         var postId = "1kqiwzc";
         var rawRedditPost = CreateValidRawRedditPost();
+        var expectedResult = CreateExpectedTransformedResult();
 
         _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
+        _mockTransformer.Transform(rawRedditPost).Returns(expectedResult);
 
         // Act
         var result = await _client.GetPost(postId);
@@ -34,7 +36,6 @@ public class RedditPostClientTests
         // Assert
         result.ShouldNotBeNull();
 
-        // Verify post structure
         result.Post.ShouldNotBeNull();
         result.Post.Id.ShouldBe("test123");
         result.Post.Title.ShouldBe("Test Post Title");
@@ -44,7 +45,7 @@ public class RedditPostClientTests
         result.Post.Content.ShouldBe("This is test content");
         result.Post.CreatedUtc.ShouldBe(new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc));
 
-        // Verify comments structure
+
         result.Comments.ShouldNotBeNull();
         result.Comments.Count.ShouldBe(1);
 
@@ -55,7 +56,7 @@ public class RedditPostClientTests
         comment.Score.ShouldBe(50);
         comment.CreatedUtc.ShouldBe(new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc));
 
-        // Verify nested replies
+
         comment.Replies.Count.ShouldBe(1);
         var reply = comment.Replies[0];
         reply.Id.ShouldBe("reply123");
@@ -64,8 +65,9 @@ public class RedditPostClientTests
         reply.Score.ShouldBe(25);
         reply.Replies.Count.ShouldBe(0);
 
-        // Verify raw client was called correctly
+
         _ = _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockTransformer.Received(1).Transform(rawRedditPost);
     }
 
     [Fact]
@@ -74,8 +76,10 @@ public class RedditPostClientTests
         // Arrange
         var postId = "test456";
         var rawRedditPost = CreateRawRedditPostWithEmptyStringReplies();
+        var expectedResult = CreateExpectedResultWithEmptyReplies();
 
         _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
+        _mockTransformer.Transform(rawRedditPost).Returns(expectedResult);
 
         // Act
         var result = await _client.GetPost(postId);
@@ -83,6 +87,9 @@ public class RedditPostClientTests
         // Assert
         result.Comments.Count.ShouldBe(1);
         result.Comments[0].Replies.Count.ShouldBe(0, "empty string replies should result in empty list");
+
+        _ = _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockTransformer.Received(1).Transform(rawRedditPost);
     }
 
     [Fact]
@@ -91,8 +98,10 @@ public class RedditPostClientTests
         // Arrange
         var postId = "test789";
         var rawRedditPost = CreateRawRedditPostWithNullReplies();
+        var expectedResult = CreateExpectedResultWithEmptyReplies();
 
         _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
+        _mockTransformer.Transform(rawRedditPost).Returns(expectedResult);
 
         // Act
         var result = await _client.GetPost(postId);
@@ -100,6 +109,9 @@ public class RedditPostClientTests
         // Assert
         result.Comments.Count.ShouldBe(1);
         result.Comments[0].Replies.Count.ShouldBe(0, "null replies should result in empty list");
+
+        _ = _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockTransformer.Received(1).Transform(rawRedditPost);
     }
 
     [Fact]
@@ -108,8 +120,10 @@ public class RedditPostClientTests
         // Arrange
         var postId = "testjson";
         var rawRedditPost = CreateRawRedditPostWithJsonElementReplies();
+        var expectedResult = CreateExpectedResultWithEmptyReplies();
 
         _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
+        _mockTransformer.Transform(rawRedditPost).Returns(expectedResult);
 
         // Act
         var result = await _client.GetPost(postId);
@@ -117,6 +131,9 @@ public class RedditPostClientTests
         // Assert
         result.Comments.Count.ShouldBe(1);
         result.Comments[0].Replies.Count.ShouldBe(0, "JsonElement empty string should result in empty list");
+
+        _ = _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockTransformer.Received(1).Transform(rawRedditPost);
     }
 
     [Fact]
@@ -125,8 +142,10 @@ public class RedditPostClientTests
         // Arrange
         var postId = "testmixed";
         var rawRedditPost = CreateRawRedditPostWithMixedCommentTypes();
+        var expectedResult = CreateExpectedResultWithSingleComment();
 
         _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
+        _mockTransformer.Transform(rawRedditPost).Returns(expectedResult);
 
         // Act
         var result = await _client.GetPost(postId);
@@ -135,6 +154,9 @@ public class RedditPostClientTests
         result.Comments.Count.ShouldBe(1, "only t1 (comment) types should be processed");
         result.Comments[0].Id.ShouldBe("comment123");
         result.Comments[0].Author.ShouldBe("commenter");
+
+        _ = _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockTransformer.Received(1).Transform(rawRedditPost);
     }
 
     [Fact]
@@ -143,8 +165,10 @@ public class RedditPostClientTests
         // Arrange
         var postId = "testnulls";
         var rawRedditPost = CreateRawRedditPostWithNullFields();
+        var expectedResult = CreateExpectedResultWithNullFields();
 
         _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
+        _mockTransformer.Transform(rawRedditPost).Returns(expectedResult);
 
         // Act
         var result = await _client.GetPost(postId);
@@ -159,6 +183,9 @@ public class RedditPostClientTests
         result.Comments[0].Id.ShouldBe(string.Empty, "null comment ID should become empty string");
         result.Comments[0].Author.ShouldBe(string.Empty, "null comment Author should become empty string");
         result.Comments[0].Content.ShouldBe(string.Empty, "null comment Content should become empty string");
+
+        _ = _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockTransformer.Received(1).Transform(rawRedditPost);
     }
 
     [Fact]
@@ -168,10 +195,14 @@ public class RedditPostClientTests
         var postId = "notitle";
         var rawRedditPost = CreateRawRedditPostWithoutTitle();
 
-        _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
+        _mockRawClient.GetPost(postId).Returns(rawRedditPost);
+        _mockTransformer.Transform(rawRedditPost).Returns<RedditPost>(_ => throw new InvalidOperationException("Reddit post must have a title"));
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(() => _client.GetPost(postId));
+
+        _ = _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockTransformer.Received(1).Transform(rawRedditPost);
     }
 
     [Fact]
@@ -182,9 +213,13 @@ public class RedditPostClientTests
         var emptyRawPost = new RawRedditPost(); // Empty post
 
         _mockRawClient.GetPost(postId).Returns(emptyRawPost);
+        _mockTransformer.Transform(emptyRawPost).Returns<RedditPost>(_ => throw new ArgumentException("Reddit post must have at least 2 listings (post and comments)", nameof(emptyRawPost)));
 
         // Act & Assert
         await Should.ThrowAsync<ArgumentException>(() => _client.GetPost(postId));
+
+        _ = _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockTransformer.Received(1).Transform(emptyRawPost);
     }
 
     [Fact]
@@ -195,24 +230,155 @@ public class RedditPostClientTests
         var rawRedditPost = CreateRawRedditPostWithNoChildren();
 
         _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
+        _mockTransformer.Transform(rawRedditPost).Returns<RedditPost>(_ => throw new ArgumentException("Post listing must contain at least one child", nameof(rawRedditPost)));
 
         // Act & Assert
         await Should.ThrowAsync<ArgumentException>(() => _client.GetPost(postId));
+
+        _ = _mockRawClient.Received(1).GetPost(postId);
+        _ = _mockTransformer.Received(1).Transform(rawRedditPost);
     }
 
     #region Test Data Factory Methods
 
+    private static RedditPost CreateExpectedTransformedResult()
+    {
+        return new RedditPost
+        {
+            Post = new RedditPostContent
+            {
+                Id = "test123",
+                Title = "Test Post Title",
+                Author = "testuser",
+                Subreddit = "testsubreddit",
+                Score = 100,
+                Content = "This is test content",
+                CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
+            },
+            Comments = new List<RedditComment>
+            {
+                new RedditComment
+                {
+                    Id = "comment123",
+                    Author = "commenter",
+                    Content = "This is a comment",
+                    Score = 50,
+                    CreatedUtc = new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc),
+                    Replies = new List<RedditComment>
+                    {
+                        new RedditComment
+                        {
+                            Id = "reply123",
+                            Author = "replier",
+                            Content = "This is a reply",
+                            Score = 25,
+                            CreatedUtc = new DateTime(2025, 1, 1, 13, 0, 0, DateTimeKind.Utc),
+                            Replies = new List<RedditComment>()
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    private static RedditPost CreateExpectedResultWithEmptyReplies()
+    {
+        return new RedditPost
+        {
+            Post = new RedditPostContent
+            {
+                Id = "test456",
+                Title = "Test Post Title",
+                Author = "testuser",
+                Subreddit = "testsubreddit",
+                Score = 0,
+                Content = string.Empty,
+                CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
+            },
+            Comments = new List<RedditComment>
+            {
+                new RedditComment
+                {
+                    Id = "comment456",
+                    Author = "commenter",
+                    Content = "This is a comment",
+                    Score = 0,
+                    CreatedUtc = new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc),
+                    Replies = new List<RedditComment>()
+                }
+            }
+        };
+    }
+
+    private static RedditPost CreateExpectedResultWithSingleComment()
+    {
+        return new RedditPost
+        {
+            Post = new RedditPostContent
+            {
+                Id = "testmixed",
+                Title = "Test Post Title",
+                Author = "testuser",
+                Subreddit = "testsubreddit",
+                Score = 0,
+                Content = string.Empty,
+                CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
+            },
+            Comments = new List<RedditComment>
+            {
+                new RedditComment
+                {
+                    Id = "comment123",
+                    Author = "commenter",
+                    Content = "This is a comment",
+                    Score = 0,
+                    CreatedUtc = new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc),
+                    Replies = new List<RedditComment>()
+                }
+            }
+        };
+    }
+
+    private static RedditPost CreateExpectedResultWithNullFields()
+    {
+        return new RedditPost
+        {
+            Post = new RedditPostContent
+            {
+                Id = string.Empty,
+                Title = "Test Post Title",
+                Author = string.Empty,
+                Subreddit = string.Empty,
+                Score = 0,
+                Content = string.Empty,
+                CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
+            },
+            Comments = new List<RedditComment>
+            {
+                new RedditComment
+                {
+                    Id = string.Empty,
+                    Author = string.Empty,
+                    Content = string.Empty,
+                    Score = 0,
+                    CreatedUtc = new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc),
+                    Replies = new List<RedditComment>()
+                }
+            }
+        };
+    }
+
     private static RawRedditPost CreateValidRawRedditPost()
     {
-        return new RawRedditPost
-        {
+        return
+        [
             new RawRedditListing
             {
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -227,7 +393,7 @@ public class RedditPostClientTests
                                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing
@@ -235,8 +401,8 @@ public class RedditPostClientTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t1",
@@ -251,8 +417,8 @@ public class RedditPostClientTests
                                 {
                                     Data = new RawRedditListingData
                                     {
-                                        Children = new List<RawRedditChild>
-                                        {
+                                        Children =
+                                        [
                                             new RawRedditChild
                                             {
                                                 Kind = "t1",
@@ -272,28 +438,28 @@ public class RedditPostClientTests
                                                     }
                                                 }
                                             }
-                                        }
+                                        ]
                                     }
                                 }
                             }
                         }
-                    }
+                    ]
                 }
             }
-        };
+        ];
     }
 
     private static RawRedditPost CreateRawRedditPostWithEmptyStringReplies()
     {
-        return new RawRedditPost
-        {
+        return
+        [
             new RawRedditListing
             {
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -305,7 +471,7 @@ public class RedditPostClientTests
                                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing
@@ -313,8 +479,8 @@ public class RedditPostClientTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t1",
@@ -327,23 +493,23 @@ public class RedditPostClientTests
                                 Replies = "" // Empty string - Reddit API quirk
                             }
                         }
-                    }
+                    ]
                 }
             }
-        };
+        ];
     }
 
     private static RawRedditPost CreateRawRedditPostWithNullReplies()
     {
-        return new RawRedditPost
-        {
+        return
+        [
             new RawRedditListing
             {
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -355,7 +521,7 @@ public class RedditPostClientTests
                                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing
@@ -363,8 +529,8 @@ public class RedditPostClientTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t1",
@@ -377,25 +543,25 @@ public class RedditPostClientTests
                                 Replies = null // Null replies
                             }
                         }
-                    }
+                    ]
                 }
             }
-        };
+        ];
     }
 
     private static RawRedditPost CreateRawRedditPostWithJsonElementReplies()
     {
         var emptyStringJson = JsonSerializer.SerializeToElement("");
 
-        return new RawRedditPost
-        {
+        return
+        [
             new RawRedditListing
             {
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -407,7 +573,7 @@ public class RedditPostClientTests
                                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing
@@ -415,8 +581,8 @@ public class RedditPostClientTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t1",
@@ -429,23 +595,23 @@ public class RedditPostClientTests
                                 Replies = emptyStringJson // JsonElement with empty string
                             }
                         }
-                    }
+                    ]
                 }
             }
-        };
+        ];
     }
 
     private static RawRedditPost CreateRawRedditPostWithMixedCommentTypes()
     {
-        return new RawRedditPost
-        {
+        return
+        [
             new RawRedditListing
             {
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -457,7 +623,7 @@ public class RedditPostClientTests
                                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing
@@ -465,8 +631,8 @@ public class RedditPostClientTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t1", // Comment - should be processed
@@ -503,23 +669,23 @@ public class RedditPostClientTests
                                 Replies = null
                             }
                         }
-                    }
+                    ]
                 }
             }
-        };
+        ];
     }
 
     private static RawRedditPost CreateRawRedditPostWithNullFields()
     {
-        return new RawRedditPost
-        {
+        return
+        [
             new RawRedditListing
             {
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -533,7 +699,7 @@ public class RedditPostClientTests
                                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing
@@ -541,8 +707,8 @@ public class RedditPostClientTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t1",
@@ -555,23 +721,23 @@ public class RedditPostClientTests
                                 Replies = null
                             }
                         }
-                    }
+                    ]
                 }
             }
-        };
+        ];
     }
 
     private static RawRedditPost CreateRawRedditPostWithoutTitle()
     {
-        return new RawRedditPost
-        {
+        return
+        [
             new RawRedditListing
             {
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -583,7 +749,7 @@ public class RedditPostClientTests
                                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing
@@ -594,13 +760,13 @@ public class RedditPostClientTests
                     Children = []
                 }
             }
-        };
+        ];
     }
 
     private static RawRedditPost CreateRawRedditPostWithNoChildren()
     {
-        return new RawRedditPost
-        {
+        return
+        [
             new RawRedditListing
             {
                 Kind = "Listing",
@@ -617,7 +783,7 @@ public class RedditPostClientTests
                     Children = []
                 }
             }
-        };
+        ];
     }
 
     #endregion
