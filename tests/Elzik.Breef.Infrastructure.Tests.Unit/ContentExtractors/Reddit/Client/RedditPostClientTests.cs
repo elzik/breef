@@ -210,10 +210,12 @@ public class RedditPostClientTests
     {
         // Arrange
         var postId = "empty";
-        var emptyRawPost = new RawRedditPost(); // Empty post
+        var emptyRawPost = new RawRedditPost();
+        var emptyRawPostParamName = nameof(emptyRawPost);
 
         _mockRawClient.GetPost(postId).Returns(emptyRawPost);
-        _mockTransformer.Transform(emptyRawPost).Returns<RedditPost>(_ => throw new ArgumentException("Reddit post must have at least 2 listings (post and comments)", nameof(emptyRawPost)));
+        _mockTransformer.Transform(emptyRawPost).Returns<RedditPost>(_ => 
+            throw new ArgumentException("Reddit post must have at least 2 listings (post and comments)", emptyRawPostParamName));
 
         // Act & Assert
         await Should.ThrowAsync<ArgumentException>(() => _client.GetPost(postId));
@@ -228,9 +230,11 @@ public class RedditPostClientTests
         // Arrange
         var postId = "nochildren";
         var rawRedditPost = CreateRawRedditPostWithNoChildren();
+        var rawRedditPostParamName = nameof(rawRedditPost);
 
         _mockRawClient.GetPost(postId).Returns(Task.FromResult(rawRedditPost));
-        _mockTransformer.Transform(rawRedditPost).Returns<RedditPost>(_ => throw new ArgumentException("Post listing must contain at least one child", nameof(rawRedditPost)));
+        _mockTransformer.Transform(rawRedditPost).Returns<RedditPost>(_ => 
+            throw new ArgumentException("Post listing must contain at least one child", rawRedditPostParamName));
 
         // Act & Assert
         await Should.ThrowAsync<ArgumentException>(() => _client.GetPost(postId));
@@ -255,29 +259,27 @@ public class RedditPostClientTests
                 Content = "This is test content",
                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
             },
-            Comments = new List<RedditComment>
-            {
-                new RedditComment
-                {
+            Comments =
+            [
+                new() {
                     Id = "comment123",
                     Author = "commenter",
                     Content = "This is a comment",
                     Score = 50,
                     CreatedUtc = new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc),
-                    Replies = new List<RedditComment>
-                    {
-                        new RedditComment
-                        {
+                    Replies =
+                    [
+                        new() {
                             Id = "reply123",
                             Author = "replier",
                             Content = "This is a reply",
                             Score = 25,
                             CreatedUtc = new DateTime(2025, 1, 1, 13, 0, 0, DateTimeKind.Utc),
-                            Replies = new List<RedditComment>()
+                            Replies = []
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
     }
 
@@ -295,18 +297,17 @@ public class RedditPostClientTests
                 Content = string.Empty,
                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
             },
-            Comments = new List<RedditComment>
-            {
-                new RedditComment
-                {
+            Comments =
+            [
+                new() {
                     Id = "comment456",
                     Author = "commenter",
                     Content = "This is a comment",
                     Score = 0,
                     CreatedUtc = new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc),
-                    Replies = new List<RedditComment>()
+                    Replies = []
                 }
-            }
+            ]
         };
     }
 
@@ -324,18 +325,17 @@ public class RedditPostClientTests
                 Content = string.Empty,
                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
             },
-            Comments = new List<RedditComment>
-            {
-                new RedditComment
-                {
+            Comments =
+            [
+                new() {
                     Id = "comment123",
                     Author = "commenter",
                     Content = "This is a comment",
                     Score = 0,
                     CreatedUtc = new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc),
-                    Replies = new List<RedditComment>()
+                    Replies = []
                 }
-            }
+            ]
         };
     }
 
@@ -353,18 +353,17 @@ public class RedditPostClientTests
                 Content = string.Empty,
                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
             },
-            Comments = new List<RedditComment>
-            {
-                new RedditComment
-                {
+            Comments =
+            [
+                new() {
                     Id = string.Empty,
                     Author = string.Empty,
                     Content = string.Empty,
                     Score = 0,
                     CreatedUtc = new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc),
-                    Replies = new List<RedditComment>()
+                    Replies = []
                 }
-            }
+            ]
         };
     }
 
