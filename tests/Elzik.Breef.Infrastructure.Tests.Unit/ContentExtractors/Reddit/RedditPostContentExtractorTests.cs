@@ -1,5 +1,6 @@
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Shouldly;
 using System.Text.Json;
@@ -10,13 +11,17 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
     {
         private readonly IRedditPostClient _mockRedditPostClient;
         private readonly ISubredditImageExtractor _mockSubredditImageExtractor;
+        private readonly IOptions<RedditOptions> _mockRedditOptions;
         private readonly RedditPostContentExtractor _extractor;
 
         public RedditPostContentExtractorTests()
         {
             _mockRedditPostClient = Substitute.For<IRedditPostClient>();
             _mockSubredditImageExtractor = Substitute.For<ISubredditImageExtractor>();
-            _extractor = new RedditPostContentExtractor(_mockRedditPostClient, _mockSubredditImageExtractor);
+            _mockRedditOptions = Substitute.For<IOptions<RedditOptions>>();
+            _mockRedditOptions.Value.Returns(new RedditOptions());
+            
+            _extractor = new RedditPostContentExtractor(_mockRedditPostClient, _mockSubredditImageExtractor, _mockRedditOptions);
         }
 
         [Theory]
@@ -55,6 +60,48 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         {
             // Act
             var canHandle = _extractor.CanHandle(url);
+
+            // Assert
+            canHandle.ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData("https://custom.reddit.com/r/programming/comments/abc123/title")]
+        [InlineData("https://alt.reddit.instance.com/r/programming/comments/abc123/title")]
+        public void CanHandle_CustomRedditInstance_ReturnsTrue(string url)
+        {
+            // Arrange
+            var customOptions = new RedditOptions
+            {
+                DefaultBaseAddress = "https://www.reddit.com",
+                AdditionalBaseAddresses = ["https://reddit.com", "https://custom.reddit.com", "https://alt.reddit.instance.com"]
+            };
+            _mockRedditOptions.Value.Returns(customOptions);
+            var extractor = new RedditPostContentExtractor(_mockRedditPostClient, _mockSubredditImageExtractor, _mockRedditOptions);
+
+            // Act
+            var canHandle = extractor.CanHandle(url);
+
+            // Assert
+            canHandle.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("https://unknown.reddit.com/r/programming/comments/abc123/title")]
+        [InlineData("https://www.unknown.reddit.com/r/programming/comments/abc123/title")]
+        public void CanHandle_UnknownRedditInstance_ReturnsFalse(string url)
+        {
+            // Arrange
+            var customOptions = new RedditOptions
+            {
+                DefaultBaseAddress = "https://www.reddit.com",
+                AdditionalBaseAddresses = ["https://reddit.com", "https://custom.reddit.com"]
+            };
+            _mockRedditOptions.Value.Returns(customOptions);
+            var extractor = new RedditPostContentExtractor(_mockRedditPostClient, _mockSubredditImageExtractor, _mockRedditOptions);
+
+            // Act
+            var canHandle = extractor.CanHandle(url);
 
             // Assert
             canHandle.ShouldBeFalse();
@@ -227,7 +274,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             exception.Message.ShouldContain("Unsupported Reddit URL format");
             exception.Message.ShouldContain(unsupportedUrl);
             exception.Message.ShouldContain("Expected format");
-            exception.Message.ShouldContain("reddit.com/r/[subreddit]/comments/[postId]");
+            exception.Message.ShouldContain("reddit-domain");
         }
 
         [Fact]
@@ -238,9 +285,9 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
 
             // Act & Assert
             var exception = await Should.ThrowAsync<InvalidOperationException>(() => _extractor.ExtractAsync(unsupportedHostUrl));
-            exception.Message.ShouldContain("Unsupported host");
+            exception.Message.ShouldContain("Unsupported domain");
             exception.Message.ShouldContain("not-reddit.com");
-            exception.Message.ShouldContain("reddit.com and www.reddit.com are supported");
+            exception.Message.ShouldContain("Supported domains");
         }
 
         [Theory]
@@ -288,8 +335,6 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             await _mockSubredditImageExtractor.DidNotReceive().GetSubredditImageUrlAsync(Arg.Any<string>());
         }
 
-
-
         [Fact]
         public async Task ExtractAsync_SubredditImageExtractorThrows_PropagatesException()
         {
@@ -298,16 +343,14 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var testPost = CreateTestRedditPost("abc123", "Test Title", null);
             _mockRedditPostClient.GetPost("abc123").Returns(testPost);
             _mockSubredditImageExtractor.GetSubredditImageUrlAsync("programming")
-                .Returns(Task.FromException<string?>(new HttpRequestException("Network error")));
+                .Returns(Task.FromException<string>(new HttpRequestException("Network error")));
 
             // Act & Assert
             await Should.ThrowAsync<HttpRequestException>(() => _extractor.ExtractAsync(url));
         }
 
-        private static RedditPost CreateTestRedditPost(string id, string title, string? imageUrl)
+        private static RedditPost CreateTestRedditPost(string id, string title, string? imageUrl) => new()
         {
-            return new RedditPost
-            {
                 Post = new RedditPostContent
                 {
                     Id = id,
@@ -319,10 +362,9 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                     CreatedUtc = DateTime.UtcNow,
                     ImageUrl = imageUrl
                 },
-                Comments = new List<RedditComment>
-                {
-                    new RedditComment
-                    {
+                Comments =
+                [
+                    new() {
                         Id = "comment1",
                         Author = "commenter1",
                         Score = 50,
@@ -330,8 +372,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                         CreatedUtc = DateTime.UtcNow,
                         Replies = []
                     }
-                }
+                ]
             };
-        }
     }
 }

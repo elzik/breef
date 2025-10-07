@@ -1,21 +1,26 @@
 ﻿using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 
 public class RedditPostContentExtractor(
     IRedditPostClient redditPostClient,
-    ISubredditImageExtractor subredditImageExtractor) : IContentExtractor
+    ISubredditImageExtractor subredditImageExtractor,
+    IOptions<RedditOptions> redditOptions) : IContentExtractor
 {
+    private readonly RedditOptions _redditOptions = redditOptions.Value;
+
     public bool CanHandle(string webPageUrl)
     {
         if (!Uri.TryCreate(webPageUrl, UriKind.Absolute, out Uri? webPageUri))
             return false;
 
-        var host = webPageUri.Host;
-        if (!host.Equals("reddit.com", StringComparison.OrdinalIgnoreCase) &&
-            !host.Equals("www.reddit.com", StringComparison.OrdinalIgnoreCase))
+        var requestDomain = webPageUri.Host;
+        
+        if (!_redditOptions.AllDomains.Any(allowedDomain => 
+            requestDomain.Equals(allowedDomain, StringComparison.OrdinalIgnoreCase)))
             return false;
 
         var segments = webPageUri.AbsolutePath.Trim('/').Split('/');
@@ -32,11 +37,15 @@ public class RedditPostContentExtractor(
             throw new InvalidOperationException($"Invalid URL format: '{webPageUrl}'. " +
                 $"URL must be a valid absolute URI.");
 
-        var host = webPageUri.Host;
-        if (!host.Equals("reddit.com", StringComparison.OrdinalIgnoreCase) &&
-            !host.Equals("www.reddit.com", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException($"Unsupported host: '{host}'. " +
-                $"Only reddit.com and www.reddit.com are supported.");
+        var requestDomain = webPageUri.Host;
+        
+        if (!_redditOptions.AllDomains.Any(allowedDomain => 
+            requestDomain.Equals(allowedDomain, StringComparison.OrdinalIgnoreCase)))
+        {
+            var supportedDomains = string.Join(", ", _redditOptions.AllDomains);
+            throw new InvalidOperationException($"Unsupported domain: '{requestDomain}'. " +
+                $"Supported domains: {supportedDomains}");
+        }
 
         var segments = webPageUri.AbsolutePath.Trim('/').Split('/');
 
@@ -45,8 +54,8 @@ public class RedditPostContentExtractor(
             segments[2].Equals("comments", StringComparison.OrdinalIgnoreCase)))
         {
             throw new InvalidOperationException($"Unsupported Reddit URL format: '{webPageUrl}'. " +
-                $"Expected format: 'https://reddit.com/r/[subreddit]/comments/[postId]' " +
-                $"or 'https://reddit.com/r/[subreddit]/comments/[postId]/[title]'.");
+                $"Expected format: 'https://[reddit-domain]/r/[subreddit]/comments/[postId]' " +
+                $"or 'https://[reddit-domain]/r/[subreddit]/comments/[postId]/[title]'.");
         }
 
         var postId = segments[3];

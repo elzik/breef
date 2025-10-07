@@ -1,5 +1,6 @@
 ﻿using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Shouldly;
 using System.Text.Json;
@@ -9,6 +10,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
     public class SubRedditExtractorTests
     {
         private readonly IHttpDownloader _mockHttpDownloader;
+        private readonly IOptions<RedditOptions> _mockRedditOptions;
         private readonly SubRedditContentExtractor _extractor;
 
         public SubRedditExtractorTests()
@@ -16,7 +18,11 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             _mockHttpDownloader = Substitute.For<IHttpDownloader>();
             _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
                 .Returns(Task.FromResult("<html><body>Mocked content</body></html>"));
-            _extractor = new SubRedditContentExtractor(_mockHttpDownloader);
+            
+            _mockRedditOptions = Substitute.For<IOptions<RedditOptions>>();
+            _mockRedditOptions.Value.Returns(new RedditOptions());
+            
+            _extractor = new SubRedditContentExtractor(_mockHttpDownloader, _mockRedditOptions);
         }
 
         [Theory]
@@ -44,6 +50,48 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         {
             // Act
             var canHandle = _extractor.CanHandle(url);
+
+            // Assert
+            canHandle.ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData("https://custom.reddit.com/r/testsubreddit/")]
+        [InlineData("https://alt.reddit.instance.com/r/testsubreddit/")]
+        public void CanHandle_CustomRedditInstance_ReturnsTrue(string url)
+        {
+            // Arrange
+            var customOptions = new RedditOptions
+            {
+                DefaultBaseAddress = "https://www.reddit.com",
+                AdditionalBaseAddresses = ["https://reddit.com", "https://custom.reddit.com", "https://alt.reddit.instance.com"]
+            };
+            _mockRedditOptions.Value.Returns(customOptions);
+            var extractor = new SubRedditContentExtractor(_mockHttpDownloader, _mockRedditOptions);
+
+            // Act
+            var canHandle = extractor.CanHandle(url);
+
+            // Assert
+            canHandle.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("https://unknown.reddit.com/r/testsubreddit/")]
+        [InlineData("https://www.unknown.reddit.com/r/testsubreddit/")]
+        public void CanHandle_UnknownRedditInstance_ReturnsFalse(string url)
+        {
+            // Arrange
+            var customOptions = new RedditOptions
+            {
+                DefaultBaseAddress = "https://www.reddit.com",
+                AdditionalBaseAddresses = ["https://reddit.com", "https://custom.reddit.com"]
+            };
+            _mockRedditOptions.Value.Returns(customOptions);
+            var extractor = new SubRedditContentExtractor(_mockHttpDownloader, _mockRedditOptions);
+
+            // Act
+            var canHandle = extractor.CanHandle(url);
 
             // Assert
             canHandle.ShouldBeFalse();
@@ -142,8 +190,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                 .Returns(Task.FromResult(json));
 
             // Act
-            var extractor = new SubRedditContentExtractor(_mockHttpDownloader);
-            var result = await extractor.ExtractAsync(url);
+            var result = await _extractor.ExtractAsync(url);
 
             // Assert
             result.Content.ShouldBe(json);

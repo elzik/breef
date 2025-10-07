@@ -40,7 +40,7 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         return redditPost;
     }
 
-    private string? ExtractBestImage(RawRedditCommentData postData)
+    private static string? ExtractBestImage(RawRedditCommentData postData)
     {
         // 1. Gallery images (highest priority) - pick the first/largest
         if (postData.IsGallery && postData.GalleryData?.Items != null && postData.MediaMetadata != null)

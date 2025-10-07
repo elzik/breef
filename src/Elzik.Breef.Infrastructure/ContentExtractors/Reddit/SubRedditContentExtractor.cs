@@ -1,21 +1,26 @@
 ﻿using Elzik.Breef.Domain;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 
-public class SubRedditContentExtractor(IHttpDownloader httpDownloader) : IContentExtractor, ISubredditImageExtractor
+public class SubRedditContentExtractor(IHttpDownloader httpDownloader, IOptions<RedditOptions> redditOptions) : IContentExtractor, ISubredditImageExtractor
 {
+    private const char UrlPathSeparator = '/';
+    private readonly RedditOptions _redditOptions = redditOptions.Value;
+
     public bool CanHandle(string webPageUrl)
     {
         if (!Uri.TryCreate(webPageUrl, UriKind.Absolute, out Uri? webPageUri))
             return false;
 
-        var host = webPageUri.Host;
-        if (!host.Equals("reddit.com", StringComparison.OrdinalIgnoreCase) &&
-            !host.Equals("www.reddit.com", StringComparison.OrdinalIgnoreCase))
+        var requestDomain = webPageUri.Host;
+        
+        if (!_redditOptions.AllDomains.Any(allowedDomain => 
+            requestDomain.Equals(allowedDomain, StringComparison.OrdinalIgnoreCase)))
             return false;
 
-        var segments = webPageUri.AbsolutePath.Trim('/').Split('/');
+        var segments = webPageUri.AbsolutePath.Trim(UrlPathSeparator).Split(UrlPathSeparator);
 
         return 
             segments.Length == 2 && 
@@ -24,9 +29,9 @@ public class SubRedditContentExtractor(IHttpDownloader httpDownloader) : IConten
 
     public async Task<Extract> ExtractAsync(string webPageUrl)
     {
-        var webPageUri = new Uri(webPageUrl.EndsWith('/') ? webPageUrl : webPageUrl + "/", UriKind.Absolute);
+        var webPageUri = new Uri(webPageUrl.EndsWith(UrlPathSeparator) ? webPageUrl : webPageUrl + UrlPathSeparator, UriKind.Absolute);
         var subRedditNewPostsUri = new Uri(webPageUri, "new.json");
-        var webPageParts = webPageUri.AbsolutePath.Trim('/').Split('/');
+        var webPageParts = webPageUri.AbsolutePath.Trim(UrlPathSeparator).Split(UrlPathSeparator);
         var subredditName = webPageParts[^1];
         var jsonContent = await httpDownloader.DownloadAsync(subRedditNewPostsUri.AbsoluteUri);
         var imageUrl = await ExtractImageUrlAsync(webPageUri);
@@ -36,7 +41,7 @@ public class SubRedditContentExtractor(IHttpDownloader httpDownloader) : IConten
 
     public async Task<string> GetSubredditImageUrlAsync(string subredditName)
     {
-        var subRedditBaseUri = new Uri($"https://www.reddit.com/r/{subredditName}/");
+        var subRedditBaseUri = new Uri($"{_redditOptions.DefaultBaseAddress}/r/{subredditName}/");
         return await ExtractImageUrlAsync(subRedditBaseUri);
     }
 

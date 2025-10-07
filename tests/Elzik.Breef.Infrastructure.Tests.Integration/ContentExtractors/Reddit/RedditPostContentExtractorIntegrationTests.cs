@@ -22,11 +22,12 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors.Reddit
             var transformer = new RawRedditPostTransformer();
             var redditPostClient = new RedditPostClient(rawRedditClient, transformer);
             var logger = new TestOutputFakeLogger<HttpDownloader>(testOutputHelper);
-            var options = Options.Create(new HttpDownloaderOptions());
-            var httpDownloader = new HttpDownloader(logger, options);
-            var subredditImageExtractor = new SubRedditContentExtractor(httpDownloader);
+            var httpDownloaderOptions = Options.Create(new HttpDownloaderOptions());
+            var httpDownloader = new HttpDownloader(logger, httpDownloaderOptions);
+            var redditOptions = Options.Create(new RedditOptions());
+            var subredditImageExtractor = new SubRedditContentExtractor(httpDownloader, redditOptions);
             
-            _extractor = new RedditPostContentExtractor(redditPostClient, subredditImageExtractor);
+            _extractor = new RedditPostContentExtractor(redditPostClient, subredditImageExtractor, redditOptions);
         }
 
         [SkippableTheory]

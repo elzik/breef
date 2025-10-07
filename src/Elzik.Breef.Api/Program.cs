@@ -9,6 +9,7 @@ using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 using Elzik.Breef.Infrastructure.Wallabag;
+using Microsoft.Extensions.Options;
 using Refit;
 using Serilog;
 using System.Reflection;
@@ -66,8 +67,17 @@ public class Program
             .ValidateOnStart();
         builder.Services.AddTransient<IHttpDownloader, HttpDownloader>();
 
+        builder.Services.AddOptions<RedditOptions>()
+            .Bind(configuration.GetSection("Reddit"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        
         builder.Services.AddRefitClient<IRawRedditPostClient>()
-            .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://www.reddit.com"));
+            .ConfigureHttpClient((provider, client) =>
+            {
+                var redditOptions = provider.GetRequiredService<IOptions<RedditOptions>>().Value;
+                client.BaseAddress = new Uri(redditOptions.DefaultBaseAddress);
+            });
 
         builder.Services.AddTransient<IRawRedditPostTransformer, RawRedditPostTransformer>();
         builder.Services.AddTransient<IRedditPostClient, RedditPostClient>();

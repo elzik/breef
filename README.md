@@ -80,6 +80,34 @@ Example
 
 ### Optional
 
+#### Reddit
+
+These config items relate to the Reddit integration using the Options pattern with support for multiple Reddit instances.
+
+- **DefaultBaseAddress** - The primary base address for Reddit API requests. Default: `"https://www.reddit.com"`. Must be a valid URL. Used for Refit HTTP client configuration, fallback subreddit image extraction, and primary Reddit instance for content extraction.
+- **AdditionalBaseAddresses** - Additional Reddit instances that the content extractors can handle. Default: `["https://reddit.com"]` (includes non-www variant by default). Domain matching is **exact** - if you want to support both `reddit.com` and `www.reddit.com`, you must explicitly configure both.
+
+The Reddit integration allows extraction of content from:
+- Custom Reddit instances
+- Alternative Reddit domains  
+- Corporate or self-hosted Reddit installations
+- Specific subdomains (e.g., `old.reddit.com`, `api.reddit.com`)
+
+**Domain Validation**: The content extractors validate URLs using **exact domain matching**. `reddit.com` does NOT automatically allow `www.reddit.com` - each domain variant must be explicitly configured.
+
+Example:
+
+```jsonc
+"Reddit": {
+    "DefaultBaseAddress": "https://www.reddit.com",     // breef_Reddit__DefaultBaseAddress
+    "AdditionalBaseAddresses": [                        // breef_Reddit__AdditionalBaseAddresses__0
+        "https://reddit.com",                           // breef_Reddit__AdditionalBaseAddresses__0
+        "https://old.reddit.com",                       // breef_Reddit__AdditionalBaseAddresses__1
+        "https://custom.reddit.com"                     // breef_Reddit__AdditionalBaseAddresses__2
+    ]
+}
+```
+
 #### AiService
 
 - **TimeOut** - Sets the number of seconds before the AiService used will time out. The default used if not set is 100 seconds. This may need to be increased where Ollama is used with limiting hardware.
@@ -132,4 +160,3 @@ Logging is handled by Serilog and configuration is documented [here](https://git
     "Default": "Debug"   // breef_Serilog__MinimumLevel__Default
   }
 }
-```
