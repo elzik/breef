@@ -19,7 +19,7 @@ public class RedditOptions
             .Where(url => Uri.TryCreate(url, UriKind.Absolute, out _))
             .Select(url => new Uri(url).Host);
 
-    private IEnumerable<string> GetEffectiveAdditionalBaseAddresses()
+    private List<string> GetEffectiveAdditionalBaseAddresses()
     {
         if (AdditionalBaseAddresses.Count == 0)
         {

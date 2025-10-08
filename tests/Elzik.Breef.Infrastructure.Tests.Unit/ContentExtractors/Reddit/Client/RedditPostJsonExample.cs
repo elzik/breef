@@ -6,6 +6,17 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit.Client;
 
 public class RedditPostJsonExample
 {
+    private readonly JsonSerializerOptions? _jsonSerializerOptions;
+
+    public RedditPostJsonExample()
+    {
+        _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+    }
+
     [Fact]
     public void RedditPost_SerializesToJson_ProducesExpectedFormat()
     {
@@ -54,12 +65,7 @@ public class RedditPostJsonExample
         };
 
         // Act
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-        var json = JsonSerializer.Serialize(redditPost, options);
+        var json = JsonSerializer.Serialize(redditPost, _jsonSerializerOptions);
 
         // Assert
         json.ShouldNotBeNullOrWhiteSpace();

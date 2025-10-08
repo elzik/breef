@@ -1,4 +1,3 @@
-using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
@@ -121,17 +120,13 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors.Reddit
             // Assert
             var redditPost = JsonSerializer.Deserialize<RedditPost>(result.Content);
             redditPost.ShouldNotBeNull();
-
-            // Verify post structure
             redditPost.Post.Id.ShouldNotBeNullOrEmpty();
             redditPost.Post.Title.ShouldNotBeNullOrEmpty();
             redditPost.Post.Author.ShouldNotBeNullOrEmpty();
             redditPost.Post.Subreddit.ShouldNotBeNullOrEmpty();
             redditPost.Post.CreatedUtc.ShouldNotBe(default);
-
-            // Verify comments structure
             redditPost.Comments.ShouldNotBeNull();
-            if (redditPost.Comments.Any())
+            if (redditPost.Comments.Count != 0)
             {
                 var firstComment = redditPost.Comments[0];
                 firstComment.Id.ShouldNotBeNullOrEmpty();
