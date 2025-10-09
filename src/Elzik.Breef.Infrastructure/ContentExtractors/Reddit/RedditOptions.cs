@@ -16,8 +16,9 @@ public class RedditOptions
 
     public IEnumerable<string> AllDomains =>
         AllBaseAddresses
-            .Where(url => Uri.TryCreate(url, UriKind.Absolute, out _))
-            .Select(url => new Uri(url).Host);
+            .Select(url => Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri : null)
+            .Where(uri => uri != null)
+            .Select(uri => uri.Host);
 
     private List<string> GetEffectiveAdditionalBaseAddresses()
     {
