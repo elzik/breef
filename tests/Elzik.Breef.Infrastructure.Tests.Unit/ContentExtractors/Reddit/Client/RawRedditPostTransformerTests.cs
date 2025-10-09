@@ -18,8 +18,8 @@ public class RawRedditPostTransformerTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -34,7 +34,7 @@ public class RawRedditPostTransformerTests
                                 CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing
@@ -42,8 +42,8 @@ public class RawRedditPostTransformerTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t1",
@@ -58,8 +58,8 @@ public class RawRedditPostTransformerTests
                                 {
                                     Data = new RawRedditListingData
                                     {
-                                        Children = new List<RawRedditChild>
-                                        {
+                                        Children =
+                                        [
                                             new RawRedditChild
                                             {
                                                 Kind = "t1",
@@ -79,12 +79,12 @@ public class RawRedditPostTransformerTests
                                                     }
                                                 }
                                             }
-                                        }
+                                        ]
                                     }
                                 }
                             }
                         }
-                    }
+                    ]
                 }
             }
         };
@@ -134,8 +134,8 @@ public class RawRedditPostTransformerTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -148,7 +148,7 @@ public class RawRedditPostTransformerTests
                                 CreatedUtc = DateTime.UtcNow
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing { Data = new RawRedditListingData { Children = [] } }
@@ -172,8 +172,8 @@ public class RawRedditPostTransformerTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -185,8 +185,8 @@ public class RawRedditPostTransformerTests
                                 Preview = new RawRedditPreview
                                 {
                                     Enabled = true,
-                                    Images = new List<RawRedditPreviewImage>
-                                    {
+                                    Images =
+                                    [
                                         new RawRedditPreviewImage
                                         {
                                             Source = new RawRedditImageSource
@@ -196,12 +196,12 @@ public class RawRedditPostTransformerTests
                                                 Height = 600
                                             }
                                         }
-                                    }
+                                    ]
                                 },
                                 CreatedUtc = DateTime.UtcNow
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing { Data = new RawRedditListingData { Children = [] } }
@@ -225,8 +225,8 @@ public class RawRedditPostTransformerTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -238,11 +238,11 @@ public class RawRedditPostTransformerTests
                                 IsGallery = true,
                                 GalleryData = new RawRedditGalleryData
                                 {
-                                    Items = new List<RawRedditGalleryItem>
-                                    {
+                                    Items =
+                                    [
                                         new RawRedditGalleryItem { MediaId = "img1" },
                                         new RawRedditGalleryItem { MediaId = "img2" }
-                                    }
+                                    ]
                                 },
                                 MediaMetadata = new Dictionary<string, RawRedditMediaMetadata>
                                 {
@@ -270,7 +270,7 @@ public class RawRedditPostTransformerTests
                                 CreatedUtc = DateTime.UtcNow
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing { Data = new RawRedditListingData { Children = [] } }
@@ -294,8 +294,8 @@ public class RawRedditPostTransformerTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -308,7 +308,7 @@ public class RawRedditPostTransformerTests
                                 CreatedUtc = DateTime.UtcNow
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing { Data = new RawRedditListingData { Children = [] } }
@@ -332,8 +332,8 @@ public class RawRedditPostTransformerTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -347,8 +347,8 @@ public class RawRedditPostTransformerTests
                                 Preview = new RawRedditPreview
                                 {
                                     Enabled = true,
-                                    Images = new List<RawRedditPreviewImage>
-                                    {
+                                    Images =
+                                    [
                                         new RawRedditPreviewImage
                                         {
                                             Source = new RawRedditImageSource
@@ -358,12 +358,12 @@ public class RawRedditPostTransformerTests
                                                 Height = 600
                                             }
                                         }
-                                    }
+                                    ]
                                 },
                                 CreatedUtc = DateTime.UtcNow
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing { Data = new RawRedditListingData { Children = [] } }
@@ -387,8 +387,8 @@ public class RawRedditPostTransformerTests
                 Kind = "Listing",
                 Data = new RawRedditListingData
                 {
-                    Children = new List<RawRedditChild>
-                    {
+                    Children =
+                    [
                         new RawRedditChild
                         {
                             Kind = "t3",
@@ -397,11 +397,11 @@ public class RawRedditPostTransformerTests
                                 Id = "test123",
                                 Title = "Invalid Thumbnail Post",
                                 Author = "testuser",
-                                Thumbnail = "self", // Should be ignored
+                                Thumbnail = "self",
                                 CreatedUtc = DateTime.UtcNow
                             }
                         }
-                    }
+                    ]
                 }
             },
             new RawRedditListing { Data = new RawRedditListingData { Children = [] } }
