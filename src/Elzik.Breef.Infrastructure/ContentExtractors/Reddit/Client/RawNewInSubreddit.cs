@@ -2,25 +2,25 @@ using System.Text.Json.Serialization;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 
-public class NewInSubreddit
+public class RawNewInSubreddit
 {
     [JsonPropertyName("data")]
-    public ListingData? Data { get; set; }
+    public RawListingData? Data { get; set; }
 }
 
-public class ListingData
+public class RawListingData
 {
     [JsonPropertyName("children")]
-    public List<Child>? Children { get; set; }
+    public List<RawChild>? Children { get; set; }
 }
 
-public class Child
+public class RawChild
 {
     [JsonPropertyName("data")]
-    public PostData? Data { get; set; }
+    public RawPostData? Data { get; set; }
 }
 
-public class PostData
+public class RawPostData
 {
     [JsonPropertyName("title")]
     public string? Title { get; set; }
