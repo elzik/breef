@@ -9,6 +9,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
 {
     public class SubRedditExtractorTests
     {
+        private const string DefaultRedditFallbackImageUrl = "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg";
+        
         private readonly IHttpDownloader _mockHttpDownloader;
         private readonly IOptions<RedditOptions> _mockRedditOptions;
         private readonly SubRedditContentExtractor _extractor;
@@ -16,11 +18,18 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         public SubRedditExtractorTests()
         {
             _mockHttpDownloader = Substitute.For<IHttpDownloader>();
-            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
+            // Set up different responses for different URLs
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("new.json")))
                 .Returns(Task.FromResult("<html><body>Mocked content</body></html>"));
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("about.json")))
+                .Returns(Task.FromResult(JsonSerializer.Serialize(new { data = new { } })));
             
             _mockRedditOptions = Substitute.For<IOptions<RedditOptions>>();
-            _mockRedditOptions.Value.Returns(new RedditOptions());
+            _mockRedditOptions.Value.Returns(new RedditOptions
+            {
+                DefaultBaseAddress = "https://www.reddit.com",
+                AdditionalBaseAddresses = ["https://reddit.com"]
+            });
             
             _extractor = new SubRedditContentExtractor(_mockHttpDownloader, _mockRedditOptions);
         }
@@ -142,7 +151,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            result.PreviewImageUrl.ShouldBe("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg");
+            result.PreviewImageUrl.ShouldBe(DefaultRedditFallbackImageUrl);
         }
 
         [Fact]
@@ -159,7 +168,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            result.PreviewImageUrl.ShouldBe("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg");
+            result.PreviewImageUrl.ShouldBe(DefaultRedditFallbackImageUrl);
         }
 
         [Fact]
@@ -274,7 +283,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
 
             // Assert
-            result.ShouldBe("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg");
+            result.ShouldBe(DefaultRedditFallbackImageUrl);
         }
 
         [Fact]
@@ -293,7 +302,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
 
             // Assert
-            result.ShouldBe("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg");
+            result.ShouldBe(DefaultRedditFallbackImageUrl);
         }
 
         [Fact]
@@ -370,15 +379,148 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             test.Message.ShouldBe("Network error");
         }
 
-        private static string CreateJsonWithImageKey(string key, string value)
+        [Theory]
+        [InlineData("icon_img", null)]
+        [InlineData("community_icon", "")]
+        [InlineData("banner_background_image", "   ")]
+        [InlineData("banner_img", "\t")]
+        [InlineData("mobile_banner_image", "\n")]
+        public async Task GetSubredditImageUrlAsync_ImageUrlIsUnsuitable_UsesDefaultImageUrl(string imageKey, string? imageUrl)
         {
-            return JsonSerializer.Serialize(new
+            // Arrange
+            var subredditName = "programming";
+            var json = CreateJsonWithImageKey(imageKey, imageUrl);
+
+            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
+                .Returns(Task.FromResult(json));
+
+            // Act
+            var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
+
+            // Assert
+            result.ShouldBe(DefaultRedditFallbackImageUrl);
+        }
+
+        [Theory]
+        [InlineData("icon_img", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==")]
+        [InlineData("community_icon", "ftp://example.com/image.png")]
+        [InlineData("banner_background_image", "file:///c:/images/banner.png")]
+        [InlineData("banner_img", "javascript:alert('xss')")]
+        [InlineData("mobile_banner_image", "mailto:test@example.com")]
+        public async Task GetSubredditImageUrlAsync_ImageUrlHasNonHttpScheme_UsesDefaultImageUrl(string imageKey, string imageUrl)
+        {
+            // Arrange
+            var subredditName = "programming";
+            var json = CreateJsonWithImageKey(imageKey, imageUrl);
+
+            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
+                .Returns(Task.FromResult(json));
+
+            // Act
+            var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
+
+            // Assert
+            result.ShouldBe(DefaultRedditFallbackImageUrl);
+        }
+
+        [Theory]
+        [InlineData("icon_img", "not-a-valid-url")]
+        [InlineData("community_icon", "://invalid-url")]
+        [InlineData("banner_background_image", "http://")]
+        [InlineData("banner_img", "https://")]
+        public async Task GetSubredditImageUrlAsync_ImageUrlIsInvalidUri_UsesDefaultImageUrl(string imageKey, string imageUrl)
+        {
+            // Arrange
+            var subredditName = "programming";
+            var json = CreateJsonWithImageKey(imageKey, imageUrl);
+
+            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
+                .Returns(Task.FromResult(json));
+
+            // Act
+            var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
+
+            // Assert
+            result.ShouldBe(DefaultRedditFallbackImageUrl);
+        }
+
+        [Fact]
+        public async Task GetSubredditImageUrlAsync_MixedValidAndInvalidUrls_UsesFirstValidHttpUrl()
+        {
+            // Arrange
+            var subredditName = "programming";
+            var validImageUrl = "https://img.reddit.com/valid-icon.png";
+            
+            var json = JsonSerializer.Serialize(new
             {
                 data = new Dictionary<string, object>
                 {
-                    { key, value }
+                    { "banner_background_image", "data:image/png;base64,invalid" }, // Invalid scheme - should be skipped
+                    { "banner_img", "" }, // Empty - should be skipped
+                    { "mobile_banner_image", "   " }, // Whitespace - should be skipped
+                    { "icon_img", validImageUrl }, // Valid HTTP URL - should be used
+                    { "community_icon", "https://img.reddit.com/another-icon.png" } // Valid but comes after
                 }
             });
+
+            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
+                .Returns(Task.FromResult(json));
+            _mockHttpDownloader.TryGet(validImageUrl).Returns(true);
+
+            // Act
+            var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
+
+            // Assert
+            result.ShouldBe(validImageUrl);
+        }
+
+        [Theory]
+        [InlineData("null")]
+        [InlineData("empty")]
+        [InlineData("whitespace")]
+        [InlineData("non-http")]
+        [InlineData("invalid-uri")]
+        public async Task ExtractAsync_ImageUrlIsInvalid_UsesDefaultImageUrl(string invalidType)
+        {
+            // Arrange
+            var url = "https://www.reddit.com/r/subreddit";
+            string? imageUrl = invalidType switch
+            {
+                "null" => null,
+                "empty" => "",
+                "whitespace" => "   ",
+                "non-http" => "data:image/png;base64,invalid",
+                "invalid-uri" => "not-a-valid-url",
+                _ => throw new ArgumentException($"Unknown invalid type: {invalidType}")
+            };
+            
+            var json = CreateJsonWithImageKey("icon_img", imageUrl);
+
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("new.json")))
+                .Returns(Task.FromResult("<html><body>Mocked content</body></html>"));
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("about.json")))
+                .Returns(Task.FromResult(json));
+
+            // Act
+            var result = await _extractor.ExtractAsync(url);
+
+            // Assert
+            result.PreviewImageUrl.ShouldBe(DefaultRedditFallbackImageUrl);
+        }
+
+        private static string CreateJsonWithImageKey(string key, string? value)
+        {
+            var data = new Dictionary<string, object?>();
+            if (value != null)
+            {
+                data[key] = value;
+            }
+            else
+            {
+                data[key] = null;
+            }
+
+            return JsonSerializer.Serialize(new { data });
         }
     }
 }
