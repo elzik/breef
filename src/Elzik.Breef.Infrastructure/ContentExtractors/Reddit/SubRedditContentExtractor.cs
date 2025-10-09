@@ -7,7 +7,6 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 public class SubRedditContentExtractor(IHttpDownloader httpDownloader, IOptions<RedditOptions> redditOptions) : IContentExtractor, ISubredditImageExtractor
 {
     private const char UrlPathSeparator = '/';
-    private const string DefaultRedditFallbackImageUrl = "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg";
     private readonly RedditOptions _redditOptions = redditOptions.Value;
 
     public bool CanHandle(string webPageUrl)
@@ -71,6 +70,6 @@ public class SubRedditContentExtractor(IHttpDownloader httpDownloader, IOptions<
             }
         }
 
-        return DefaultRedditFallbackImageUrl;
+        return _redditOptions.FallbackImageUrl;
     }
 }

@@ -9,7 +9,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
 {
     public class SubRedditExtractorTests
     {
-        private const string DefaultRedditFallbackImageUrl = "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg";
+        private const string FallbackImageUrl = "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg";
         
         private readonly IHttpDownloader _mockHttpDownloader;
         private readonly IOptions<RedditOptions> _mockRedditOptions;
@@ -136,7 +136,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         [InlineData("banner_background_image")]
         [InlineData("banner_img")]
         [InlineData("mobile_banner_image")]
-        public async Task ExtractAsync_TryGetReturnsFalse_UsesDefaultImageUrl(string imageKey)
+        public async Task ExtractAsync_TryGetReturnsFalse_UsesFallbackImageUrl(string imageKey)
         {
             // Arrange
             var url = $"https://www.reddit.com/r/subreddit";
@@ -151,11 +151,11 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            result.PreviewImageUrl.ShouldBe(DefaultRedditFallbackImageUrl);
+            result.PreviewImageUrl.ShouldBe(FallbackImageUrl);
         }
 
         [Fact]
-        public async Task ExtractAsync_NoImageKeysExist_UsesDefaultImageUrl()
+        public async Task ExtractAsync_NoImageKeysExist_UsesFallbackImageUrl()
         {
             // Arrange
             var url = $"https://www.reddit.com/r/subreddit";
@@ -168,7 +168,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            result.PreviewImageUrl.ShouldBe(DefaultRedditFallbackImageUrl);
+            result.PreviewImageUrl.ShouldBe(FallbackImageUrl);
         }
 
         [Fact]
@@ -270,7 +270,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         }
 
         [Fact]
-        public async Task GetSubredditImageUrlAsync_NoImageKeysExist_ReturnsDefaultImageUrl()
+        public async Task GetSubredditImageUrlAsync_NoImageKeysExist_ReturnsFallbackImageUrl()
         {
             // Arrange
             var subredditName = "programming";
@@ -283,11 +283,11 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
 
             // Assert
-            result.ShouldBe(DefaultRedditFallbackImageUrl);
+            result.ShouldBe(FallbackImageUrl);
         }
 
         [Fact]
-        public async Task GetSubredditImageUrlAsync_ImageExistsButNotAccessible_ReturnsDefaultImageUrl()
+        public async Task GetSubredditImageUrlAsync_ImageExistsButNotAccessible_ReturnsFallbackImageUrl()
         {
             // Arrange
             var subredditName = "programming";
@@ -302,7 +302,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
 
             // Assert
-            result.ShouldBe(DefaultRedditFallbackImageUrl);
+            result.ShouldBe(FallbackImageUrl);
         }
 
         [Fact]
@@ -390,7 +390,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         [InlineData("banner_background_image", "file:///c:/images/banner.png")]
         [InlineData("banner_img", "javascript:alert('xss')")]
         [InlineData("mobile_banner_image", "mailto:test@example.com")]
-        public async Task GetSubredditImageUrlAsync_ImageUrlIsUnsuitable_UsesDefaultImageUrl(string imageKey, string? imageUrl)
+        public async Task GetSubredditImageUrlAsync_ImageUrlIsUnsuitable_UsesFallbackImageUrl(string imageKey, string? imageUrl)
         {
             // Arrange
             var subredditName = "programming";
@@ -403,7 +403,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
 
             // Assert
-            result.ShouldBe(DefaultRedditFallbackImageUrl);
+            result.ShouldBe(FallbackImageUrl);
         }
 
         [Theory]
@@ -411,7 +411,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         [InlineData("community_icon", "://invalid-url")]
         [InlineData("banner_background_image", "http://")]
         [InlineData("banner_img", "https://")]
-        public async Task GetSubredditImageUrlAsync_ImageUrlIsInvalidUri_UsesDefaultImageUrl(string imageKey, string imageUrl)
+        public async Task GetSubredditImageUrlAsync_ImageUrlIsInvalidUri_UsesFallbackImageUrl(string imageKey, string imageUrl)
         {
             // Arrange
             var subredditName = "programming";
@@ -424,7 +424,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
 
             // Assert
-            result.ShouldBe(DefaultRedditFallbackImageUrl);
+            result.ShouldBe(FallbackImageUrl);
         }
 
         [Fact]
@@ -463,7 +463,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         [InlineData("whitespace")]
         [InlineData("non-http")]
         [InlineData("invalid-uri")]
-        public async Task ExtractAsync_ImageUrlIsInvalid_UsesDefaultImageUrl(string invalidType)
+        public async Task ExtractAsync_ImageUrlIsInvalid_UsesFallbackImageUrl(string invalidType)
         {
             // Arrange
             var url = "https://www.reddit.com/r/subreddit";
@@ -488,7 +488,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            result.PreviewImageUrl.ShouldBe(DefaultRedditFallbackImageUrl);
+            result.PreviewImageUrl.ShouldBe(FallbackImageUrl);
         }
 
         private static string CreateJsonWithImageKey(string key, string? value)

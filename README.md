@@ -86,6 +86,7 @@ These config items relate to the Reddit integration using the Options pattern wi
 
 - **DefaultBaseAddress** - The primary base address for Reddit API requests. Default: `"https://www.reddit.com"`. Must be a valid URL. Used for Refit HTTP client configuration, fallback subreddit image extraction, and primary Reddit instance for content extraction.
 - **AdditionalBaseAddresses** - Additional Reddit instances that the content extractors can handle. Default: `["https://reddit.com"]` (includes non-www variant by default). Domain matching is **exact** - if you want to support both `reddit.com` and `www.reddit.com`, you must explicitly configure both.
+- **FallbackImageUrl** - The fallback image URL used when subreddit-specific images cannot be retrieved. Default: `"https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg"`. This URL is used as the default Reddit logo when no subreddit banner, icon, or community image is available.
 
 The Reddit integration allows extraction of content from:
 - Custom Reddit instances
@@ -99,12 +100,11 @@ Example:
 
 ```jsonc
 "Reddit": {
-    "DefaultBaseAddress": "https://www.reddit.com",     // breef_Reddit__DefaultBaseAddress
-    "AdditionalBaseAddresses": [                        // breef_Reddit__AdditionalBaseAddresses__0
-        "https://reddit.com",                           // breef_Reddit__AdditionalBaseAddresses__0
-        "https://old.reddit.com",                       // breef_Reddit__AdditionalBaseAddresses__1
-        "https://custom.reddit.com"                     // breef_Reddit__AdditionalBaseAddresses__2
-    ]
+    "DefaultBaseAddress": "https://www.reddit.com",         // breef_Reddit__DefaultBaseAddress
+    "AdditionalBaseAddresses": [                            // breef_Reddit__AdditionalBaseAddresses__0
+        "https://reddit.com",                               // breef_Reddit__AdditionalBaseAddresses__0
+    ],
+    "FallbackImageUrl": "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg"  // breef_Reddit__FallbackImageUrl
 }
 ```
 

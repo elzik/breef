@@ -10,6 +10,8 @@ public class RedditOptions
 
     public List<string> AdditionalBaseAddresses { get; set; } = [];
 
+    public string FallbackImageUrl { get; set; } = "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg";
+
     public IEnumerable<string> AllBaseAddresses =>
         new[] { DefaultBaseAddress }.Concat(GetEffectiveAdditionalBaseAddresses());
 

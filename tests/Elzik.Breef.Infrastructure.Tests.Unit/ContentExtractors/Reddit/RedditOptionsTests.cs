@@ -19,6 +19,16 @@ public class RedditOptionsTests
     }
 
     [Fact]
+    public void RedditOptions_FallbackImageUrl_ShouldBeRedditLogo()
+    {
+        // Arrange & Act
+        var options = new RedditOptions();
+
+        // Assert
+        options.FallbackImageUrl.ShouldBe("https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg");
+    }
+
+    [Fact]
     public void RedditOptions_AdditionalBaseAddresses_ShouldBeEmptyByDefault()
     {
         // Arrange & Act
