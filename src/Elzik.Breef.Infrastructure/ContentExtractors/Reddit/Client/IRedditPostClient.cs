@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client
+﻿namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client
 {
     public interface IRedditPostClient
     {

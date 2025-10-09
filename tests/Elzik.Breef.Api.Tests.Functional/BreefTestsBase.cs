@@ -1,5 +1,4 @@
 ﻿using Elzik.Breef.Api.Presentation;
-using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure.Wallabag;
 using Microsoft.Extensions.Configuration;
 using Shouldly;

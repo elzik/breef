@@ -1,6 +1,5 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Xunit.Abstractions;
 
