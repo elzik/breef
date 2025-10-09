@@ -17,7 +17,7 @@ public class RedditOptions
         AllBaseAddresses
             .Select(url => Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri : null)
             .Where(uri => uri != null)
-            .Select(uri => uri.Host);
+            .Select(uri => uri!.Host);
 
     private List<string> GetEffectiveAdditionalBaseAddresses()
     {

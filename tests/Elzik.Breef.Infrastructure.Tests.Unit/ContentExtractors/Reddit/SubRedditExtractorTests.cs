@@ -385,29 +385,12 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         [InlineData("banner_background_image", "   ")]
         [InlineData("banner_img", "\t")]
         [InlineData("mobile_banner_image", "\n")]
-        public async Task GetSubredditImageUrlAsync_ImageUrlIsUnsuitable_UsesDefaultImageUrl(string imageKey, string? imageUrl)
-        {
-            // Arrange
-            var subredditName = "programming";
-            var json = CreateJsonWithImageKey(imageKey, imageUrl);
-
-            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
-                .Returns(Task.FromResult(json));
-
-            // Act
-            var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
-
-            // Assert
-            result.ShouldBe(DefaultRedditFallbackImageUrl);
-        }
-
-        [Theory]
         [InlineData("icon_img", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==")]
         [InlineData("community_icon", "ftp://example.com/image.png")]
         [InlineData("banner_background_image", "file:///c:/images/banner.png")]
         [InlineData("banner_img", "javascript:alert('xss')")]
         [InlineData("mobile_banner_image", "mailto:test@example.com")]
-        public async Task GetSubredditImageUrlAsync_ImageUrlHasNonHttpScheme_UsesDefaultImageUrl(string imageKey, string imageUrl)
+        public async Task GetSubredditImageUrlAsync_ImageUrlIsUnsuitable_UsesDefaultImageUrl(string imageKey, string? imageUrl)
         {
             // Arrange
             var subredditName = "programming";
