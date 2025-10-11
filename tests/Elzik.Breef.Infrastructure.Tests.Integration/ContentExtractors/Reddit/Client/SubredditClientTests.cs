@@ -1,10 +1,10 @@
 using Refit;
 using Shouldly;
-using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors.Reddit.Client;
 
-public class SubredditClientTests
+public class RawSubredditClientTests
 {
     private static bool IsRunningInGitHubWorkflow => Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
 
@@ -14,7 +14,7 @@ public class SubredditClientTests
         // Arrange
         Skip.If(IsRunningInGitHubWorkflow, "Skipped because requests to reddit.com from GitHub workflows are " +
             "always blocked meaning this test case always fails. This must be run locally instead.");
-        var client = RestService.For<ISubredditClient>("https://www.reddit.com/");
+        var client = RestService.For<IRawSubredditClient>("https://www.reddit.com/");
 
         // Act
         var newInSubreddit = await client.GetNewInSubreddit("reddit");
@@ -41,7 +41,7 @@ public class SubredditClientTests
         // Arrange
         Skip.If(IsRunningInGitHubWorkflow, "Skipped because requests to reddit.com from GitHub workflows are " +
             "always blocked meaning this test case always fails. This must be run locally instead.");
-        var client = RestService.For<ISubredditClient>("https://www.reddit.com/");
+        var client = RestService.For<IRawSubredditClient>("https://www.reddit.com/");
 
         // Act
         var aboutSubreddit = await client.GetAboutSubreddit("reddit");

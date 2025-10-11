@@ -79,8 +79,17 @@ public class Program
                 client.BaseAddress = new Uri(redditOptions.DefaultBaseAddress);
             });
 
+        builder.Services.AddRefitClient<IRawSubredditClient>()
+            .ConfigureHttpClient((provider, client) =>
+            {
+                var redditOptions = provider.GetRequiredService<IOptions<RedditOptions>>().Value;
+                client.BaseAddress = new Uri(redditOptions.DefaultBaseAddress);
+            });
+
         builder.Services.AddTransient<IRawRedditPostTransformer, RawRedditPostTransformer>();
         builder.Services.AddTransient<IRedditPostClient, RedditPostClient>();
+        builder.Services.AddTransient<IRawNewInSubredditTransformer, RawNewInSubredditTransformer>();
+        builder.Services.AddTransient<ISubredditClient, SubredditClient>();
 
         builder.Services.AddTransient<HtmlContentExtractor>();
         builder.Services.AddTransient<SubRedditContentExtractor>();
