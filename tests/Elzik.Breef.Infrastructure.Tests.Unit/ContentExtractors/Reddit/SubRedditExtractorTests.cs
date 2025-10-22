@@ -1,5 +1,6 @@
 ﻿using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Shouldly;
@@ -11,27 +12,30 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
     {
         private const string FallbackImageUrl = "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg";
         
+        private readonly ISubredditClient _mockSubredditClient;
         private readonly IHttpDownloader _mockHttpDownloader;
         private readonly IOptions<RedditOptions> _mockRedditOptions;
         private readonly SubRedditContentExtractor _extractor;
 
         public SubRedditExtractorTests()
         {
+            _mockSubredditClient = Substitute.For<ISubredditClient>();
+            _mockSubredditClient.GetNewInSubreddit(Arg.Any<string>())
+                .Returns(new NewInSubreddit { Posts = new List<RedditPost>() });
+            
             _mockHttpDownloader = Substitute.For<IHttpDownloader>();
-            // Set up different responses for different URLs
-            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("new.json")))
-                .Returns(Task.FromResult("<html><body>Mocked content</body></html>"));
-            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("about.json")))
+            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
                 .Returns(Task.FromResult(JsonSerializer.Serialize(new { data = new { } })));
             
             _mockRedditOptions = Substitute.For<IOptions<RedditOptions>>();
             _mockRedditOptions.Value.Returns(new RedditOptions
             {
                 DefaultBaseAddress = "https://www.reddit.com",
-                AdditionalBaseAddresses = ["https://reddit.com"]
+                AdditionalBaseAddresses = ["https://reddit.com"],
+                FallbackImageUrl = FallbackImageUrl
             });
             
-            _extractor = new SubRedditContentExtractor(_mockHttpDownloader, _mockRedditOptions);
+            _extractor = new SubRedditContentExtractor(_mockSubredditClient, _mockHttpDownloader, _mockRedditOptions);
         }
 
         [Theory]
@@ -73,10 +77,11 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var customOptions = new RedditOptions
             {
                 DefaultBaseAddress = "https://www.reddit.com",
-                AdditionalBaseAddresses = ["https://reddit.com", "https://custom.reddit.com", "https://alt.reddit.instance.com"]
+                AdditionalBaseAddresses = ["https://reddit.com", "https://custom.reddit.com", "https://alt.reddit.instance.com"],
+                FallbackImageUrl = FallbackImageUrl
             };
             _mockRedditOptions.Value.Returns(customOptions);
-            var extractor = new SubRedditContentExtractor(_mockHttpDownloader, _mockRedditOptions);
+            var extractor = new SubRedditContentExtractor(_mockSubredditClient, _mockHttpDownloader, _mockRedditOptions);
 
             // Act
             var canHandle = extractor.CanHandle(url);
@@ -94,10 +99,11 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var customOptions = new RedditOptions
             {
                 DefaultBaseAddress = "https://www.reddit.com",
-                AdditionalBaseAddresses = ["https://reddit.com", "https://custom.reddit.com"]
+                AdditionalBaseAddresses = ["https://reddit.com", "https://custom.reddit.com"],
+                FallbackImageUrl = FallbackImageUrl
             };
             _mockRedditOptions.Value.Returns(customOptions);
-            var extractor = new SubRedditContentExtractor(_mockHttpDownloader, _mockRedditOptions);
+            var extractor = new SubRedditContentExtractor(_mockSubredditClient, _mockHttpDownloader, _mockRedditOptions);
 
             // Act
             var canHandle = extractor.CanHandle(url);
@@ -193,35 +199,58 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         {
             // Arrange
             var url = $"https://www.reddit.com/r/subreddit";
-            var json = JsonSerializer.Serialize(new { data = new { } });
-
-            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith(".json")))
-                .Returns(Task.FromResult(json));
+            var samplePost = new RedditPost
+            {
+                Post = new RedditPostContent
+                {
+                    Id = "abc123",
+                    Title = "Test Post",
+                    Author = "testuser",
+                    Subreddit = "subreddit",
+                    Score = 100,
+                    Content = "Test content",
+                    CreatedUtc = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+                Comments = new List<RedditComment>()
+            };
+            
+            var newInSubreddit = new NewInSubreddit 
+            { 
+                Posts = new List<RedditPost> { samplePost } 
+            };
+            var expectedJson = JsonSerializer.Serialize(newInSubreddit);
+            
+            _mockSubredditClient.GetNewInSubreddit("subreddit").Returns(newInSubreddit);
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("about.json")))
+                .Returns(Task.FromResult(JsonSerializer.Serialize(new { data = new { } })));
 
             // Act
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            result.Content.ShouldBe(json);
+            result.Content.ShouldBe(expectedJson);
+            
+            var deserializedContent = JsonSerializer.Deserialize<NewInSubreddit>(result.Content);
+            deserializedContent.ShouldNotBeNull();
+            deserializedContent.Posts.Count.ShouldBe(1);
+            deserializedContent.Posts[0].Post.Id.ShouldBe("abc123");
+            deserializedContent.Posts[0].Post.Title.ShouldBe("Test Post");
         }
 
         [Theory]
         [InlineData("https://www.reddit.com/r/testsubreddit")]
         [InlineData("https://www.reddit.com/r/testsubreddit/")]
-        public async Task ExtractAsync_ValidUrl_CallsHttpDownloaderWithCorrectUrl(string subredditUrl)
+        public async Task ExtractAsync_ValidUrl_CallsSubredditClientWithCorrectName(string subredditUrl)
         {
             // Arrange
-            var expectedApiUrl = "https://www.reddit.com/r/testsubreddit/new.json";
-            var json = JsonSerializer.Serialize(new { data = new { } });
-
-            _mockHttpDownloader.DownloadAsync(Arg.Any<string>())
-                .Returns(Task.FromResult(json));
+            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("about.json")))
+                .Returns(Task.FromResult(JsonSerializer.Serialize(new { data = new { } })));
 
             // Act
             await _extractor.ExtractAsync(subredditUrl);
 
             // Assert
-            await _mockHttpDownloader.Received(1).DownloadAsync(expectedApiUrl);
+            await _mockSubredditClient.Received(1).GetNewInSubreddit("testsubreddit");
         }
 
         [Theory]
@@ -331,7 +360,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.GetSubredditImageUrlAsync(subredditName);
 
             // Assert
-            result.ShouldBe(bannerImageUrl); // Should return the first accessible image based on priority order
+            result.ShouldBe(bannerImageUrl);
         }
 
         [Fact]
@@ -438,11 +467,11 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             {
                 data = new Dictionary<string, object>
                 {
-                    { "banner_background_image", "data:image/png;base64,invalid" }, // Invalid scheme - should be skipped
-                    { "banner_img", "" }, // Empty - should be skipped
-                    { "mobile_banner_image", "   " }, // Whitespace - should be skipped
-                    { "icon_img", validImageUrl }, // Valid HTTP URL - should be used
-                    { "community_icon", "https://img.reddit.com/another-icon.png" } // Valid but comes after
+                    { "banner_background_image", "data:image/png;base64,invalid" },
+                    { "banner_img", "" },
+                    { "mobile_banner_image", "   " },
+                    { "icon_img", validImageUrl },
+                    { "community_icon", "https://img.reddit.com/another-icon.png" }
                 }
             });
 
@@ -479,8 +508,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             
             var json = CreateJsonWithImageKey("icon_img", imageUrl);
 
-            _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("new.json")))
-                .Returns(Task.FromResult("<html><body>Mocked content</body></html>"));
+            _mockSubredditClient.GetNewInSubreddit("subreddit")
+                .Returns(new NewInSubreddit { Posts = new List<RedditPost>() });
             _mockHttpDownloader.DownloadAsync(Arg.Is<string>(s => s.EndsWith("about.json")))
                 .Returns(Task.FromResult(json));
 

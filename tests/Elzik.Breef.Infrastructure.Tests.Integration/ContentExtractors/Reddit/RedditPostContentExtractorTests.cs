@@ -20,11 +20,15 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors.Reddit
             var rawRedditClient = RestService.For<IRawRedditPostClient>("https://www.reddit.com/");
             var transformer = new RawRedditPostTransformer();
             var redditPostClient = new RedditPostClient(rawRedditClient, transformer);
-            var logger = new TestOutputFakeLogger<HttpDownloader>(testOutputHelper);
-            var httpDownloaderOptions = Options.Create(new HttpDownloaderOptions());
-            var httpDownloader = new HttpDownloader(logger, httpDownloaderOptions);
+            
+            var rawSubredditClient = RestService.For<IRawSubredditClient>("https://www.reddit.com/");
+            var rawNewInSubredditTransformer = new RawNewInSubredditTransformer(redditPostClient);
+            var subredditClient = new SubredditClient(rawSubredditClient, rawNewInSubredditTransformer);
+            
             var redditOptions = Options.Create(new RedditOptions());
-            var subredditImageExtractor = new SubRedditContentExtractor(httpDownloader, redditOptions);
+            var httpDownloaderOptions = Options.Create(new HttpDownloaderOptions { UserAgent = "breef-integration-tests" });
+            var httpDownloader = new HttpDownloader(new Microsoft.Extensions.Logging.Abstractions.NullLogger<HttpDownloader>(), httpDownloaderOptions);
+            var subredditImageExtractor = new SubRedditContentExtractor(subredditClient, httpDownloader, redditOptions);
             
             _extractor = new RedditPostContentExtractor(redditPostClient, subredditImageExtractor, redditOptions);
         }

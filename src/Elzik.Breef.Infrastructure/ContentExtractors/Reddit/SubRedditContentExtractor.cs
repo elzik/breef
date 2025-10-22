@@ -1,12 +1,16 @@
 ﻿using Elzik.Breef.Domain;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 
-public class SubRedditContentExtractor(IHttpDownloader httpDownloader, IOptions<RedditOptions> redditOptions) : IContentExtractor, ISubredditImageExtractor
+public class SubRedditContentExtractor
+    (ISubredditClient subredditClient, IHttpDownloader httpDownloader, IOptions<RedditOptions> redditOptions) 
+    : IContentExtractor, ISubredditImageExtractor
 {
     private const char UrlPathSeparator = '/';
+    private readonly IHttpDownloader _httpDownloader = httpDownloader;
     private readonly RedditOptions _redditOptions = redditOptions.Value;
 
     public bool CanHandle(string webPageUrl)
@@ -30,10 +34,11 @@ public class SubRedditContentExtractor(IHttpDownloader httpDownloader, IOptions<
     public async Task<Extract> ExtractAsync(string webPageUrl)
     {
         var webPageUri = new Uri(webPageUrl.EndsWith(UrlPathSeparator) ? webPageUrl : webPageUrl + UrlPathSeparator, UriKind.Absolute);
-        var subRedditNewPostsUri = new Uri(webPageUri, "new.json");
         var webPageParts = webPageUri.AbsolutePath.Trim(UrlPathSeparator).Split(UrlPathSeparator);
         var subredditName = webPageParts[^1];
-        var jsonContent = await httpDownloader.DownloadAsync(subRedditNewPostsUri.AbsoluteUri);
+        
+        var newInSubreddit = await subredditClient.GetNewInSubreddit(subredditName);
+        var jsonContent = JsonSerializer.Serialize(newInSubreddit);
         var imageUrl = await ExtractImageUrlAsync(webPageUri);
 
         return new Extract($"New in r/{subredditName}", jsonContent, imageUrl);
@@ -48,7 +53,7 @@ public class SubRedditContentExtractor(IHttpDownloader httpDownloader, IOptions<
     private async Task<string> ExtractImageUrlAsync(Uri subRedditBaseUri)
     {
         Uri subRedditAboutUri = new(subRedditBaseUri, "about.json");
-        var jsonContent = await httpDownloader.DownloadAsync(subRedditAboutUri.AbsoluteUri);
+        var jsonContent = await _httpDownloader.DownloadAsync(subRedditAboutUri.AbsoluteUri);
 
         string[] imageKeys = ["banner_background_image", "banner_img", "mobile_banner_image", "icon_img", "community_icon"];
 
@@ -63,7 +68,7 @@ public class SubRedditContentExtractor(IHttpDownloader httpDownloader, IOptions<
                 if (!string.IsNullOrWhiteSpace(imageUrl) && 
                     Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri) &&
                     (uri.Scheme == "http" || uri.Scheme == "https") &&
-                    await httpDownloader.TryGet(imageUrl))
+                    await _httpDownloader.TryGet(imageUrl))
                 {
                     return imageUrl;
                 }
