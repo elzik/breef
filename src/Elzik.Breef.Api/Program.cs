@@ -92,14 +92,14 @@ public class Program
         builder.Services.AddTransient<ISubredditClient, SubredditClient>();
 
         builder.Services.AddTransient<HtmlContentExtractor>();
-        builder.Services.AddTransient<SubRedditContentExtractor>();
+        builder.Services.AddTransient<SubredditContentExtractor>();
         builder.Services.AddTransient<RedditPostContentExtractor>();
-        builder.Services.AddTransient<ISubredditImageExtractor, SubRedditContentExtractor>();
+        builder.Services.AddTransient<ISubredditImageExtractor, SubredditContentExtractor>();
         builder.Services.AddTransient<IContentExtractor>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<ContentExtractorStrategy>>();
             var defaultContentExtractor = provider.GetRequiredService<HtmlContentExtractor>();
-            var subredditExtractor = provider.GetRequiredService<SubRedditContentExtractor>();
+            var subredditExtractor = provider.GetRequiredService<SubredditContentExtractor>();
             var redditPostExtractor = provider.GetRequiredService<RedditPostContentExtractor>();
             return new ContentExtractorStrategy(logger, 
                 [subredditExtractor, redditPostExtractor], 

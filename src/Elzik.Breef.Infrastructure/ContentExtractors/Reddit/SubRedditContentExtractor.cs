@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 
-public class SubRedditContentExtractor
+public class SubredditContentExtractor
     (ISubredditClient subredditClient, IHttpDownloader httpDownloader, IOptions<RedditOptions> redditOptions) 
     : IContentExtractor, ISubredditImageExtractor
 {

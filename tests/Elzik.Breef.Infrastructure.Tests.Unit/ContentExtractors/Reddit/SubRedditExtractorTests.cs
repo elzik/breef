@@ -8,16 +8,16 @@ using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
 {
-    public class SubRedditExtractorTests
+    public class SubredditExtractorTests
     {
         private const string FallbackImageUrl = "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg";
         
         private readonly ISubredditClient _mockSubredditClient;
         private readonly IHttpDownloader _mockHttpDownloader;
         private readonly IOptions<RedditOptions> _mockRedditOptions;
-        private readonly SubRedditContentExtractor _extractor;
+        private readonly SubredditContentExtractor _extractor;
 
-        public SubRedditExtractorTests()
+        public SubredditExtractorTests()
         {
             _mockSubredditClient = Substitute.For<ISubredditClient>();
             _mockSubredditClient.GetNewInSubreddit(Arg.Any<string>())
@@ -35,7 +35,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                 FallbackImageUrl = FallbackImageUrl
             });
             
-            _extractor = new SubRedditContentExtractor(_mockSubredditClient, _mockHttpDownloader, _mockRedditOptions);
+            _extractor = new SubredditContentExtractor(_mockSubredditClient, _mockHttpDownloader, _mockRedditOptions);
         }
 
         [Theory]
@@ -43,7 +43,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         [InlineData("https://reddit.com/r/testsubreddit")]
         [InlineData("hTTpS://rEDdiT.cOm/R/tEsTsUbReDdIt/")]
         [InlineData("https://www.reddit.com/r/testsubreddit/")]
-        public void CanHandle_ValidSubRedditUrl_ReturnsTrue(string url)
+        public void CanHandle_ValidSubredditUrl_ReturnsTrue(string url)
         {
             // Act
             var canHandle = _extractor.CanHandle(url);
@@ -59,7 +59,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         [InlineData("https://reddit.com/r/testsubreddit/more")]
         [InlineData("https://not-reddit.com/r/testsubreddit/")]
         [InlineData("https://www2.reddit.com/r/testsubreddit/")]
-        public void CanHandle_InvalidSubRedditUrl_ReturnsFalse(string url)
+        public void CanHandle_InvalidSubredditUrl_ReturnsFalse(string url)
         {
             // Act
             var canHandle = _extractor.CanHandle(url);
@@ -81,7 +81,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                 FallbackImageUrl = FallbackImageUrl
             };
             _mockRedditOptions.Value.Returns(customOptions);
-            var extractor = new SubRedditContentExtractor(_mockSubredditClient, _mockHttpDownloader, _mockRedditOptions);
+            var extractor = new SubredditContentExtractor(_mockSubredditClient, _mockHttpDownloader, _mockRedditOptions);
 
             // Act
             var canHandle = extractor.CanHandle(url);
@@ -103,7 +103,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                 FallbackImageUrl = FallbackImageUrl
             };
             _mockRedditOptions.Value.Returns(customOptions);
-            var extractor = new SubRedditContentExtractor(_mockSubredditClient, _mockHttpDownloader, _mockRedditOptions);
+            var extractor = new SubredditContentExtractor(_mockSubredditClient, _mockHttpDownloader, _mockRedditOptions);
 
             // Act
             var canHandle = extractor.CanHandle(url);

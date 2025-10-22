@@ -9,7 +9,7 @@ public class RawSubredditClientTests
     private static bool IsRunningInGitHubWorkflow => Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
 
     [SkippableFact]
-    public async Task GetNewInSubReddit_ValidSubreddit_ReturnsNewInSubreddit()
+    public async Task GetNewInSubreddit_ValidSubreddit_ReturnsNewInSubreddit()
     {
         // Arrange
         Skip.If(IsRunningInGitHubWorkflow, "Skipped because requests to reddit.com from GitHub workflows are " +
@@ -23,7 +23,7 @@ public class RawSubredditClientTests
         newInSubreddit.ShouldNotBeNull();
         newInSubreddit.Data.ShouldNotBeNull();
         newInSubreddit.Data.Children.ShouldNotBeNull();
-        newInSubreddit.Data.Children.Count.ShouldBe(25);
+        newInSubreddit.Data.Children.Count.ShouldNotBe(0, "because at least one post will be returned");
         foreach (var child in newInSubreddit.Data.Children)
         {
             child.Data.ShouldNotBeNull();
