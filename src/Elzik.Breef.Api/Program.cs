@@ -61,11 +61,18 @@ public class Program
             .ValidateOnStart();
         builder.Services.AddAuth();
 
-        builder.Services.AddOptions<HttpDownloaderOptions>()
-            .Bind(configuration.GetSection("HttpDownloader"))
+        builder.Services.AddOptions<HttpClientOptions>()
+            .Bind(configuration.GetSection("HttpClient"))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        builder.Services.AddTransient<IHttpDownloader, HttpDownloader>();
+
+        builder.Services.AddHttpClient("BreefDownloader")
+            .ConfigureHttpClient((provider, client) =>
+            {
+                var httpClientOptions = provider.GetRequiredService<IOptions<HttpClientOptions>>().Value;
+                client.Timeout = TimeSpan.FromSeconds(httpClientOptions.TimeoutSeconds);
+                client.DefaultRequestHeaders.Add("User-Agent", httpClientOptions.UserAgent);
+            });
 
         builder.Services.AddOptions<RedditOptions>()
             .Bind(configuration.GetSection("Reddit"))

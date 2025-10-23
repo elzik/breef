@@ -2,6 +2,7 @@ using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using Refit;
 using Shouldly;
 using System.Text.Json;
@@ -24,12 +25,18 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors.Reddit
             var rawSubredditClient = RestService.For<IRawSubredditClient>("https://www.reddit.com/");
             var rawNewInSubredditTransformer = new RawNewInSubredditTransformer(redditPostClient);
             var subredditClient = new SubredditClient(rawSubredditClient, rawNewInSubredditTransformer);
-            
+ 
             var redditOptions = Options.Create(new RedditOptions());
-            var httpDownloaderOptions = Options.Create(new HttpDownloaderOptions { UserAgent = "breef-integration-tests" });
-            var httpDownloader = new HttpDownloader(new Microsoft.Extensions.Logging.Abstractions.NullLogger<HttpDownloader>(), httpDownloaderOptions);
-            var subredditImageExtractor = new SubredditContentExtractor(subredditClient, httpDownloader, redditOptions);
-            
+            var httpClientOptions = Options.Create(new HttpClientOptions { UserAgent = "breef-integration-tests" });
+  
+            var mockHttpClientFactory = Substitute.For<IHttpClientFactory>();
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("User-Agent", httpClientOptions.Value.UserAgent);
+            httpClient.Timeout = TimeSpan.FromSeconds(httpClientOptions.Value.TimeoutSeconds);
+            mockHttpClientFactory.CreateClient("BreefDownloader").Returns(httpClient);
+    
+            var subredditImageExtractor = new SubredditContentExtractor(subredditClient, mockHttpClientFactory, redditOptions);
+          
             _extractor = new RedditPostContentExtractor(redditPostClient, subredditImageExtractor, redditOptions);
         }
 

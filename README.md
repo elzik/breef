@@ -141,12 +141,14 @@ Example:
 These settings affect how pages are downloaded prior to being summarised.
 
   - **UserAgent** - The user agent used when downloading pages. By default this is set to `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36` but can be overridden here.
+  - **TimeoutSeconds** - The timeout in seconds for HTTP requests when downloading pages. By default this is set to `30` seconds but can be overridden here. Must be at least 1 second.
 
 Example:
 
 ```jsonc
-"HttpDownloader" : {
-    "UserAgent": "<custom-agent>"   // breef_HttpDownloader__UserAgent
+"HttpClient" : {
+    "UserAgent": "<custom-agent>",          // breef_HttpClient__UserAgent
+    "TimeoutSeconds": 30                    // breef_HttpClient__TimeoutSeconds
 }
 ```
 

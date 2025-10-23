@@ -6,11 +6,11 @@ using System.Text.Json;
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 
 public class SubredditContentExtractor
-    (ISubredditClient subredditClient, IHttpDownloader httpDownloader, IOptions<RedditOptions> redditOptions) 
+    (ISubredditClient subredditClient, IHttpClientFactory httpClientFactory, IOptions<RedditOptions> redditOptions)
     : IContentExtractor, ISubredditImageExtractor
 {
     private const char UrlPathSeparator = '/';
-    private readonly IHttpDownloader _httpDownloader = httpDownloader;
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     private readonly RedditOptions _redditOptions = redditOptions.Value;
 
     public bool CanHandle(string webPageUrl)
@@ -52,29 +52,34 @@ public class SubredditContentExtractor
 
     private async Task<string> ExtractImageUrlAsync(Uri subRedditBaseUri)
     {
-        Uri subRedditAboutUri = new(subRedditBaseUri, "about.json");
-        var jsonContent = await _httpDownloader.DownloadAsync(subRedditAboutUri.AbsoluteUri);
+      Uri subRedditAboutUri = new(subRedditBaseUri, "about.json");
+        var httpClient = _httpClientFactory.CreateClient("BreefDownloader");
+        var jsonContent = await httpClient.GetStringAsync(subRedditAboutUri.AbsoluteUri);
 
         string[] imageKeys = ["banner_background_image", "banner_img", "mobile_banner_image", "icon_img", "community_icon"];
 
         using var doc = JsonDocument.Parse(jsonContent);
         var data = doc.RootElement.GetProperty("data");
 
-        foreach (var imageKey in imageKeys)
+     foreach (var imageKey in imageKeys)
         {
-            if (data.TryGetProperty(imageKey, out var prop))
-            {
-                var imageUrl = prop.GetString();
-                if (!string.IsNullOrWhiteSpace(imageUrl) && 
-                    Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri) &&
-                    (uri.Scheme == "http" || uri.Scheme == "https") &&
-                    await _httpDownloader.TryGet(imageUrl))
+  if (data.TryGetProperty(imageKey, out var prop))
+    {
+  var imageUrl = prop.GetString();
+        if (!string.IsNullOrWhiteSpace(imageUrl) && 
+   Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri) &&
+       (uri.Scheme == "http" || uri.Scheme == "https"))
                 {
-                    return imageUrl;
-                }
+  var client = _httpClientFactory.CreateClient("BreefDownloader");
+             var response = await client.GetAsync(imageUrl);
+           if (response.IsSuccessStatusCode)
+         {
+                 return imageUrl;
+       }
+      }
             }
         }
 
         return _redditOptions.FallbackImageUrl;
-    }
+  }
 }

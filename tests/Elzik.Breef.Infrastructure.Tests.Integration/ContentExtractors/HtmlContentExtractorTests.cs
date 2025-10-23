@@ -18,12 +18,18 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
         {
             // Arrange
             var mockTestUrl = "https://mock.url";
-            var mockHttpDownloader = Substitute.For<IHttpDownloader>();
+            var mockHttpClientFactory = Substitute.For<IHttpClientFactory>();
+            var mockHttpClient = Substitute.For<HttpClient>();
+            mockHttpClientFactory.CreateClient("BreefDownloader").Returns(mockHttpClient);
+
             var testHtml = await File.ReadAllTextAsync(Path.Join("../../../../TestData", testFileName));
-            mockHttpDownloader.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
+
+            var mockHandler = new MockHttpMessageHandler(testHtml);
+            var httpClient = new HttpClient(mockHandler);
+            mockHttpClientFactory.CreateClient("BreefDownloader").Returns(httpClient);
 
             // Act
-            var extractor = new HtmlContentExtractor(mockHttpDownloader);
+            var extractor = new HtmlContentExtractor(mockHttpClientFactory);
             var result = await extractor.ExtractAsync(mockTestUrl);
 
             // Assert
@@ -41,10 +47,10 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
         public void CanHandle_AnyString_CanHandle()
         {
             // Arrange
-            var mockHttpDownloader = Substitute.For<IHttpDownloader>();
+            var mockHttpClientFactory = Substitute.For<IHttpClientFactory>();
 
             // Act
-            var defaultOnlyContentExtractorStrategy = new HtmlContentExtractor(mockHttpDownloader);
+            var defaultOnlyContentExtractorStrategy = new HtmlContentExtractor(mockHttpClientFactory);
             var canHandleAnyString = defaultOnlyContentExtractorStrategy.CanHandle("Any string.");
 
             // Assert
@@ -54,6 +60,18 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
         private static string NormaliseLineEndings(string text)
         {
             return text.Replace("\r\n", "\n");
+        }
+
+        private class MockHttpMessageHandler(string content) : HttpMessageHandler
+        {
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(new HttpResponseMessage
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = new StringContent(content)
+                });
+            }
         }
     }
 }
