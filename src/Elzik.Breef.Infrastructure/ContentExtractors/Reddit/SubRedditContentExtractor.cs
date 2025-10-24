@@ -52,7 +52,7 @@ public class SubredditContentExtractor
 
     private async Task<string> ExtractImageUrlAsync(Uri subRedditBaseUri)
     {
-      Uri subRedditAboutUri = new(subRedditBaseUri, "about.json");
+        Uri subRedditAboutUri = new(subRedditBaseUri, "about.json");
         var httpClient = _httpClientFactory.CreateClient("BreefDownloader");
         var jsonContent = await httpClient.GetStringAsync(subRedditAboutUri.AbsoluteUri);
 
@@ -61,25 +61,25 @@ public class SubredditContentExtractor
         using var doc = JsonDocument.Parse(jsonContent);
         var data = doc.RootElement.GetProperty("data");
 
-     foreach (var imageKey in imageKeys)
+        foreach (var imageKey in imageKeys)
         {
-  if (data.TryGetProperty(imageKey, out var prop))
-    {
-  var imageUrl = prop.GetString();
-        if (!string.IsNullOrWhiteSpace(imageUrl) && 
-   Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri) &&
-       (uri.Scheme == "http" || uri.Scheme == "https"))
+            if (data.TryGetProperty(imageKey, out var prop))
+            {
+                var imageUrl = prop.GetString();
+                if (!string.IsNullOrWhiteSpace(imageUrl) && 
+                    Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri) &&
+                    (uri.Scheme == "http" || uri.Scheme == "https"))
                 {
-  var client = _httpClientFactory.CreateClient("BreefDownloader");
-             var response = await client.GetAsync(imageUrl);
-           if (response.IsSuccessStatusCode)
-         {
-                 return imageUrl;
-       }
-      }
+                    var client = _httpClientFactory.CreateClient("BreefDownloader");
+                    var response = await client.GetAsync(imageUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return imageUrl;
+                    }
+                }
             }
         }
 
         return _redditOptions.FallbackImageUrl;
-  }
+    }
 }
