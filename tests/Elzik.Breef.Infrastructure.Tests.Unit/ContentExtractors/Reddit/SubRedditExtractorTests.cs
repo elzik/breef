@@ -481,7 +481,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                     { "mobile_banner_image", "   " },
                     { "icon_img", validImageUrl },
                     { "community_icon", "https://img.reddit.com/another-icon.png" }
-               }
+                }
             });
 
             var mockHandler = new MockHttpMessageHandler(json, System.Net.HttpStatusCode.OK);
@@ -493,6 +493,23 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
 
             // Assert
             result.ShouldBe(validImageUrl);
+        }
+
+        [Fact]
+        public async Task ExtractAsync_UrlWithQueryString_ExtractsCorrectSubredditName()
+        {
+            // Arrange
+            var json = JsonSerializer.Serialize(new { data = new { } });
+            var mockHandler = new MockHttpMessageHandler(json, System.Net.HttpStatusCode.OK);
+            var httpClient = new HttpClient(mockHandler);
+            _mockHttpClientFactory.CreateClient("BreefDownloader").Returns(httpClient);
+
+            // Act - URL with both query string and fragment
+            var result = await _extractor.ExtractAsync("https://www.reddit.com/r/dotnet/?utm_source=share#section");
+
+            // Assert
+            result.Title.ShouldBe("New in r/dotnet");
+            await _mockSubredditClient.Received(1).GetNewInSubreddit("dotnet");
         }
 
         [Theory]
