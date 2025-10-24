@@ -71,7 +71,7 @@ public class SubredditContentExtractor
                     (uri.Scheme == "http" || uri.Scheme == "https"))
                 {
                     var client = _httpClientFactory.CreateClient("BreefDownloader");
-                    var response = await client.GetAsync(imageUrl);
+                    using var response = await client.GetAsync(imageUrl);
                     if (response.IsSuccessStatusCode)
                     {
                         return imageUrl;
