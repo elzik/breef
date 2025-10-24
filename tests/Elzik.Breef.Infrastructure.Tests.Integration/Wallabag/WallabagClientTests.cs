@@ -1,9 +1,7 @@
 ﻿using Elzik.Breef.Infrastructure.Wallabag;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Refit;
 using Shouldly;
-using System.Diagnostics;
 using Xunit.Abstractions;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag

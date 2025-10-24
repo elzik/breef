@@ -62,7 +62,7 @@ public class ContentSummariserTests
     public async Task SummariseAsync_ValidContent_ProvidesModelInstructions()
     {
         // Act
-        var result = await _contentSummariser.SummariseAsync(_testContent);
+        _ = await _contentSummariser.SummariseAsync(_testContent);
 
         // Assert
         var systemPrompt = @$"

@@ -1,11 +1,11 @@
 using Elzik.Breef.Domain;
-using Elzik.Breef.Infrastructure;
+using Elzik.Breef.Infrastructure.ContentExtractors;
 using NSubstitute;
 using Shouldly;
 
-namespace Elzik.Breef.Infrastructure.Tests.Integration
+namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
 {
-    public class ContentExtractorTests
+    public class HtmlContentExtractorTests
     {
         [Theory]
         [InlineData("TestHtmlPage.html", "TestHtmlPage-ExpectedContent.txt", "Test HTML Page", "https://test-large-image.jpg")]
@@ -18,12 +18,18 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
         {
             // Arrange
             var mockTestUrl = "https://mock.url";
-            var mockHttpClient = Substitute.For<IWebPageDownloader>();
+            var mockHttpClientFactory = Substitute.For<IHttpClientFactory>();
+            var mockHttpClient = Substitute.For<HttpClient>();
+            mockHttpClientFactory.CreateClient("BreefDownloader").Returns(mockHttpClient);
+
             var testHtml = await File.ReadAllTextAsync(Path.Join("../../../../TestData", testFileName));
-            mockHttpClient.DownloadAsync(Arg.Is(mockTestUrl)).Returns(Task.FromResult(testHtml));
+
+            var mockHandler = new MockHttpMessageHandler(testHtml);
+            var httpClient = new HttpClient(mockHandler);
+            mockHttpClientFactory.CreateClient("BreefDownloader").Returns(httpClient);
 
             // Act
-            var extractor = new ContentExtractor(mockHttpClient);
+            var extractor = new HtmlContentExtractor(mockHttpClientFactory);
             var result = await extractor.ExtractAsync(mockTestUrl);
 
             // Assert
@@ -37,9 +43,35 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration
             result.PreviewImageUrl.ShouldBe(expectedPreviewImageUrl);
         }
 
+        [Fact]
+        public void CanHandle_AnyString_CanHandle()
+        {
+            // Arrange
+            var mockHttpClientFactory = Substitute.For<IHttpClientFactory>();
+
+            // Act
+            var defaultOnlyContentExtractorStrategy = new HtmlContentExtractor(mockHttpClientFactory);
+            var canHandleAnyString = defaultOnlyContentExtractorStrategy.CanHandle("Any string.");
+
+            // Assert
+            canHandleAnyString.ShouldBeTrue();
+        }
+
         private static string NormaliseLineEndings(string text)
         {
             return text.Replace("\r\n", "\n");
+        }
+
+        private class MockHttpMessageHandler(string content) : HttpMessageHandler
+        {
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(new HttpResponseMessage
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = new StringContent(content)
+                });
+            }
         }
     }
 }

@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Shouldly;
 using Elzik.Breef.Infrastructure.Wallabag;
-using Newtonsoft.Json.Linq;
 
 namespace Elzik.Breef.Infrastructure.Tests.Integration.Wallabag;
 
