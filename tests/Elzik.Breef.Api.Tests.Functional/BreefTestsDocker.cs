@@ -67,10 +67,9 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
                         new TestOutputHelperStream(_testOutputHelper),
                         new TestOutputHelperStream(_testOutputHelper));
 
-            ushort internalDockerPort = 8080;
             _testContainer = new ContainerBuilder()
                 .WithImage(DockerImageName)
-                .WithPortBinding(internalDockerPort, true)
+                .WithPortBinding(8080, true)
                 .WithEnvironment("breef_BreefApi__ApiKey", ApiKey)
                 .WithEnvironment("breef_AiService__Provider", breefAiServiceProvider)
                 .WithEnvironment("breef_AiService__EndpointUrl", breefAiServiceEndpointUrl)
@@ -81,8 +80,7 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
                 .WithEnvironment("breef_Wallabag__Password", breefWallabagPassword)
                 .WithEnvironment("breef_Wallabag__ClientId", breefWallabagClientId)
                 .WithEnvironment("breef_Wallabag__ClientSecret", breefWallabagClientSecret)
-                .WithWaitStrategy(Wait.ForUnixContainer()
-                    .UntilHttpRequestIsSucceeded(r => r.ForPort(internalDockerPort)))
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8080))
                 .WithOutputConsumer(outputConsumer)
                 .Build();
         }
