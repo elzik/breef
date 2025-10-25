@@ -282,29 +282,6 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             result.ShouldBe(imageUrl);
         }
 
-        [Theory]
-        [InlineData("programming")]
-        [InlineData("learnprogramming")]
-        [InlineData("AskReddit")]
-        [InlineData("funny")]
-        public async Task GetSubredditImageUrlAsync_ValidSubredditName_CallsCorrectAboutUrl(string subredditName)
-        {
-            // Arrange
-            var expectedUrl = $"https://www.reddit.com/r/{subredditName}/about.json";
-            var json = JsonSerializer.Serialize(new { data = new { } });
-
-            var mockHandler = new MockHttpMessageHandler(json, System.Net.HttpStatusCode.OK);
-            var httpClient = new HttpClient(mockHandler);
-            _mockHttpClientFactory.CreateClient("BreefDownloader").Returns(httpClient);
-
-            // Act
-            await _extractor.GetSubredditImageUrlAsync(subredditName);
-
-            // Assert
-            // Since we're using MockHttpMessageHandler, we can't easily verify the exact URL called
-            // The test passes if no exception is thrown and the method completes successfully
-        }
-
         [Fact]
         public async Task GetSubredditImageUrlAsync_NoImageKeysExist_ReturnsFallbackImageUrl()
         {
