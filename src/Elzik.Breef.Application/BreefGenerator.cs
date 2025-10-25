@@ -1,5 +1,4 @@
 ﻿using Elzik.Breef.Domain;
-using System.Diagnostics;
 
 namespace Elzik.Breef.Application
 {

@@ -4,15 +4,15 @@ using Elzik.Breef.Application;
 using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure;
 using Elzik.Breef.Infrastructure.AI;
+using Elzik.Breef.Infrastructure.ContentExtractors;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 using Elzik.Breef.Infrastructure.Wallabag;
 using Microsoft.Extensions.Options;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
 using Refit;
 using Serilog;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Elzik.Breef.Api;
 
@@ -61,13 +61,57 @@ public class Program
             .ValidateOnStart();
         builder.Services.AddAuth();
 
-        builder.Services.AddOptions<WebPageDownLoaderOptions>()
-            .Bind(configuration.GetSection("WebPageDownLoader"))
+        builder.Services.AddOptions<HttpClientOptions>()
+            .Bind(configuration.GetSection("HttpClient"))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        builder.Services.AddTransient<IWebPageDownloader, WebPageDownloader>();
 
-        builder.Services.AddTransient<IContentExtractor, ContentExtractor>();
+        builder.Services.AddHttpClient("BreefDownloader")
+            .ConfigureHttpClient((provider, client) =>
+            {
+                var httpClientOptions = provider.GetRequiredService<IOptions<HttpClientOptions>>().Value;
+                client.Timeout = TimeSpan.FromSeconds(httpClientOptions.TimeoutSeconds);
+                client.DefaultRequestHeaders.Add("User-Agent", httpClientOptions.UserAgent);
+            });
+
+        builder.Services.AddOptions<RedditOptions>()
+            .Bind(configuration.GetSection("Reddit"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        
+        builder.Services.AddRefitClient<IRawRedditPostClient>()
+            .ConfigureHttpClient((provider, client) =>
+            {
+                var redditOptions = provider.GetRequiredService<IOptions<RedditOptions>>().Value;
+                client.BaseAddress = new Uri(redditOptions.DefaultBaseAddress);
+            });
+
+        builder.Services.AddRefitClient<IRawSubredditClient>()
+            .ConfigureHttpClient((provider, client) =>
+            {
+                var redditOptions = provider.GetRequiredService<IOptions<RedditOptions>>().Value;
+                client.BaseAddress = new Uri(redditOptions.DefaultBaseAddress);
+            });
+
+        builder.Services.AddTransient<IRawRedditPostTransformer, RawRedditPostTransformer>();
+        builder.Services.AddTransient<IRedditPostClient, RedditPostClient>();
+        builder.Services.AddTransient<IRawNewInSubredditTransformer, RawNewInSubredditTransformer>();
+        builder.Services.AddTransient<ISubredditClient, SubredditClient>();
+
+        builder.Services.AddTransient<HtmlContentExtractor>();
+        builder.Services.AddTransient<SubredditContentExtractor>();
+        builder.Services.AddTransient<RedditPostContentExtractor>();
+        builder.Services.AddTransient<ISubredditImageExtractor, SubredditContentExtractor>();
+        builder.Services.AddTransient<IContentExtractor>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<ContentExtractorStrategy>>();
+            var defaultContentExtractor = provider.GetRequiredService<HtmlContentExtractor>();
+            var subredditExtractor = provider.GetRequiredService<SubredditContentExtractor>();
+            var redditPostExtractor = provider.GetRequiredService<RedditPostContentExtractor>();
+            return new ContentExtractorStrategy(logger, 
+                [subredditExtractor, redditPostExtractor], 
+                defaultContentExtractor);
+        });
 
         builder.Services.AddOptions<AiServiceOptions>()
             .Bind(configuration.GetSection("AiService"))

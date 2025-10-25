@@ -1,6 +1,5 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Xunit.Abstractions;
 
@@ -9,6 +8,7 @@ namespace Elzik.Breef.Api.Tests.Functional;
 public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 {
     private const string DockerImageName = "ghcr.io/elzik/elzik-breef-api:latest";
+    private const int ContainerStartTimeoutSeconds = 30;
     private readonly IContainer? _testContainer;
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly bool _dockerIsUnavailable;
@@ -157,9 +157,25 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
     {
         if (!_dockerIsUnavailable)
         {
-            await _testContainer!.StartAsync(); // Null forgiven since if we're not skipping tests,
-                                                // _testContainer will never be null
-            HostPort = _testContainer.GetMappedPublicPort(8080);
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(ContainerStartTimeoutSeconds));
+
+            if(_testContainer == null)
+            {
+                throw new InvalidOperationException("Test container is not initialized " +
+                                                    "and cannot be started.");
+            }
+
+            try
+            {
+                await _testContainer.StartAsync(timeoutCts.Token);
+                HostPort = _testContainer.GetMappedPublicPort(8080);
+            }
+            catch (OperationCanceledException) when (timeoutCts.Token.IsCancellationRequested)
+            {
+                throw new TimeoutException($"Container failed to start within {ContainerStartTimeoutSeconds} seconds. " +
+                                           $"This may indicate that the container is taking too long to become ready " +
+                                           $"or there's an issue with the container startup.");
+            }
         }
     }
 
@@ -167,8 +183,13 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
     {
         if (!_dockerIsUnavailable)
         {
-            await _testContainer!.StopAsync(); // Null forgiven since if we're not skipping tests,
-                                               // _testContainer will never be null
+            if (_testContainer == null)
+            {
+                throw new InvalidOperationException("Test container is not initialized " +
+                                                    "and cannot be stopped.");
+            }
+
+            await _testContainer.StopAsync();
         }
     }
 }

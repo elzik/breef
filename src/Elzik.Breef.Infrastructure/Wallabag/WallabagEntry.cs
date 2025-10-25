@@ -1,6 +1,3 @@
-using Refit;
-using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Elzik.Breef.Infrastructure.Wallabag

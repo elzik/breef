@@ -80,6 +80,34 @@ Example
 
 ### Optional
 
+#### Reddit
+
+These config items relate to the Reddit integration using the Options pattern with support for multiple Reddit instances.
+
+- **DefaultBaseAddress** - The primary base address for Reddit API requests. Default: `"https://www.reddit.com"`. Must be a valid URL. Used for Refit HTTP client configuration, fallback subreddit image extraction, and primary Reddit instance for content extraction.
+- **AdditionalBaseAddresses** - Additional Reddit instances that the content extractors can handle. Default: `["https://reddit.com"]` (includes non-www variant by default). Domain matching is **exact** - if you want to support both `reddit.com` and `www.reddit.com`, you must explicitly configure both.
+- **FallbackImageUrl** - The fallback image URL used when subreddit-specific images cannot be retrieved. Default: `"https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg"`. This URL is used as the default Reddit logo when no subreddit banner, icon, or community image is available.
+
+The Reddit integration allows extraction of content from:
+- Custom Reddit instances
+- Alternative Reddit domains  
+- Corporate or self-hosted Reddit installations
+- Specific subdomains (e.g., `old.reddit.com`, `api.reddit.com`)
+
+**Domain Validation**: The content extractors validate URLs using **exact domain matching**. `reddit.com` does NOT automatically allow `www.reddit.com` - each domain variant must be explicitly configured.
+
+Example:
+
+```jsonc
+"Reddit": {
+    "DefaultBaseAddress": "https://www.reddit.com",         // breef_Reddit__DefaultBaseAddress
+    "AdditionalBaseAddresses": [                            // breef_Reddit__AdditionalBaseAddresses__0
+        "https://reddit.com",                               // breef_Reddit__AdditionalBaseAddresses__0
+    ],
+    "FallbackImageUrl": "https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Lockup_Logo.svg"  // breef_Reddit__FallbackImageUrl
+}
+```
+
 #### AiService
 
 - **TimeOut** - Sets the number of seconds before the AiService used will time out. The default used if not set is 100 seconds. This may need to be increased where Ollama is used with limiting hardware.
@@ -112,13 +140,15 @@ Example:
 
 These settings affect how pages are downloaded prior to being summarised.
 
-  - **UserAgent** - The user agent used when downloading pages. By default this is set to `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36` but can be overridden here.
+- **UserAgent** - The user agent used when downloading pages. By default this is set to `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36` but can be overridden here.
+- **TimeoutSeconds** - The timeout in seconds for HTTP requests when downloading pages. By default this is set to `30` seconds but can be overridden here. Must be at least 1 second.
 
 Example:
 
 ```jsonc
-"WebPageDownLoader" : {
-    "UserAgent": "<custom-agent>"   // breef_WebPageDownLoader__UserAgent
+"HttpClient" : {
+    "UserAgent": "<custom-agent>",          // breef_HttpClient__UserAgent
+    "TimeoutSeconds": 30                    // breef_HttpClient__TimeoutSeconds
 }
 ```
 
@@ -132,4 +162,3 @@ Logging is handled by Serilog and configuration is documented [here](https://git
     "Default": "Debug"   // breef_Serilog__MinimumLevel__Default
   }
 }
-```

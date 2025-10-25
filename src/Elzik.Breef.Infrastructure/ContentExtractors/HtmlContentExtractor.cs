@@ -1,13 +1,14 @@
 ﻿using Elzik.Breef.Domain;
 using HtmlAgilityPack;
 
-namespace Elzik.Breef.Infrastructure;
+namespace Elzik.Breef.Infrastructure.ContentExtractors;
 
-public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
+public class HtmlContentExtractor(IHttpClientFactory httpClientFactory) : IContentExtractor
 {
     public async Task<Extract> ExtractAsync(string webPageUrl)
     {
-        var html = await httpClient.DownloadAsync(webPageUrl);
+        var httpClient = httpClientFactory.CreateClient("BreefDownloader");
+        var html = await httpClient.GetStringAsync(webPageUrl);
         var htmlDocument = new HtmlDocument();
         htmlDocument.LoadHtml(html);
 
@@ -78,4 +79,6 @@ public class ContentExtractor(IWebPageDownloader httpClient) : IContentExtractor
 
         return imageNodesSortedBySize.FirstOrDefault()?.ImageUrl;
     }
+
+    public bool CanHandle(string webPageUrl) => true;
 }
