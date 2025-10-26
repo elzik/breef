@@ -1,4 +1,5 @@
 ﻿using AspNetCore.Authentication.ApiKey;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Elzik.Breef.Api.Auth;
 
@@ -12,22 +13,19 @@ public static class AuthExtensions
                 options.KeyName = "BREEF-API-KEY";
                 options.Realm = "BreefAPI";
             });
-        services.AddAuthorization();
+
+        var authBuilder = services.AddAuthorizationBuilder();
+        authBuilder.AddPolicy("RequireAuthenticated", p => p.RequireAuthenticatedUser());
+
+        services.Configure<AuthorizationOptions>(options =>
+        {
+            options.FallbackPolicy = options.GetPolicy("RequireAuthenticated");
+        });
     }
 
     public static void UseAuth(this WebApplication app)
     {
         app.UseAuthentication();
         app.UseAuthorization();
-        app.Use(async (context, next) =>
-        {
-            if (context.User.Identity != null && !context.User.Identity.IsAuthenticated)
-            {
-                context.Response.StatusCode = 401;
-                await context.Response.WriteAsync("Unauthorised");
-                return;
-            }
-            await next();
-        });
     }
 }

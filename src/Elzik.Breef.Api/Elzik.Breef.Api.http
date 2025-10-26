@@ -1,8 +1,15 @@
 @Elzik.Breef.Api_HostAddress = http://localhost:5079
 
+### Breefs
+
 Post {{Elzik.Breef.Api_HostAddress}}/breefs
 Content-Type: application/json
 BREEF-API-KEY: test-key
 {
-  "url":"https://www.reddit.com/r/dotnet/comments/1o0j6or/im_giving_up_on_copilot_i_spend_more_time/"
+ "url":"https://www.reddit.com/r/selfhosted/comments/1og7kjd/a_note_to_myself_from_the_future_document/"
 }
+
+### Health
+
+Get {{Elzik.Breef.Api_HostAddress}}/health
+Content-Type: application/json

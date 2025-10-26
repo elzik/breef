@@ -135,6 +135,9 @@ public class Program
         app.UseCors();
         app.UseAuth();
 
+        app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
+           .AllowAnonymous();
+
         app.AddBreefEndpoints();
 
         await app.RunAsync();
