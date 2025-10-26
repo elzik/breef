@@ -14,11 +14,12 @@ public static class AuthExtensions
                 options.Realm = "BreefAPI";
             });
 
-        services.AddAuthorization(options =>
+        var authBuilder = services.AddAuthorizationBuilder();
+        authBuilder.AddPolicy("RequireAuthenticated", p => p.RequireAuthenticatedUser());
+
+        services.Configure<AuthorizationOptions>(options =>
         {
-            options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
+            options.FallbackPolicy = options.GetPolicy("RequireAuthenticated");
         });
     }
 
