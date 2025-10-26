@@ -73,9 +73,13 @@ namespace Elzik.Breef.Api.Tests.Functional
 
             // Assert
             response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+            response.Headers.WwwAuthenticate.ShouldNotBeEmpty();
+            var challenge = response.Headers.WwwAuthenticate.First();
+            challenge.Scheme.ShouldBe("ApiKey");
+            challenge.Parameter.ShouldNotBeNullOrEmpty();
+            challenge.Parameter.ShouldContain("BREEF-API-KEY");
             var responseString = await response.Content.ReadAsStringAsync();
-            responseString.ShouldNotBeNullOrEmpty();
-            responseString.ShouldContain("Unauthorised");
+            responseString.ShouldBeEmpty();
         }
     }
 }
