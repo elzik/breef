@@ -4,7 +4,7 @@
 
 Post {{Elzik.Breef.Api_HostAddress}}/breefs
 Content-Type: application/json
-BREEF-API-KEY: OBR8ZSp3jHY5T4lv1aVE0P4tCk6YXNe3CPkjYpoR05Y=
+BREEF-API-KEY: test-key
 {
  "url":"https://www.reddit.com/r/selfhosted/comments/1og7kjd/a_note_to_myself_from_the_future_document/"
 }
