@@ -80,7 +80,10 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
                 .WithEnvironment("breef_Wallabag__Password", breefWallabagPassword)
                 .WithEnvironment("breef_Wallabag__ClientId", breefWallabagClientId)
                 .WithEnvironment("breef_Wallabag__ClientSecret", breefWallabagClientSecret)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(8080))
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(request => request
+                    .ForPort(8080)
+                    .ForPath("/health")
+                    .ForStatusCode(System.Net.HttpStatusCode.OK)))
                 .WithOutputConsumer(outputConsumer)
                 .Build();
         }
