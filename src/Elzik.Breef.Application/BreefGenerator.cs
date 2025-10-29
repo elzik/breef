@@ -10,7 +10,11 @@ namespace Elzik.Breef.Application
         public async Task<PublishedBreef> GenerateBreefAsync(string url)
         {
             var extract = await contentExtractor.ExtractAsync(url);
-            var summary = await contentSummariser.SummariseAsync(extract.Content);
+
+            var instructionsPath = Path.Combine(AppContext.BaseDirectory, "SummarisationInstructions", "HtmlContent.md");
+            var instructions = await File.ReadAllTextAsync(instructionsPath);
+
+            var summary = await contentSummariser.SummariseAsync(extract.Content, instructions);
 
             var breef = new Domain.Breef(url, extract.Title ,summary, extract.PreviewImageUrl);
 

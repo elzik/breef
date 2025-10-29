@@ -7,25 +7,15 @@ namespace Elzik.Breef.Infrastructure.AI;
 
 public class AiContentSummariser(
     ILogger<AiContentSummariser> logger, 
-    IChatCompletionService Chat, 
-    IOptions<AiContentSummariserOptions> summariserOptions) : IContentSummariser
+    IChatCompletionService Chat) : IContentSummariser
 {
-    public async Task<string> SummariseAsync(string content)
+    public async Task<string> SummariseAsync(string content, string instructions)
     {
-        var systemPrompt = @$"
-You are an expert summarizer. Your task is to summarize the provided text:
-  - Summarise text, including HTML entities.
-  - Limit summaries to {summariserOptions.Value.TargetSummaryLengthPercentage}% of the original length but never more then {summariserOptions.Value.TargetSummaryMaxWordCount} words.
-  - Ensure accurate attribution of information to the correct entities.
-  - Do not include a link to the original articles.
-  - Do not include the title in the response.
-  - Do not include any metadata in the response.
-  - Do not include a code block in the response.";
-        
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(instructions);
         var formattingInstructions = "Summarise this content in an HTML format using paragraphs and " +
             "bullet points to enhance readability\n:";
 
-        var chatHistory = new ChatHistory(systemPrompt);
+        var chatHistory = new ChatHistory(instructions);
         chatHistory.AddMessage(AuthorRole.User, $"{formattingInstructions}{content}");
 
         var result = await Chat.GetChatMessageContentAsync(chatHistory);

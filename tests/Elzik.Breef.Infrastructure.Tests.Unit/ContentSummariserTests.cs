@@ -22,12 +22,7 @@ public class ContentSummariserTests
     {
         _logger = new FakeLogger<AiContentSummariser>();
         _chatCompletionService = Substitute.For<IChatCompletionService>();
-        var summariserOptions = Options.Create(new AiContentSummariserOptions
-        {
-            TargetSummaryLengthPercentage = 10,
-            TargetSummaryMaxWordCount = 200
-        });
-        _contentSummariser = new AiContentSummariser(_logger, _chatCompletionService, summariserOptions);
+        _contentSummariser = new AiContentSummariser(_logger, _chatCompletionService);
 
         _testContent = "This is a test content.";
         _testSummary = "Test summary.";
@@ -52,7 +47,7 @@ public class ContentSummariserTests
     public async Task SummariseAsync_ValidContent_ReturnsSummary()
     {
         // Act
-        var result = await _contentSummariser.SummariseAsync(_testContent);
+        var result = await _contentSummariser.SummariseAsync(_testContent, "Test instructions");
 
         // Assert
         result.ShouldBe("Test summary.");
@@ -61,22 +56,16 @@ public class ContentSummariserTests
     [Fact]
     public async Task SummariseAsync_ValidContent_ProvidesModelInstructions()
     {
+        // Arrange
+        var instructions = "Test instructions";
+
         // Act
-        _ = await _contentSummariser.SummariseAsync(_testContent);
+        _ = await _contentSummariser.SummariseAsync(_testContent, instructions);
 
         // Assert
-        var systemPrompt = @$"
-You are an expert summarizer. Your task is to summarize the provided text:
-  - Summarise text, including HTML entities.
-  - Limit summaries to 10% of the original length but never more then 200 words.
-  - Ensure accurate attribution of information to the correct entities.
-  - Do not include a link to the original articles.
-  - Do not include the title in the response.
-  - Do not include any metadata in the response.
-  - Do not include a code block in the response.";
         await _chatCompletionService.Received(1).GetChatMessageContentsAsync(
             Arg.Is<ChatHistory>(ch => ch.Any(m =>
-                m.Content == systemPrompt && m.Role == AuthorRole.System)),
+                m.Content == instructions && m.Role == AuthorRole.System)),
             Arg.Any<PromptExecutionSettings>(),
             Arg.Any<Kernel>(),
             Arg.Any<CancellationToken>());
@@ -86,7 +75,7 @@ You are an expert summarizer. Your task is to summarize the provided text:
     public async Task SummariseAsync_ValidContent_Logs()
     {
         // Act
-        await _contentSummariser.SummariseAsync(_testContent);
+        await _contentSummariser.SummariseAsync(_testContent, "Test instructions");
 
         // Assert
         _logger.Collector.Count.ShouldBe(1);
