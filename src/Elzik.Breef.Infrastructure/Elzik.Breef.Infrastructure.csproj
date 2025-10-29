@@ -26,13 +26,6 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.10" />
 		<ProjectReference Include="..\Elzik.Breef.Domain\Elzik.Breef.Domain.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="..\Elzik.Breef.Infrastructure\SummarisationInstructions\**\*.md"
-			  Link="SummarisationInstructions\%(RecursiveDir)%(Filename)%(Extension)">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
 	
 	<ItemGroup>
 		<None Include="SummarisationInstructions\**\*.md"
