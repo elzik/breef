@@ -40,8 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\src\Elzik.Breef.Infrastructure\SummarisationInstructions\**\*.md" 
-		  Link="SummarisationInstructions\%(RecursiveDir)%(Filename)%(Extension)">
+    <None Include="..\..\src\Elzik.Breef.Infrastructure\SummarisationInstructions\**\*.md" Link="SummarisationInstructions\%(RecursiveDir)%(Filename)%(Extension)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
   </ItemGroup>
