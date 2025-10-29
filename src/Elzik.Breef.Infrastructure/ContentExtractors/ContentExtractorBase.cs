@@ -24,6 +24,13 @@ public abstract class ContentExtractorBase : IContentExtractor
         var result = await CreateUntypedExtractAsync(webPageUrl);
         var extractType = GetExtractType();
 
+        if (result is null)
+        {
+            throw new InvalidOperationException(
+                $"CreateUntypedExtractAsync returned null for URL '{webPageUrl}' " +
+                $"in extractor type '{extractType}'. A valid UntypedExtract must be returned.");
+        }
+
         return result.WithType(extractType);
     }
 

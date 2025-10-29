@@ -82,6 +82,24 @@ public class ContentExtractorBaseTests
         result.ExtractType.ShouldBe("HtmlContentLike");
     }
 
+    [Fact]
+    public async Task ExtractAsync_WhenCreateUntypedExtractAsyncReturnsNull_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var extractor = new NullReturningExtractor();
+        var url = "https://example.com/test";
+
+        // Act
+        var exception = await Should.ThrowAsync<InvalidOperationException>(
+            async () => await extractor.ExtractAsync(url));
+
+        // Assert
+        exception.Message.ShouldContain("CreateUntypedExtractAsync returned null");
+        exception.Message.ShouldContain(url);
+        exception.Message.ShouldContain("NullReturning");
+        exception.Message.ShouldContain("A valid UntypedExtract must be returned");
+    }
+
     private class ValidTestExtractor : ContentExtractorBase
     {
         public override bool CanHandle(string webPageUrl) => true;
@@ -119,6 +137,16 @@ public class ContentExtractorBaseTests
         protected override Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
         {
             return Task.FromResult(new UntypedExtract("Invalid", "Invalid", null));
+        }
+    }
+
+    private class NullReturningExtractor : ContentExtractorBase
+    {
+        public override bool CanHandle(string webPageUrl) => true;
+
+        protected override Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
+        {
+            return Task.FromResult<UntypedExtract>(null!);
         }
     }
 }
