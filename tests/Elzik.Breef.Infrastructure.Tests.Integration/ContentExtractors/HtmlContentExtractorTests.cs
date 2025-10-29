@@ -41,6 +41,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
             lineEndingNormalisedContent.ShouldBe(lineEndingNormalisedExpected);
             result.Title.ShouldBe(expectedTitle);
             result.PreviewImageUrl.ShouldBe(expectedPreviewImageUrl);
+            result.ExtractType.ShouldBe("HtmlContent");
         }
 
         [Fact]

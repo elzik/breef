@@ -31,7 +31,11 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors
 
             _logger.LogInformation("Extraction will be provided for by {ExtractorName}", extractor.GetType().Name);
 
-            return await extractor.ExtractAsync(webPageUrl);
+            var extract = await extractor.ExtractAsync(webPageUrl);
+
+            _logger.LogInformation("Extraction of type {ExtractType} completed.", extract.ExtractType);
+
+            return extract;
         }
     }
 

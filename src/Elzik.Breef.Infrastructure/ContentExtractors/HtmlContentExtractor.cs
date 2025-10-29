@@ -3,9 +3,14 @@ using HtmlAgilityPack;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors;
 
-public class HtmlContentExtractor(IHttpClientFactory httpClientFactory) : IContentExtractor
+public class HtmlContentExtractor(IHttpClientFactory httpClientFactory) : ContentExtractorBase
 {
-    public async Task<Extract> ExtractAsync(string webPageUrl)
+    public override bool CanHandle(string webPageUrl)
+    {
+        return true;
+    }
+
+    protected override async Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
     {
         var httpClient = httpClientFactory.CreateClient("BreefDownloader");
         var html = await httpClient.GetStringAsync(webPageUrl);
@@ -17,7 +22,7 @@ public class HtmlContentExtractor(IHttpClientFactory httpClientFactory) : IConte
         var largestImageUrl = GetLargestImageUrl(htmlDocument);
 
 
-        return new Extract(title, content, largestImageUrl);
+        return new UntypedExtract(title, content, largestImageUrl);
     }
 
     private static string GetContent(HtmlDocument htmlDocument)
@@ -79,6 +84,4 @@ public class HtmlContentExtractor(IHttpClientFactory httpClientFactory) : IConte
 
         return imageNodesSortedBySize.FirstOrDefault()?.ImageUrl;
     }
-
-    public bool CanHandle(string webPageUrl) => true;
 }

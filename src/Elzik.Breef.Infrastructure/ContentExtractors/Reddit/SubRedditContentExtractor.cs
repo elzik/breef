@@ -5,15 +5,17 @@ using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 
-public class SubredditContentExtractor
-    (ISubredditClient subredditClient, IHttpClientFactory httpClientFactory, IOptions<RedditOptions> redditOptions)
-    : IContentExtractor, ISubredditImageExtractor
+public class SubredditContentExtractor(
+    ISubredditClient subredditClient,
+    IHttpClientFactory httpClientFactory,
+    IOptions<RedditOptions> redditOptions)
+    : ContentExtractorBase, ISubredditImageExtractor
 {
     private const char UrlPathSeparator = '/';
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     private readonly RedditOptions _redditOptions = redditOptions.Value;
 
-    public bool CanHandle(string webPageUrl)
+    public override bool CanHandle(string webPageUrl)
     {
         if (!Uri.TryCreate(webPageUrl, UriKind.Absolute, out Uri? webPageUri))
             return false;
@@ -31,7 +33,7 @@ public class SubredditContentExtractor
             segments[0].Equals("r", StringComparison.OrdinalIgnoreCase);
     }
 
-    public async Task<Extract> ExtractAsync(string webPageUrl)
+    protected override async Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
     {
         var webPageUri = new Uri(webPageUrl.EndsWith(UrlPathSeparator) ? webPageUrl : webPageUrl + UrlPathSeparator, UriKind.Absolute);
         var webPageParts = webPageUri.AbsolutePath.Trim(UrlPathSeparator).Split(UrlPathSeparator);
@@ -41,7 +43,7 @@ public class SubredditContentExtractor
         var jsonContent = JsonSerializer.Serialize(newInSubreddit);
         var imageUrl = await ExtractImageUrlAsync(webPageUri);
 
-        return new Extract($"New in r/{subredditName}", jsonContent, imageUrl);
+        return new UntypedExtract($"New in r/{subredditName}", jsonContent, imageUrl);
     }
 
     public async Task<string> GetSubredditImageUrlAsync(string subredditName)
