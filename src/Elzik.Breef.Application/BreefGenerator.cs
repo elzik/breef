@@ -2,21 +2,21 @@
 
 namespace Elzik.Breef.Application
 {
-    public class BreefGenerator( 
+    public class BreefGenerator(
         IContentExtractor contentExtractor,
-        IContentSummariser contentSummariser,
+   IContentSummariser contentSummariser,
+        IContentSummarisationInstructionProvider instructionProvider,
         IBreefPublisher breefPublisher) : IBreefGenerator
     {
         public async Task<PublishedBreef> GenerateBreefAsync(string url)
         {
             var extract = await contentExtractor.ExtractAsync(url);
 
-            var instructionsPath = Path.Combine(AppContext.BaseDirectory, "SummarisationInstructions", "HtmlContent.md");
-            var instructions = await File.ReadAllTextAsync(instructionsPath);
+            var instructions = instructionProvider.GetInstructions(extract.ExtractType);
 
             var summary = await contentSummariser.SummariseAsync(extract.Content, instructions);
 
-            var breef = new Domain.Breef(url, extract.Title ,summary, extract.PreviewImageUrl);
+            var breef = new Domain.Breef(url, extract.Title, summary, extract.PreviewImageUrl);
 
             var publishedBreef = await breefPublisher.PublishAsync(breef);
 

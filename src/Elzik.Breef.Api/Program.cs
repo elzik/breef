@@ -123,6 +123,15 @@ public class Program
             .ValidateOnStart();
         builder.Services.AddAiContentSummariser();
 
+        builder.Services.AddSingleton<IContentSummarisationInstructionProvider>(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<FileBasedContentSummarisationInstructionProvider>>();
+            return new FileBasedContentSummarisationInstructionProvider(
+                logger,
+                Path.Combine(AppContext.BaseDirectory, "SummarisationInstructions"),
+                ["HtmlContent", "RedditPostContent", "SubredditContent"]);
+        });
+
         builder.Services.AddOptions<WallabagOptions>()
             .Bind(configuration.GetSection("Wallabag"))
             .ValidateDataAnnotations()
