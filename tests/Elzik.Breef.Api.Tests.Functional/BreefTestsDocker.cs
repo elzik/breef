@@ -25,7 +25,10 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
         _dockerIsUnavailable = DockerIsUnavailable();
         _testOutputHelper = testOutputHelper
             ?? throw new ArgumentNullException(nameof(testOutputHelper));
-        _client = new HttpClient();
+        _client = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(30)
+        };
         _client.DefaultRequestHeaders.Add("BREEF-API-KEY", ApiKey);
 
         if (!_dockerIsUnavailable)
@@ -184,15 +187,12 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        if (!_dockerIsUnavailable)
-        {
-            if (_testContainer == null)
-            {
-                throw new InvalidOperationException("Test container is not initialized " +
-                                                    "and cannot be stopped.");
-            }
+        _client?.Dispose();
 
+        if (!_dockerIsUnavailable && _testContainer != null)
+        {
             await _testContainer.StopAsync();
+            await _testContainer.DisposeAsync();
         }
     }
 }
