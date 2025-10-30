@@ -8,9 +8,9 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors;
 
 public class ContentExtractorStrategyTests
 {
-    private readonly Extract _extractedByExtractor1 = new("Title1", "Content1", "Image1");
-    private readonly Extract _extractedByExtractor2 = new("Title2", "Content2", "Image2");
-    private readonly Extract _extractedByDefaultExtractor = new("DefaultTitle", "DefaultContent", "DefaultImage");
+    private readonly Extract _extractedByExtractor1 = new("Title1", "Content1", "Image1", "Extractor1Type");
+    private readonly Extract _extractedByExtractor2 = new("Title2", "Content2", "Image2", "Extractor2Type");
+    private readonly Extract _extractedByDefaultExtractor = new("DefaultTitle", "DefaultContent", "DefaultImage", "DefaultExtractorType");
 
     private readonly IContentExtractor _extractor1 = Substitute.For<IContentExtractor>();
     private readonly IContentExtractor _extractor2 = Substitute.For<IContentExtractor>();
@@ -42,7 +42,7 @@ public class ContentExtractorStrategyTests
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(true);
         _extractor2.CanHandle(Arg.Any<string>()).Returns(false);
-        _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+        _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ =>
             throw new InvalidOperationException("This extractor (2) should not be used."));
 
 
@@ -51,10 +51,13 @@ public class ContentExtractorStrategyTests
 
         // Assert
         extract.ShouldBe(_extractedByExtractor1);
-        _fakeLogger.Collector.Count.ShouldBe(1);
-        _fakeLogger.Collector.LatestRecord.Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
-        _fakeLogger.Collector.LatestRecord.Message.ShouldStartWith(
+        _fakeLogger.Collector.Count.ShouldBe(2);
+        _fakeLogger.Collector.GetSnapshot()[0].Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
+        _fakeLogger.Collector.GetSnapshot()[0].Message.ShouldStartWith(
             $"Extraction will be provided for by {_extractor1.GetType().Name}");
+        _fakeLogger.Collector.GetSnapshot()[1].Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
+        _fakeLogger.Collector.GetSnapshot()[1].Message.ShouldStartWith(
+            $"Extraction of type {_extractedByExtractor1.ExtractType} completed.");
     }
 
     [Fact]
@@ -62,8 +65,8 @@ public class ContentExtractorStrategyTests
     {
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(false);
-        _extractor1.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
-            throw new InvalidOperationException("This extractor (1) should not be used."));
+        _extractor1.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ =>
+      throw new InvalidOperationException("This extractor (1) should not be used."));
         _extractor2.CanHandle(Arg.Any<string>()).Returns(true);
 
         // Act
@@ -71,10 +74,13 @@ public class ContentExtractorStrategyTests
 
         // Assert
         extract.ShouldBe(_extractedByExtractor2);
-        _fakeLogger.Collector.Count.ShouldBe(1);
-        _fakeLogger.Collector.LatestRecord.Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
-        _fakeLogger.Collector.LatestRecord.Message.ShouldStartWith(
+        _fakeLogger.Collector.Count.ShouldBe(2);
+        _fakeLogger.Collector.GetSnapshot()[0].Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
+        _fakeLogger.Collector.GetSnapshot()[0].Message.ShouldStartWith(
             $"Extraction will be provided for by {_extractor2.GetType().Name}");
+        _fakeLogger.Collector.GetSnapshot()[1].Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
+        _fakeLogger.Collector.GetSnapshot()[1].Message.ShouldStartWith(
+            $"Extraction of type {_extractedByExtractor2.ExtractType} completed.");
     }
 
     [Fact]
@@ -82,10 +88,10 @@ public class ContentExtractorStrategyTests
     {
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(false);
-        _extractor1.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
-            throw new InvalidOperationException("This extractor (1) should not be used."));
+        _extractor1.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ =>
+        throw new InvalidOperationException("This extractor (1) should not be used."));
         _extractor2.CanHandle(Arg.Any<string>()).Returns(false);
-        _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+        _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ =>
             throw new InvalidOperationException("This extractor (2) should not be used."));
 
         // Act
@@ -93,10 +99,13 @@ public class ContentExtractorStrategyTests
 
         // Assert
         extract.ShouldBe(_extractedByDefaultExtractor);
-        _fakeLogger.Collector.Count.ShouldBe(1);
-        _fakeLogger.Collector.LatestRecord.Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
-        _fakeLogger.Collector.LatestRecord.Message.ShouldStartWith(
+        _fakeLogger.Collector.Count.ShouldBe(2);
+        _fakeLogger.Collector.GetSnapshot()[0].Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
+        _fakeLogger.Collector.GetSnapshot()[0].Message.ShouldStartWith(
             $"Extraction will be provided for by {_defaultExtractor.GetType().Name}");
+        _fakeLogger.Collector.GetSnapshot()[1].Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
+        _fakeLogger.Collector.GetSnapshot()[1].Message.ShouldStartWith(
+            $"Extraction of type {_extractedByDefaultExtractor.ExtractType} completed.");
     }
 
     [Fact]
@@ -104,10 +113,10 @@ public class ContentExtractorStrategyTests
     {
         // Arrange
         _extractor1.CanHandle(Arg.Any<string>()).Returns(true);
-        _extractor1.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+        _extractor1.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ =>
             throw new InvalidOperationException("This extractor (1) should not be used."));
         _extractor2.CanHandle(Arg.Any<string>()).Returns(true);
-        _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ => 
+        _extractor2.ExtractAsync(Arg.Any<string>()).Returns<Task<Extract>>(_ =>
             throw new InvalidOperationException("This extractor (2) should not be used."));
 
         // Act
@@ -116,10 +125,13 @@ public class ContentExtractorStrategyTests
 
         // Assert
         extract.ShouldBe(_extractedByDefaultExtractor);
-        _fakeLogger.Collector.Count.ShouldBe(1);
-        _fakeLogger.Collector.LatestRecord.Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
-        _fakeLogger.Collector.LatestRecord.Message.ShouldStartWith(
+        _fakeLogger.Collector.Count.ShouldBe(2);
+        _fakeLogger.Collector.GetSnapshot()[0].Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
+        _fakeLogger.Collector.GetSnapshot()[0].Message.ShouldStartWith(
             $"Extraction will be provided for by {_defaultExtractor.GetType().Name}");
+        _fakeLogger.Collector.GetSnapshot()[1].Level.ShouldBe(Microsoft.Extensions.Logging.LogLevel.Information);
+        _fakeLogger.Collector.GetSnapshot()[1].Message.ShouldStartWith(
+            $"Extraction of type {_extractedByDefaultExtractor.ExtractType} completed.");
     }
 
     [Fact]
@@ -155,7 +167,7 @@ public class ContentExtractorStrategyTests
 
         // Act
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-        var ex = Assert.Throws<ArgumentNullException>(() => 
+        var ex = Assert.Throws<ArgumentNullException>(() =>
             new ContentExtractorStrategy(_fakeLogger, [extractor], null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
@@ -171,7 +183,7 @@ public class ContentExtractorStrategyTests
 
         // Act
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-        var ex = Assert.Throws<ArgumentNullException>(() => 
+        var ex = Assert.Throws<ArgumentNullException>(() =>
             new ContentExtractorStrategy(_fakeLogger, null, defaultExtractor));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
