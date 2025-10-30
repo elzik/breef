@@ -40,6 +40,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Infrastructure.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elzik.Breef.Api.Tests.Integration", "tests\Elzik.Breef.Api.Tests.Integration\Elzik.Breef.Api.Tests.Integration.csproj", "{F1FD6E10-FB87-4BBD-B853-05889A04CFA9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleRequests", "SampleRequests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		Elzik.Breef.Api.http = Elzik.Breef.Api.http
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,6 +93,7 @@ Global
 		{7F0140C3-DDE1-4248-9FCC-980699F2D05A} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
 		{6CACB8E5-4B4C-4C05-AD80-32561037DAF0} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
 		{F1FD6E10-FB87-4BBD-B853-05889A04CFA9} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
+		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6E3F0693-A48D-48DC-935C-2D8758390BC2}
