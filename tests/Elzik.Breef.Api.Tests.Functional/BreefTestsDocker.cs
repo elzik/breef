@@ -111,13 +111,16 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
         process.Start();
         process.WaitForExit();
 
+        string standardOutput = process.StandardOutput.ReadToEnd();
+        string standardError = process.StandardError.ReadToEnd();
+
         if (process.ExitCode != 0)
         {
             throw new InvalidOperationException(
-                process.StandardError.ReadToEnd() + Environment.NewLine + process.StandardOutput.ReadToEnd());
+                standardError + Environment.NewLine + standardOutput);
         }
 
-        _testOutputHelper.WriteLine(process.StandardOutput.ReadToEnd());
+        _testOutputHelper.WriteLine(standardOutput);
     }
 
     private static bool DockerIsUnavailable()
@@ -136,16 +139,18 @@ public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 
             using var process = new Process { StartInfo = processStartInfo };
             process.Start();
-            string output = process.StandardOutput.ReadToEnd();
             process.WaitForExit();
+
+            string standardOutput = process.StandardOutput.ReadToEnd();
+            string standardError = process.StandardError.ReadToEnd();
 
             if (process.ExitCode != 0)
             {
                 throw new InvalidOperationException(
-                    process.StandardError.ReadToEnd() + Environment.NewLine + process.StandardOutput.ReadToEnd());
+                    standardError + Environment.NewLine + standardOutput);
             }
 
-            return !output.StartsWith("Docker version", StringComparison.OrdinalIgnoreCase);
+            return !standardOutput.StartsWith("Docker version", StringComparison.OrdinalIgnoreCase);
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
