@@ -117,10 +117,6 @@ public class Program
             .Bind(configuration.GetSection("AiService"))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        builder.Services.AddOptions<AiContentSummariserOptions>()
-            .Bind(configuration.GetSection("AiContentSummariser"))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
         builder.Services.AddAiContentSummariser();
 
         builder.Services.AddSingleton<IContentSummarisationInstructionProvider>(sp =>

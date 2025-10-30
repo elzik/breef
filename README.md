@@ -120,22 +120,6 @@ Example:
 }
 ```
 
-#### AI Content Summariser
-
-The AI model will use these settings when generating summaries. Although the model may not adhere to these settings, they will influence the resulting summary.
-
-- **TargetSummaryLengthPercentage** - Sets the size of the summary with respect to the size of the original article. The default used if not set is 10%.
-- **TargetSummaryMaxWordCount** - Sets the maximum number of words for the summary generated. The default used if not set is 200 words.
-
-Example:
-
-```jsonc
-"AiContentSummariser": {
-    "TargetSummaryLengthPercentage": 10,   // breef_AiContentSummariser__TargetSummaryLengthPercentage
-    "TargetSummaryMaxWordCount": 200       // breef_AiContentSummariser__TargetSummaryMaxWordCount
-}
-```
-
 #### Web Page Downloader
 
 These settings affect how pages are downloaded prior to being summarised.
