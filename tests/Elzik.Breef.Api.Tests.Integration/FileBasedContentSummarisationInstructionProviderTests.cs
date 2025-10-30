@@ -96,9 +96,12 @@ public class FileBasedContentSummarisationInstructionProviderTests
         exception.Message.ShouldContain("At least one required extract instruction must be specified.");
     }
 
-    public static IEnumerable<object[]> EmptyArrayTestData()
+    public static TheoryData<string[]> EmptyArrayTestData()
     {
-        yield return new object[] { Array.Empty<string>() };
+        return new TheoryData<string[]>
+        {
+            Array.Empty<string>()
+        };
     }
 
     [Fact]
