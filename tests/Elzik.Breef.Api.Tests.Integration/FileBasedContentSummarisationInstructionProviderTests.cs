@@ -11,7 +11,7 @@ public class FileBasedContentSummarisationInstructionProviderTests
     {
         // Arrange
         var dir = Path.Combine(Path.GetTempPath(), "SummarisationInstructionsIntegrationTest");
-        
+
         if (Directory.Exists(dir)) Directory.Delete(dir, true);
         Directory.CreateDirectory(dir);
 
@@ -20,9 +20,9 @@ public class FileBasedContentSummarisationInstructionProviderTests
         File.WriteAllText(Path.Combine(dir, "SubredditContent.md"), "dummy");
 
         // Act & Assert
-        Should.NotThrow(() => 
+        Should.NotThrow(() =>
             new FileBasedContentSummarisationInstructionProvider(
-                new NullLogger<FileBasedContentSummarisationInstructionProvider>(), 
+                new NullLogger<FileBasedContentSummarisationInstructionProvider>(),
                 dir, ["HtmlContent", "RedditPostContent", "SubredditContent"]));
     }
 
@@ -39,7 +39,7 @@ public class FileBasedContentSummarisationInstructionProviderTests
         // Act & Assert
         Should.Throw<InvalidOperationException>(() =>
             new FileBasedContentSummarisationInstructionProvider(
-                new NullLogger<FileBasedContentSummarisationInstructionProvider>(), 
+                new NullLogger<FileBasedContentSummarisationInstructionProvider>(),
                 dir, ["HtmlContent", "RedditPostContent", "SubredditContent"]));
     }
 
@@ -67,7 +67,7 @@ public class FileBasedContentSummarisationInstructionProviderTests
         Should.Throw<DirectoryNotFoundException>(() =>
         {
             return new FileBasedContentSummarisationInstructionProvider(
-                new NullLogger<FileBasedContentSummarisationInstructionProvider>(), 
+                new NullLogger<FileBasedContentSummarisationInstructionProvider>(),
                 dir, ["TestMissingExtractor"]);
         });
     }
@@ -84,10 +84,12 @@ public class FileBasedContentSummarisationInstructionProviderTests
 
         // Act
         var exception = Should.Throw<ArgumentException>(() =>
-            new FileBasedContentSummarisationInstructionProvider(
-                new NullLogger<FileBasedContentSummarisationInstructionProvider>(),
-                dir,
-                requiredExtractTypeNames!));
+        {
+            return new FileBasedContentSummarisationInstructionProvider(
+                            new NullLogger<FileBasedContentSummarisationInstructionProvider>(),
+                            dir,
+                            requiredExtractTypeNames!);
+        });
 
         // Assert
         exception.ParamName.ShouldBe("requiredExtractTypeNames");
@@ -125,7 +127,7 @@ public class FileBasedContentSummarisationInstructionProviderTests
     [Theory]
     [InlineData("")]
     [InlineData("   \n\t  ")]
-    public void GetInstructions_InvalidInstructions_Throws(string instructionContent)
+    public void Instantiated_EmptyInstructionFile_Throws(string instructionContent)
     {
         // Arrange
         var dir = Path.Combine(Path.GetTempPath(), $"SummarisationInstructions_{Guid.NewGuid()}");
@@ -134,16 +136,17 @@ public class FileBasedContentSummarisationInstructionProviderTests
 
         File.WriteAllText(Path.Combine(dir, "TestContent.md"), instructionContent);
 
-        var provider = new FileBasedContentSummarisationInstructionProvider(
-            new NullLogger<FileBasedContentSummarisationInstructionProvider>(),
-            dir,
-            ["TestContent"]);
-
         // Act
         var exception = Should.Throw<InvalidOperationException>(() =>
-            provider.GetInstructions("TestContent"));
+        {
+            return new FileBasedContentSummarisationInstructionProvider(
+                        new NullLogger<FileBasedContentSummarisationInstructionProvider>(),
+                        dir,
+                        ["TestContent"]);
+        });
 
         // Assert
-        exception.Message.ShouldContain("Summarisation instructions for content type 'TestContent' are empty.");
+        exception.Message.ShouldContain("Summarisation instruction file is empty:");
+        exception.Message.ShouldContain("TestContent.md");
     }
 }

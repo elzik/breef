@@ -17,12 +17,10 @@ public sealed class FileBasedContentSummarisationInstructionProvider : IContentS
             throw new DirectoryNotFoundException($"Summarisation instructions directory not found at: {instructionFileDirectoryPath}");
         }
 
-        if(requiredExtractTypeNames == null || !requiredExtractTypeNames.Any())
+        if (requiredExtractTypeNames == null || !requiredExtractTypeNames.Any())
         {
-           throw new ArgumentException("At least one required extract instruction must be specified.", nameof(requiredExtractTypeNames));
+            throw new ArgumentException("At least one required extract instruction must be specified.", nameof(requiredExtractTypeNames));
         }
-
-        var missing = new List<string>();
 
         foreach (var extractTypeName in requiredExtractTypeNames)
         {
@@ -30,19 +28,18 @@ public sealed class FileBasedContentSummarisationInstructionProvider : IContentS
 
             if (!File.Exists(filePath))
             {
-                missing.Add($"{extractTypeName}.md");
-                continue;
+                throw new InvalidOperationException($"Missing summarisation instruction file: {filePath}");
             }
 
             var instructions = File.ReadAllText(filePath);
+
+            if (string.IsNullOrWhiteSpace(instructions))
+            {
+                throw new InvalidOperationException($"Summarisation instruction file is empty: {filePath}");
+            }
+
             _templatesByKey[extractTypeName] = instructions;
             logger.LogInformation("Loaded summarisation template for {Key} from {FilePath}", extractTypeName, filePath);
-        }
-
-        if (missing.Count != 0)
-        {
-            var missingInstructionsMessage = "Missing summarisation instruction files: " + string.Join(", ", missing);
-            throw new InvalidOperationException(missingInstructionsMessage);
         }
     }
 
@@ -50,12 +47,6 @@ public sealed class FileBasedContentSummarisationInstructionProvider : IContentS
     {
         if (_templatesByKey.TryGetValue(extractTypeName, out var instructions))
         {
-            if(string.IsNullOrWhiteSpace(instructions))
-            {
-                throw new InvalidOperationException(
-                    $"Summarisation instructions for content type '{extractTypeName}' are empty.");
-            }
-
             return instructions;
         }
 
