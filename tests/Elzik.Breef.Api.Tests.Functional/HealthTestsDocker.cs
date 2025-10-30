@@ -122,14 +122,15 @@ public class HealthTestsDocker : HealthTestsBase, IAsyncLifetime
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
-            if (ex.Message.StartsWith("An error occurred trying to start process")
-                && ex.Message.EndsWith("The system cannot find the file specified."))
+            const int ERROR_FILE_NOT_FOUND = 2;
+      
+            if (ex.NativeErrorCode == ERROR_FILE_NOT_FOUND)
             {
                 return true;
             }
 
             throw;
-        }
+ }
     }
 
     public async Task InitializeAsync()
