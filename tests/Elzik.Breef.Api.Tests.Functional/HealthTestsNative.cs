@@ -15,33 +15,36 @@ public class HealthTestsNative
         _output = output;
     }
 
-    public static IEnumerable<object[]> WebApplicationFactories()
+    public static TheoryData<WebApplicationFactory<Program>, string> WebApplicationFactories()
     {
-        yield return new object[] { new DevelopmentWebApplicationFactory(), "Development" };
-        yield return new object[] { new ProductionWebApplicationFactory(), "Production" };
+        return new TheoryData<WebApplicationFactory<Program>, string>
+        {
+            { new DevelopmentWebApplicationFactory(), "Development" },
+            { new ProductionWebApplicationFactory(), "Production" }
+        };
     }
 
-    [Theory]
+  [Theory]
     [MemberData(nameof(WebApplicationFactories))]
     public async Task Health_Called_ReturnsOK(WebApplicationFactory<Program> factory, string environmentName)
     {
-        // Arrange
-        _output.WriteLine($"Testing health endpoint in {environmentName} environment");
+   // Arrange
+    _output.WriteLine($"Testing health endpoint in {environmentName} environment");
         using var client = factory.CreateClient();
         const string baseUrl = "http://localhost";
 
         // Act
-        var response = await client.GetAsync($"{baseUrl}/health");
+     var response = await client.GetAsync($"{baseUrl}/health");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<HealthResponse>();
+      var body = await response.Content.ReadFromJsonAsync<HealthResponse>();
         body.ShouldNotBeNull();
-        body!.Status.ShouldBe("Healthy");
+   body!.Status.ShouldBe("Healthy");
     }
 
     private class HealthResponse
     {
-        public string Status { get; set; } = string.Empty;
+      public string Status { get; set; } = string.Empty;
     }
 }
