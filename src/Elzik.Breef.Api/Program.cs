@@ -150,7 +150,7 @@ public class Program
         }
 
         app.UseStatusCodePages();
-        
+
         app.UseCors();
         app.UseAuth();
 
