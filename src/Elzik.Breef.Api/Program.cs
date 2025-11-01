@@ -45,6 +45,8 @@ public class Program
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
         });
 
+        builder.Services.AddProblemDetails();
+
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(builder =>
@@ -137,11 +139,23 @@ public class Program
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
 
         var app = builder.Build();
+  
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler();
+        }
+
+        app.UseStatusCodePages();
+        
         app.UseCors();
         app.UseAuth();
 
         app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
-           .AllowAnonymous();
+    .AllowAnonymous();
 
         app.AddBreefEndpoints();
 
