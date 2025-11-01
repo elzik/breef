@@ -8,6 +8,14 @@
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5079"
     },
+    "Local (Production)": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5079"
+    },
     "Docker": {
       "commandName": "Docker",
       "environmentVariables": {
