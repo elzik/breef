@@ -146,7 +146,7 @@ public class Program
         }
         else
         {
-            app.UseExceptionHandler();
+            app.UseExceptionHandler(options => { });
         }
 
         app.UseStatusCodePages();
