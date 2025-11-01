@@ -155,7 +155,7 @@ public class Program
         app.UseAuth();
 
         app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
-    .AllowAnonymous();
+            .AllowAnonymous();
 
         app.AddBreefEndpoints();
 
