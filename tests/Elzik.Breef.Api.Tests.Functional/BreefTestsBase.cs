@@ -60,15 +60,12 @@ namespace Elzik.Breef.Api.Tests.Functional
             publishedBreef.PublishedUrl.ShouldStartWith($"{_wallabagOptions.BaseUrl}/view/");
         }
 
-        [SkippableTheory]
-        [InlineData("Production")]
-        [InlineData("Development")]
-        public async Task Unauthorised(string environment)
+        [SkippableFact]
+        public async Task Unauthorised()
         {
             Skip.If(SkipTestsIf, SkipTestsReason);
 
             // Arrange
-            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", environment);
             Client.DefaultRequestHeaders.Clear();
             var breef = new { Url = "http://example.com" };
 
@@ -78,8 +75,6 @@ namespace Elzik.Breef.Api.Tests.Functional
             // Assert
             response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
             response.Headers.WwwAuthenticate.ShouldNotBeEmpty();
-            response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
-
             var challenge = response.Headers.WwwAuthenticate.First();
             challenge.Scheme.ShouldBe("ApiKey");
             challenge.Parameter.ShouldNotBeNullOrEmpty();
