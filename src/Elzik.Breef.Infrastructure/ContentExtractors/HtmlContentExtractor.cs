@@ -1,5 +1,7 @@
 ﻿using Elzik.Breef.Domain;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
+using Elzik.Breef.Infrastructure;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors;
 
@@ -13,7 +15,15 @@ public class HtmlContentExtractor(IHttpClientFactory httpClientFactory) : Conten
     protected override async Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
     {
         var httpClient = httpClientFactory.CreateClient("BreefDownloader");
-        var html = await httpClient.GetStringAsync(webPageUrl);
+        string html;
+        try
+        {
+            html = await httpClient.GetStringAsync(webPageUrl);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new CallerFixableHttpRequestException($"Failed to download content for URL: {webPageUrl}", ex);
+        }
         var htmlDocument = new HtmlDocument();
         htmlDocument.LoadHtml(html);
 

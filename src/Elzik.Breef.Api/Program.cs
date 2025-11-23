@@ -1,4 +1,5 @@
 using Elzik.Breef.Api.Auth;
+using Elzik.Breef.Api.ExceptionHandling;
 using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Application;
 using Elzik.Breef.Domain;
@@ -9,6 +10,8 @@ using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 using Elzik.Breef.Infrastructure.Wallabag;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 using Refit;
 using Serilog;
@@ -44,8 +47,6 @@ public class Program
         {
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
         });
-
-        builder.Services.AddProblemDetails();
 
         builder.Services.AddCors(options =>
         {
@@ -140,16 +141,9 @@ public class Program
 
         var app = builder.Build();
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-        }
-        else
-        {
-            app.UseExceptionHandler(options => { });
-        }
-
         app.UseStatusCodePages();
+
+        app.UseExceptionHandling();
 
         app.UseCors();
         app.UseAuth();

@@ -6,7 +6,7 @@ Post {{Elzik.Breef.Api_HostAddress}}/breefs
 Content-Type: application/json
 BREEF-API-KEY: test-key
 {
- "url":"https://www.168716871687168716positive.news/society/swiping-less-living-more-how-to-take-control-of-our-digital-lives/"
+ "url":"https://www.positive.news/society/swiping-less-living-more-how-to-take-control-of-our-digital-lives/"
 }
 
 ### Reddit Post
