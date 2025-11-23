@@ -48,6 +48,8 @@ public class Program
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
         });
 
+        builder.Services.AddExceptionHandling();
+
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(builder =>
