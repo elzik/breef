@@ -25,13 +25,13 @@ public static class ExceptionHandlingExtensions
                 if (exception is CallerFixableHttpRequestException callerFixable)
                 {
                     statusCode = StatusCodes.Status400BadRequest;
-                    title = "There was a problem with your request,";
+                    title = "There was a problem with your request";
                     detail = callerFixable.Message;
                 }
                 else
                 {
                     statusCode = StatusCodes.Status500InternalServerError;
-                    title = "An error occurred while processing your request.";
+                    title = "An error occurred while processing your request";
                     detail = "Contact your Breef administrator for a solution.";
                 }
 
