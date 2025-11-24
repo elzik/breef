@@ -6,42 +6,16 @@ using Xunit.Abstractions;
 
 namespace Elzik.Breef.Api.Tests.Functional;
 
-public class HealthTestsNative
+public class HealthTestsNative : HealthTestsBase, IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly ITestOutputHelper _output;
+    private readonly WebApplicationFactory<Program> _webApplicationFactory;
+    private readonly HttpClient _client;
 
-    public HealthTestsNative(ITestOutputHelper output)
+    protected override HttpClient Client => _client;
+
+    public HealthTestsNative(WebApplicationFactory<Program> webAppFactory)
     {
-        _output = output;
-    }
-
-    [Theory]
-    [InlineData("Development")]
-    [InlineData("Production")]
-    public async Task Health_Called_ReturnsOK(string environmentName)
-    {
-        // Arrange
-        _output.WriteLine($"Testing health endpoint in {environmentName} environment");
-
-        using WebApplicationFactory<Program> factory = environmentName == "Development"
-            ? new DevelopmentWebApplicationFactory()
-            : new ProductionWebApplicationFactory();
-
-        using var client = factory.CreateClient();
-        const string baseUrl = "http://localhost";
-
-        // Act
-        var response = await client.GetAsync($"{baseUrl}/health");
-
-        // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<HealthResponse>();
-        body.ShouldNotBeNull();
-        body!.Status.ShouldBe("Healthy");
-    }
-
-    private class HealthResponse
-    {
-        public string Status { get; set; } = string.Empty;
+        _webApplicationFactory = webAppFactory;
+        _client = _webApplicationFactory.CreateClient();
     }
 }
