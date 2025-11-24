@@ -24,7 +24,7 @@ public static class ExceptionHandlingExtensions
 
                 if (exception is ICallerFixableException)
                 {
-                    if (string.IsNullOrWhiteSpace(exception?.Message))
+                    if (string.IsNullOrWhiteSpace(exception.Message))
                     {
                         throw new InvalidOperationException(
                             "Caller-fixable exception must have a non-empty message for the caller to fix.",
