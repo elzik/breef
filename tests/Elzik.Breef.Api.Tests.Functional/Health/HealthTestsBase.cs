@@ -2,7 +2,7 @@ using Shouldly;
 using System.Net;
 using System.Net.Http.Json;
 
-namespace Elzik.Breef.Api.Tests.Functional
+namespace Elzik.Breef.Api.Tests.Functional.Health
 {
     public abstract class HealthTestsBase
     {

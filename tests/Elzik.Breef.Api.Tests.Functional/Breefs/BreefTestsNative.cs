@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace Elzik.Breef.Api.Tests.Functional;
+namespace Elzik.Breef.Api.Tests.Functional.Breefs;
 
 public class BreefTestsNative : BreefTestsBase, IClassFixture<WebApplicationFactory<Program>>
 {

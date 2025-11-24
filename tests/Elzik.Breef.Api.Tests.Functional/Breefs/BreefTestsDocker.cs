@@ -3,9 +3,9 @@ using DotNet.Testcontainers.Containers;
 using System.Diagnostics;
 using Xunit.Abstractions;
 
-namespace Elzik.Breef.Api.Tests.Functional;
+namespace Elzik.Breef.Api.Tests.Functional.Breefs;
 
-public class HealthTestsDocker : HealthTestsBase, IAsyncLifetime
+public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 {
     private const string DockerImageName = "ghcr.io/elzik/elzik-breef-api:latest";
     private const int ContainerStartTimeoutSeconds = 30;
@@ -20,41 +20,73 @@ public class HealthTestsDocker : HealthTestsBase, IAsyncLifetime
     protected override string SkipTestsReason => "Test was skipped because Docker is not available. Install Docker Engine for Linux, " +
         "Docker Desktop for Windows or make peace with the fact that tests can not run for the Docker container.";
 
-    public HealthTestsDocker(ITestOutputHelper testOutputHelper)
+    public BreefTestsDocker(ITestOutputHelper testOutputHelper)
     {
         _dockerIsUnavailable = DockerIsUnavailable();
         _testOutputHelper = testOutputHelper
- ?? throw new ArgumentNullException(nameof(testOutputHelper));
+            ?? throw new ArgumentNullException(nameof(testOutputHelper));
         _client = new HttpClient
         {
             Timeout = TimeSpan.FromSeconds(30)
         };
+        _client.DefaultRequestHeaders.Add("BREEF-API-KEY", ApiKey);
 
         if (!_dockerIsUnavailable)
         {
             BuildDockerImage();
 
+            string? breefAiServiceProvider = Environment.GetEnvironmentVariable("breef_AiService__Provider");
+            string? breefAiServiceEndpointUrl = Environment.GetEnvironmentVariable("breef_AiService__EndpointUrl");
+            string? breefAiServiceModelId = Environment.GetEnvironmentVariable("breef_AiService__ModelId");
+            string? breefAiServiceApiKey = Environment.GetEnvironmentVariable("breef_AiService__ApiKey");
+
+            string? breefWallabagBaseUrl = Environment.GetEnvironmentVariable("breef_Wallabag__BaseUrl");
+            string? breefWallabagUsername = Environment.GetEnvironmentVariable("breef_Wallabag__Username");
+            string? breefWallabagPassword = Environment.GetEnvironmentVariable("breef_Wallabag__Password");
+            string? breefWallabagClientId = Environment.GetEnvironmentVariable("breef_Wallabag__ClientId");
+            string? breefWallabagClientSecret = Environment.GetEnvironmentVariable("breef_Wallabag__ClientSecret");
+
+            Skip.If(string.IsNullOrWhiteSpace(breefAiServiceProvider),
+                "Skipped because no AI service provider provided in breef_AiService__Provider environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefAiServiceEndpointUrl),
+                "Skipped because no AI endpoint provided in breef_AiService__EndpointUrl environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefAiServiceModelId),
+                "Skipped because no AI model ID provided in breef_AiService__ModelId environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefAiServiceApiKey),
+                "Skipped because no AI API key provided in breef_AiService__ApiKey environment variable.");
+
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagBaseUrl),
+                "Skipped because no Wallabag URL provided in breef_Wallabag__BaseUrl environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagUsername),
+                "Skipped because no Wallabag username provided in breef_Wallabag__Username environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagPassword),
+                "Skipped because no Wallabag password provided in breef_Wallabag__Password environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagClientId),
+                "Skipped because no Wallabag client ID provided in breef_Wallabag__ClientId environment variable.");
+            Skip.If(string.IsNullOrWhiteSpace(breefWallabagClientSecret),
+                "Skipped because no Wallabag client secret provided in breef_Wallabag__ClientSecret environment variable.");
+
             var outputConsumer = Consume.RedirectStdoutAndStderrToStream(
-                new TestOutputHelperStream(_testOutputHelper),
-                new TestOutputHelperStream(_testOutputHelper));
+                        new TestOutputHelperStream(_testOutputHelper),
+                        new TestOutputHelperStream(_testOutputHelper));
 
             _testContainer = new ContainerBuilder()
                 .WithImage(DockerImageName)
                 .WithPortBinding(8080, true)
-                .WithEnvironment("breef_BreefApi__ApiKey", "dummy-api-key")
-                .WithEnvironment("breef_AiService__Provider", "OpenAI")
-                .WithEnvironment("breef_AiService__EndpointUrl", "http://dummy-ai.local")
-                .WithEnvironment("breef_AiService__ModelId", "dummy-model")
-                .WithEnvironment("breef_AiService__ApiKey", "dummy-api-key")
-                .WithEnvironment("breef_Wallabag__BaseUrl", "http://dummy-wallabag.local")
-                .WithEnvironment("breef_Wallabag__Username", "dummy-user")
-                .WithEnvironment("breef_Wallabag__Password", "dummy-password")
-                .WithEnvironment("breef_Wallabag__ClientId", "dummy-client-id")
-                .WithEnvironment("breef_Wallabag__ClientSecret", "dummy-client-secret")
+                .WithEnvironment("breef_BreefApi__ApiKey", ApiKey)
+                .WithEnvironment("breef_AiService__Provider", breefAiServiceProvider)
+                .WithEnvironment("breef_AiService__EndpointUrl", breefAiServiceEndpointUrl)
+                .WithEnvironment("breef_AiService__ModelId", breefAiServiceModelId)
+                .WithEnvironment("breef_AiService__ApiKey", breefAiServiceApiKey)
+                .WithEnvironment("breef_Wallabag__BaseUrl", breefWallabagBaseUrl)
+                .WithEnvironment("breef_Wallabag__Username", breefWallabagUsername)
+                .WithEnvironment("breef_Wallabag__Password", breefWallabagPassword)
+                .WithEnvironment("breef_Wallabag__ClientId", breefWallabagClientId)
+                .WithEnvironment("breef_Wallabag__ClientSecret", breefWallabagClientSecret)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(request => request
-                .ForPort(8080)
-                .ForPath("/health")
-                .ForStatusCode(System.Net.HttpStatusCode.OK)))
+                    .ForPort(8080)
+                    .ForPath("/health")
+                    .ForStatusCode(System.Net.HttpStatusCode.OK)))
                 .WithOutputConsumer(outputConsumer)
                 .Build();
         }
@@ -85,7 +117,7 @@ public class HealthTestsDocker : HealthTestsBase, IAsyncLifetime
         if (process.ExitCode != 0)
         {
             throw new InvalidOperationException(
-             standardError + Environment.NewLine + standardOutput);
+                standardError + Environment.NewLine + standardOutput);
         }
 
         _testOutputHelper.WriteLine(standardOutput);
@@ -115,7 +147,7 @@ public class HealthTestsDocker : HealthTestsBase, IAsyncLifetime
             if (process.ExitCode != 0)
             {
                 throw new InvalidOperationException(
-                   standardError + Environment.NewLine + standardOutput);
+                    standardError + Environment.NewLine + standardOutput);
             }
 
             return !standardOutput.StartsWith("Docker version", StringComparison.OrdinalIgnoreCase);
@@ -123,14 +155,14 @@ public class HealthTestsDocker : HealthTestsBase, IAsyncLifetime
         catch (System.ComponentModel.Win32Exception ex)
         {
             const int ERROR_FILE_NOT_FOUND = 2;
-      
+
             if (ex.NativeErrorCode == ERROR_FILE_NOT_FOUND)
             {
                 return true;
             }
 
             throw;
- }
+        }
     }
 
     public async Task InitializeAsync()
@@ -139,9 +171,10 @@ public class HealthTestsDocker : HealthTestsBase, IAsyncLifetime
         {
             using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(ContainerStartTimeoutSeconds));
 
-            if (_testContainer == null)
+            if(_testContainer == null)
             {
-                throw new InvalidOperationException("Test container is not initialized and cannot be started.");
+                throw new InvalidOperationException("Test container is not initialized " +
+                                                    "and cannot be started.");
             }
 
             try

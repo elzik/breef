@@ -7,7 +7,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Elzik.Breef.Api.Tests.Functional
+namespace Elzik.Breef.Api.Tests.Functional.Breefs
 {
     public abstract class BreefTestsBase
     {
