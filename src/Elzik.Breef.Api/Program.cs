@@ -35,7 +35,7 @@ public class Program
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .Enrich.FromLogContext()
-            .WriteTo.Console()
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} [{TraceId}]{NewLine}{Exception}")
             .ReadFrom.Configuration(configuration)
             .CreateLogger();
         builder.Host.UseSerilog();

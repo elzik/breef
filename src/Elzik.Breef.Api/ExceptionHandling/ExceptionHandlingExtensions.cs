@@ -1,5 +1,7 @@
 ﻿using Elzik.Breef.Domain;
 using Microsoft.AspNetCore.Diagnostics;
+using Serilog.Context;
+using System.Diagnostics;
 
 namespace Elzik.Breef.Api.ExceptionHandling;
 
@@ -47,6 +49,11 @@ public static class ExceptionHandlingExtensions
                     Title = title,
                     Detail = detail
                 };
+
+                if(Activity.Current != null)
+                {
+                    problemDetails.Extensions["traceId"] = Activity.Current.TraceId.ToString();
+                }
 
                 context.Response.StatusCode = statusCode;
                 context.Response.ContentType = "application/problem+json";

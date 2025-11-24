@@ -35,6 +35,8 @@ public class ExceptionHandlingTests
         json.RootElement.GetProperty("title").GetString().ShouldBe(expected.title);
         json.RootElement.GetProperty("status").GetInt32().ShouldBe(expected.status);
         json.RootElement.GetProperty("detail").GetString().ShouldBe(expected.detail);
+        json.RootElement.TryGetProperty("traceId", out var traceIdProp).ShouldBeTrue();
+        traceIdProp.GetString().ShouldNotBeNullOrWhiteSpace();
     }
 
     [Fact]
@@ -67,6 +69,8 @@ public class ExceptionHandlingTests
         json.RootElement.GetProperty("title").GetString().ShouldBe(expected.title);
         json.RootElement.GetProperty("status").GetInt32().ShouldBe(expected.status);
         json.RootElement.GetProperty("detail").GetString().ShouldBe(expected.detail);
+        json.RootElement.TryGetProperty("traceId", out var traceIdProp).ShouldBeTrue();
+        traceIdProp.GetString().ShouldNotBeNullOrWhiteSpace();
     }
 
     private static void ForceBreefGeneratorException(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
