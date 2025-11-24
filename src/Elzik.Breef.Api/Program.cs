@@ -1,4 +1,5 @@
 using Elzik.Breef.Api.Auth;
+using Elzik.Breef.Api.ExceptionHandling;
 using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Application;
 using Elzik.Breef.Domain;
@@ -9,6 +10,8 @@ using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 using Elzik.Breef.Infrastructure.Wallabag;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 using Refit;
 using Serilog;
@@ -32,7 +35,7 @@ public class Program
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .Enrich.FromLogContext()
-            .WriteTo.Console()
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} [{TraceId}]{NewLine}{Exception}")
             .ReadFrom.Configuration(configuration)
             .CreateLogger();
         builder.Host.UseSerilog();
@@ -44,6 +47,8 @@ public class Program
         {
             options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
         });
+
+        builder.Services.AddExceptionHandling();
 
         builder.Services.AddCors(options =>
         {
@@ -137,11 +142,16 @@ public class Program
         builder.Services.AddTransient<IBreefGenerator, BreefGenerator>();
 
         var app = builder.Build();
+
+        app.UseStatusCodePages();
+
+        app.UseExceptionHandling();
+
         app.UseCors();
         app.UseAuth();
 
         app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
-           .AllowAnonymous();
+            .AllowAnonymous();
 
         app.AddBreefEndpoints();
 
