@@ -1,4 +1,4 @@
-﻿using Elzik.Breef.Infrastructure;
+﻿using Elzik.Breef.Domain;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace Elzik.Breef.Api.ExceptionHandling;
@@ -22,11 +22,17 @@ public static class ExceptionHandlingExtensions
                 string title;
                 string detail;
 
-                if (exception is CallerFixableHttpRequestException callerFixable)
+                if (exception is ICallerFixableException)
                 {
+                    if (string.IsNullOrWhiteSpace(exception?.Message))
+                    {
+                        throw new InvalidOperationException(
+                            "Caller-fixable exception must have a non-empty message for the caller to fix.",
+                            exception);
+                    }
                     statusCode = StatusCodes.Status400BadRequest;
                     title = "There was a problem with your request";
-                    detail = callerFixable.Message;
+                    detail = exception.Message;
                 }
                 else
                 {
