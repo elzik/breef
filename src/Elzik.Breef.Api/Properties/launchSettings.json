@@ -2,17 +2,6 @@
   "profiles": {
     "Local": {
       "commandName": "Project",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5079"
-    },
-    "Local (Production)": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Production"
-      },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5079"
     },
