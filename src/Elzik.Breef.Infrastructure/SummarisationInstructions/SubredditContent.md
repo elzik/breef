@@ -11,7 +11,7 @@ JSON with a "Posts" array, where each post contains:
 ## Requirements
 
 1. **Overview**: Describe the general state/themes of the subreddit
-2. **Posts**: Sumarise every post with a thematic summary of its comments
+2. **Posts**: Summarise every post with a thematic summary of its comments
 3. **Summaries**: 
    - Maximum 200 words OR 10% of original length (whichever is shorter)
    - For a top-level post, include post title as HTML link to the post URL: `<a href="RedditPostContent.PostUrl">Title</a>`
