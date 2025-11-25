@@ -15,7 +15,7 @@ JSON with a "Posts" array, where each post contains:
 3. **Summaries**: 
    - Maximum 200 words OR 10% of original length (whichever is shorter)
    - For a top-level post, include post title as HTML link to the post URL: `<a href="RedditPostContent.PostUrl">Title</a>`
-   - Where a post's replies are highly scoring, also summarise them and include author attribution with comment links: `<a href="RedditPostContent.PostUrl">@author</a>`. Link to the author's comment, not to the author's profile.
+   - Where a post's replies are highly scoring, also summarise them and include author attribution with comment links: `<a href="RedditComment.PostUrl">@author</a>`. Link to the author's comment, not to the author's profile.
 4. **Exclude**:
    - Links Subreddit
    - Root post title
