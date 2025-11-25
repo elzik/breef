@@ -5,8 +5,8 @@ Summarize the provided Reddit subreddit JSON data containing posts and nested co
 ## Input Structure
 
 JSON with a "Posts" array, where each post contains:
-- Metadata: Title, Author, Subreddit, Score, Content, CreatedUtc
-- Comments: Array with Author, Score, Content, CreatedUtc, and nested Replies
+- Metadata: Title, Author, Subreddit, Score, Content, CreatedUtc, PostUrl
+- Comments: Array with Author, Score, Content, CreatedUtc, PostUrl and nested Replies
 
 ## Requirements
 
@@ -14,9 +14,9 @@ JSON with a "Posts" array, where each post contains:
 2. **Posts**: Sumarise every post with a thematic summary of its comments
 3. **Summaries**: 
    - Maximum 200 words OR 10% of original length (whichever is shorter)
-   - For a top-level post, include post title as HTML link: `<a href="POST_URL">Title</a>`
-   - Where a post's replies are highly scoring, also summarise them and include author attribution with comment links: `<a href="COMMENT_URL">@author</a>`. Link to the author's comment, not to the author's profile.
-1. **Exclude**:
+   - For a top-level post, include post title as HTML link to the post URL: `<a href="RedditPostContent.PostUrl">Title</a>`
+   - Where a post's replies are highly scoring, also summarise them and include author attribution with comment links: `<a href="RedditPostContent.PostUrl">@author</a>`. Link to the author's comment, not to the author's profile.
+4. **Exclude**:
    - Links Subreddit
    - Root post title
    - Metadata timestamps/scores
@@ -25,6 +25,7 @@ JSON with a "Posts" array, where each post contains:
 ## Output Format
 
 - Strictly well-formatted HTML output
+- Do not include any markdown notation nor put the summary in a codeblock
 - Brief overview of themes covered in this specific JSON document
-- DO not include a general description of the subreddit itself
+- Do not include a general description of the subreddit itself
 - Summaries of the highest scoring top-level posts

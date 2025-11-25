@@ -63,6 +63,7 @@ public sealed class RedditPostContentExtractorTests : IDisposable
         redditPost.Post.ShouldNotBeNull();
         redditPost.Post.Id.ShouldBe("1kqiwzc");
         redditPost.Post.Title.ShouldNotBeNullOrWhiteSpace();
+        redditPost.Post.PostUrl.ShouldNotBeNullOrWhiteSpace();
         redditPost.Comments.ShouldNotBeNull();
     }
 
@@ -136,6 +137,7 @@ public sealed class RedditPostContentExtractorTests : IDisposable
         redditPost.Post.Author.ShouldNotBeNullOrEmpty();
         redditPost.Post.Subreddit.ShouldNotBeNullOrEmpty();
         redditPost.Post.CreatedUtc.ShouldNotBe(default);
+        redditPost.Post.PostUrl.ShouldNotBeNullOrWhiteSpace();
         redditPost.Comments.ShouldNotBeNull();
         if (redditPost.Comments.Count != 0)
         {

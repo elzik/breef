@@ -60,6 +60,7 @@ public class RedditPostContentExtractor(
 
         var postId = segments[3];
         var post = await redditPostClient.GetPost(postId);
+        post.Post.PostUrl = webPageUrl;
 
         if (string.IsNullOrWhiteSpace(post.Post.ImageUrl))
         {

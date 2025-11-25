@@ -56,7 +56,8 @@ public class RawNewInSubredditTransformerTests
                 Author = "author1",
                 Score = 100,
                 Content = "Content 1",
-                CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc)
+                CreatedUtc = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc),
+                PostUrl = "https://reddit.com/r/testsubreddit/comments/post1"
             },
             Comments = []
         };
@@ -70,7 +71,8 @@ public class RawNewInSubredditTransformerTests
                 Author = "author2",
                 Score = 200,
                 Content = "Content 2",
-                CreatedUtc = new DateTime(2025, 1, 1, 13, 0, 0, DateTimeKind.Utc)
+                CreatedUtc = new DateTime(2025, 1, 1, 13, 0, 0, DateTimeKind.Utc),
+                PostUrl = "https://reddit.com/r/testsubreddit/comments/post2"
             },
             Comments = []
         };
@@ -92,6 +94,7 @@ public class RawNewInSubredditTransformerTests
         firstPost.Post.Author.ShouldBe("author1");
         firstPost.Post.Score.ShouldBe(100);
         firstPost.Post.Content.ShouldBe("Content 1");
+        firstPost.Post.PostUrl.ShouldBe("https://reddit.com/r/testsubreddit/comments/post1");
 
         var secondPost = result.Posts[1];
         secondPost.Post.Id.ShouldBe("post2");
@@ -99,6 +102,7 @@ public class RawNewInSubredditTransformerTests
         secondPost.Post.Author.ShouldBe("author2");
         secondPost.Post.Score.ShouldBe(200);
         secondPost.Post.Content.ShouldBe("Content 2");
+        secondPost.Post.PostUrl.ShouldBe("https://reddit.com/r/testsubreddit/comments/post2");
     }
 
     [Fact]
@@ -319,7 +323,8 @@ public class RawNewInSubredditTransformerTests
                 Score = 42,
                 Subreddit = "test",
                 CreatedUtc = new DateTime(2025, 1, 1, 14, 0, 0, DateTimeKind.Utc),
-                ImageUrl = "https://example.com/image.jpg"
+                ImageUrl = "https://example.com/image.jpg",
+                PostUrl = "https://reddit.com/r/test/single_post"
             },
             Comments =
             [
@@ -352,6 +357,7 @@ public class RawNewInSubredditTransformerTests
         post.Post.Score.ShouldBe(42);
         post.Post.Subreddit.ShouldBe("test");
         post.Post.ImageUrl.ShouldBe("https://example.com/image.jpg");
+        post.Post.PostUrl.ShouldNotBeNullOrEmpty();
         post.Comments.Count.ShouldBe(1);
         post.Comments[0].Content.ShouldBe("Great post!");
     }

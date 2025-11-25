@@ -215,7 +215,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         {
             // Arrange
             var url = "https://www.reddit.com/r/programming/comments/abc123/title";
-            var testPost = CreateTestRedditPost("abc123", "Test Title", "https://example.com/image.jpg");
+            var testPost = CreateTestRedditPost("abc123", "Test Title", "https://example.com/image.jpg", url);
             _mockRedditPostClient.GetPost("abc123").Returns(testPost);
 
             // Act
@@ -226,6 +226,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             deserializedPost.ShouldNotBeNull();
             deserializedPost.Post.Id.ShouldBe("abc123");
             deserializedPost.Post.Title.ShouldBe("Test Title");
+            deserializedPost.Post.PostUrl.ShouldBe(url);
         }
 
         [Theory]
@@ -349,7 +350,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             await Should.ThrowAsync<HttpRequestException>(() => _extractor.ExtractAsync(url));
         }
 
-        private static RedditPost CreateTestRedditPost(string id, string title, string? imageUrl) => new()
+        private static RedditPost CreateTestRedditPost(string id, string title, string? imageUrl, string? postUrl = null) => new()
         {
                 Post = new RedditPostContent
                 {
@@ -360,7 +361,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                     Score = 100,
                     Content = "Test post content",
                     CreatedUtc = DateTime.UtcNow,
-                    ImageUrl = imageUrl
+                    ImageUrl = imageUrl,
+                    PostUrl = postUrl ?? $"https://reddit.com/r/testsubreddit/comments/{id}"
                 },
                 Comments =
                 [

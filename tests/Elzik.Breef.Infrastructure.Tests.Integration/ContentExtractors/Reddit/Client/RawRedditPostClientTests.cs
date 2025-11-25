@@ -44,6 +44,7 @@ public class RawRedditPostClientTests
             "at companies – 12 weeks\n\nClean code – 6 weeks\n\nApprenticeship at companies – 16 weeks\n\nExam " +
             "thesis – 4 weeks");
         mainPost.Content.ShouldBe(mainPost.SelfText);
+        mainPost.Url.ShouldNotBeNullOrWhiteSpace();
 
         var replies = redditPost[1].Data.Children;
 
