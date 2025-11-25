@@ -1,12 +1,13 @@
 ﻿using Elzik.Breef.Api.Presentation;
 using Elzik.Breef.Infrastructure.Wallabag;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Shouldly;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Elzik.Breef.Api.Tests.Functional
+namespace Elzik.Breef.Api.Tests.Functional.Breefs
 {
     public abstract class BreefTestsBase
     {
@@ -78,8 +79,15 @@ namespace Elzik.Breef.Api.Tests.Functional
             challenge.Scheme.ShouldBe("ApiKey");
             challenge.Parameter.ShouldNotBeNullOrEmpty();
             challenge.Parameter.ShouldContain("BREEF-API-KEY");
+            
             var responseString = await response.Content.ReadAsStringAsync();
-            responseString.ShouldBeEmpty();
+            responseString.ShouldNotBeNullOrEmpty();
+            var problemDetails = JsonSerializer
+                .Deserialize<ProblemDetails>(responseString, JsonSerializerOptions);
+            problemDetails.ShouldNotBeNull();
+            problemDetails.Status.ShouldBe(401);
+            problemDetails.Title.ShouldBe("Unauthorized");
+            problemDetails.Type.ShouldNotBeNullOrWhiteSpace();
         }
     }
 }

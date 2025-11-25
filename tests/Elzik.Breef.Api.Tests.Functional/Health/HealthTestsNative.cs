@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Mvc.Testing;
+using Shouldly;
+using System.Net;
+using System.Net.Http.Json;
+using Xunit.Abstractions;
 
-namespace Elzik.Breef.Api.Tests.Functional;
+namespace Elzik.Breef.Api.Tests.Functional.Health;
 
 public class HealthTestsNative : HealthTestsBase, IClassFixture<WebApplicationFactory<Program>>
 {
