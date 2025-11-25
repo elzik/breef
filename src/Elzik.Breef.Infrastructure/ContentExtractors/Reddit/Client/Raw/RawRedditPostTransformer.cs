@@ -69,8 +69,7 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         return extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp" or ".bmp" or ".svg";
     }
 
-    private List<RedditComment> TransformComments(List<RawRedditChild> children, 
-        string subreddit = "", string postId = "")
+    private List<RedditComment> TransformComments(List<RawRedditChild> children, string subreddit = "", string postId = "")
     {
         var comments = new List<RedditComment>();
 
@@ -144,6 +143,80 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         return TransformComments(replies.Data.Children, subreddit, postId);
     }
 
+    private List<RedditComment> TransformComments(List<RawRedditChild> children, string subreddit, string postId, string host)
+    {
+        var comments = new List<RedditComment>();
+
+        foreach (var child in children)
+        {
+            if (child.Kind == "t1")
+            {
+                var commentUrl = $"https://{host}/r/{subreddit}/comments/{postId}/comment/{child.Data.Id}/";
+                var comment = new RedditComment
+                {
+                    Id = child.Data.Id ?? string.Empty,
+                    Author = child.Data.Author ?? string.Empty,
+                    Score = child.Data.Score,
+                    Content = child.Data.Content ?? string.Empty,
+                    CreatedUtc = child.Data.CreatedUtc,
+                    PostUrl = commentUrl,
+                    Replies = TransformComments(child.Data.Replies, subreddit, postId, host)
+                };
+
+                comments.Add(comment);
+            }
+        }
+
+        return comments;
+    }
+
+    private List<RedditComment> TransformComments(object? replies, string subreddit, string postId, string host)
+    {
+        if (replies == null)
+            return [];
+
+        if (replies is string stringReply && stringReply == "")
+            return [];
+
+        if (replies is JsonElement jsonElement)
+        {
+            if (jsonElement.ValueKind == JsonValueKind.Null)
+                return [];
+
+            if (jsonElement.ValueKind == JsonValueKind.String && jsonElement.GetString() == "")
+                return [];
+
+            try
+            {
+                var deserializedListing = JsonSerializer.Deserialize<RawRedditListing>(jsonElement.GetRawText());
+                return TransformComments(deserializedListing, subreddit, postId, host);
+            }
+            catch
+            {
+                return [];
+            }
+        }
+
+        if (replies is RawRedditListing listing)
+            return TransformComments(listing, subreddit, postId, host);
+
+        return [];
+    }
+
+    private List<RedditComment> TransformComments(RawRedditListing? replies, string subreddit, string postId, string host)
+    {
+        if (replies == null)
+            return [];
+
+        if (replies.Data == null)
+            return [];
+
+        if (replies.Data.Children == null)
+            return [];
+
+        return TransformComments(replies.Data.Children, subreddit, postId, host);
+    }
+
     public RedditPost Transform(RawRedditPost rawRedditPost)
     {
         ArgumentNullException.ThrowIfNull(rawRedditPost);
@@ -187,87 +260,5 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         };
 
         return redditPost;
-    }
-
-    private List<RedditComment> TransformComments(List<RawRedditChild> children, 
-        string subreddit = "", string postId = "", string host = "www.reddit.com")
-    {
-        var comments = new List<RedditComment>();
-
-        foreach (var child in children)
-        {
-            if (child.Kind == "t1")
-            {
-                var commentUrl = $"https://{host}/r/{subreddit}/comments/{postId}/comment/{child.Data.Id}/";
-                var comment = new RedditComment
-                {
-                    Id = child.Data.Id ?? string.Empty,
-                    Author = child.Data.Author ?? string.Empty,
-                    Score = child.Data.Score,
-                    Content = child.Data.Content ?? string.Empty,
-                    CreatedUtc = child.Data.CreatedUtc,
-                    PostUrl = commentUrl,
-                    Replies = TransformComments(child.Data.Replies, subreddit, postId, host)
-                };
-
-                comments.Add(comment);
-            }
-        }
-
-        return comments;
-    }
-
-    private List<RedditComment> TransformComments(object? replies, 
-        string subreddit = "", 
-        string postId = "", 
-        string host = "www.reddit.com")
-    {
-        if (replies == null)
-            return [];
-
-        if (replies is string stringReply && stringReply == "")
-            return [];
-
-        if (replies is JsonElement jsonElement)
-        {
-            if (jsonElement.ValueKind == JsonValueKind.Null)
-                return [];
-
-            if (jsonElement.ValueKind == JsonValueKind.String && jsonElement.GetString() == "")
-                return [];
-
-            try
-            {
-                var deserializedListing = JsonSerializer.Deserialize<RawRedditListing>(jsonElement.GetRawText());
-                return TransformComments(deserializedListing, subreddit, postId, host);
-            }
-            catch
-            {
-                return [];
-            }
-        }
-
-        if (replies is RawRedditListing listing)
-            return TransformComments(listing, subreddit, postId, host);
-
-        return [];
-    }
-
-    private List<RedditComment> TransformComments(
-        RawRedditListing? replies, 
-        string subreddit = "", 
-        string postId = "", 
-        string host = "www.reddit.com")
-    {
-        if (replies == null)
-            return [];
-
-        if (replies.Data == null)
-            return [];
-
-        if (replies.Data.Children == null)
-            return [];
-
-        return TransformComments(replies.Data.Children, subreddit, postId, host);
     }
 }
