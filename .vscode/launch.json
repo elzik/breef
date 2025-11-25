@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Local",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Elzik.Breef.Api/bin/Debug/net8.0/Elzik.Breef.Api.dll",
+      "cwd": "${workspaceFolder}/src/Elzik.Breef.Api",
+      "stopAtEntry": false
+    }
+  ]
+}

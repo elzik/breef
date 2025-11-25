@@ -1,33 +1,36 @@
-@Elzik.Breef.Api_HostAddress = http://localhost:5079
+@host = http://localhost:5079
 
 ### HTML
 
-Post {{Elzik.Breef.Api_HostAddress}}/breefs
+POST {{host}}/breefs
 Content-Type: application/json
 BREEF-API-KEY: test-key
+
 {
- "url":"https://www.positive.news/society/swiping-less-living-more-how-to-take-control-of-our-digital-lives/"
+  "url": "https://www.positive.news/society/swiping-less-living-more-how-to-take-control-of-our-digital-lives/"
 }
 
 ### Reddit Post
 
-Post {{Elzik.Breef.Api_HostAddress}}/breefs
+POST {{host}}/breefs
 Content-Type: application/json
 BREEF-API-KEY: test-key
+
 {
- "url":"https://www.reddit.com/r/selfhosted/comments/1ojndg6/advice_should_i_buy_a_new_router_or_build_one/"
+  "url": "https://www.reddit.com/r/selfhosted/comments/1ojndg6/advice_should_i_buy_a_new_router_or_build_one/"
 }
 
 ### Subreddit
 
-Post {{Elzik.Breef.Api_HostAddress}}/breefs
+POST {{host}}/breefs
 Content-Type: application/json
 BREEF-API-KEY: test-key
+
 {
- "url":"https://www.reddit.com/r/dotnet/"
+  "url": "https://www.reddit.com/r/dotnet/"
 }
 
 ### Health
 
-Get {{Elzik.Breef.Api_HostAddress}}/health
+GET {{host}}/health
 Content-Type: application/json
