@@ -10,11 +10,12 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
 
     public RawRedditPostTransformer(IOptions<RedditOptions> options)
     {
-        if (options == null)
-            throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
+
         if (options.Value == null)
             throw new InvalidOperationException("RedditOptions configuration is missing or not bound.");
-          _options = options.Value;
+
+        _options = options.Value;
     }
 
     private static string? ExtractBestImage(RawRedditCommentData postData)
