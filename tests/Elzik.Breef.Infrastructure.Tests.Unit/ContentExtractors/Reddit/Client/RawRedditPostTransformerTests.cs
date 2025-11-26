@@ -1069,7 +1069,7 @@ public class RawRedditPostTransformerTests
                                 Body = "Comment",
                                 Score = 10,
                                 CreatedUtc = DateTime.UtcNow,
-                                Replies = new RawRedditListing { Data = null }
+                                Replies = new RawRedditListing { Data = null! }
                             }
                         }
                     ]
@@ -1131,7 +1131,7 @@ public class RawRedditPostTransformerTests
                                 CreatedUtc = DateTime.UtcNow,
                                 Replies = new RawRedditListing
                                 {
-                                    Data = new RawRedditListingData { Children = null }
+                                    Data = new RawRedditListingData { Children = null! }
                                 }
                             }
                         }
