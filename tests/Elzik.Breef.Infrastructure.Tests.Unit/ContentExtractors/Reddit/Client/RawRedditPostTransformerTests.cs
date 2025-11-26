@@ -1,11 +1,22 @@
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
+using Microsoft.Extensions.Options;
 using Shouldly;
 
 namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit.Client;
 
 public class RawRedditPostTransformerTests
 {
-    private readonly RawRedditPostTransformer _transformer = new();
+    private readonly RawRedditPostTransformer _transformer;
+
+    public RawRedditPostTransformerTests()
+    {
+        var options = Options.Create(new RedditOptions()
+        {
+            DefaultBaseAddress = "https://www.test-reddit.com"
+        });
+        _transformer = new RawRedditPostTransformer(options);
+    }
 
     [Fact]
     public void Transform_ValidRedditPost_ReturnsExpectedStructure()
@@ -112,6 +123,7 @@ public class RawRedditPostTransformerTests
         comment.Content.ShouldBe("This is a comment");
         comment.Score.ShouldBe(50);
         comment.CreatedUtc.ShouldBe(new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc));
+        comment.PostUrl.ShouldBe("https://www.test-reddit.com/r/testsubreddit/comments/test123/comment/comment123/");
 
         comment.Replies.Count.ShouldBe(1);
         var reply = comment.Replies[0];
@@ -120,6 +132,7 @@ public class RawRedditPostTransformerTests
         reply.Content.ShouldBe("This is a reply");
         reply.Score.ShouldBe(25);
         reply.CreatedUtc.ShouldBe(new DateTime(2025, 1, 1, 13, 0, 0, DateTimeKind.Utc));
+        reply.PostUrl.ShouldBe("https://www.test-reddit.com/r/testsubreddit/comments/test123/comment/reply123/");
         reply.Replies.Count.ShouldBe(0);
     }
 

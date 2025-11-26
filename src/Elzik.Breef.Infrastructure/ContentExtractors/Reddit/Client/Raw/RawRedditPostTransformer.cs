@@ -1,10 +1,22 @@
 using System.Text.Json;
 using System.Web;
+using Microsoft.Extensions.Options;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 
 public class RawRedditPostTransformer : IRawRedditPostTransformer
 {
+    private readonly RedditOptions _options;
+
+    public RawRedditPostTransformer(IOptions<RedditOptions> options)
+    {
+        if (options == null)
+            throw new ArgumentNullException(nameof(options));
+        if (options.Value == null)
+            throw new InvalidOperationException("RedditOptions configuration is missing or not bound.");
+          _options = options.Value;
+    }
+
     private static string? ExtractBestImage(RawRedditCommentData postData)
     {
         // 1. Gallery images (highest priority) - pick the first/largest
@@ -161,10 +173,10 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         var subreddit = mainPostData.Subreddit ?? string.Empty;
         var postId = mainPostData.Id ?? string.Empty;
         var postUrl = mainPostData.Url ?? string.Empty;
-        var host = "www.reddit.com";
-        if (!string.IsNullOrWhiteSpace(postUrl) && Uri.TryCreate(postUrl, UriKind.Absolute, out var postUri))
+
+        if (!Uri.TryCreate(_options.DefaultBaseAddress, UriKind.Absolute, out var defaultUri))
         {
-            host = postUri.Host;
+            throw new InvalidOperationException("RedditOptions.DefaultBaseAddress is not a valid absolute URI");
         }
 
         var redditPost = new RedditPost
@@ -181,7 +193,7 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
                 ImageUrl = bestImage,
                 PostUrl = postUrl
             },
-            Comments = TransformComments(commentsListing.Data?.Children ?? [], subreddit, postId, host)
+            Comments = TransformComments(commentsListing.Data?.Children ?? [], subreddit, postId, defaultUri.Host)
         };
 
         return redditPost;

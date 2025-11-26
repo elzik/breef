@@ -19,7 +19,11 @@ public sealed class RedditPostContentExtractorTests : IDisposable
     public RedditPostContentExtractorTests()
     {
         var rawRedditClient = RestService.For<IRawRedditPostClient>("https://www.reddit.com/");
-        var transformer = new RawRedditPostTransformer();
+        var options = Options.Create(new RedditOptions()
+        {
+            DefaultBaseAddress = "https://www.test-reddit.com"
+        });
+        var transformer = new RawRedditPostTransformer(options);
         var redditPostClient = new RedditPostClient(rawRedditClient, transformer);
         
         var rawSubredditClient = RestService.For<IRawSubredditClient>("https://www.reddit.com/");

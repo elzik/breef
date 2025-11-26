@@ -1,5 +1,7 @@
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
+using Microsoft.Extensions.Options;
 using Refit;
 using Shouldly;
 
@@ -17,7 +19,11 @@ public class RedditPostClientTests
             "always blocked meaning this test case always fails. This must be run locally instead.");
 
         var rawRedditClient = RestService.For<IRawRedditPostClient>("https://www.reddit.com/");
-        var transformer = new RawRedditPostTransformer();
+        var options = Options.Create(new RedditOptions()
+        {
+            DefaultBaseAddress = "https://www.test-reddit.com"
+        });
+        var transformer = new RawRedditPostTransformer(options);
         var redditClient = new RedditPostClient(rawRedditClient, transformer);
         var postId = "1kqiwzc"; // https://www.reddit.com/r/learnprogramming/comments/1kqiwzc
 
