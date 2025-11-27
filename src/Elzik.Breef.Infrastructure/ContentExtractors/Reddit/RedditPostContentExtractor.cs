@@ -70,6 +70,6 @@ public class RedditPostContentExtractor(
 
         var postJson = JsonSerializer.Serialize(post);
 
-        return new UntypedExtract(post.Post.Title, postJson, post.Post.ImageUrl);
+        return new UntypedExtract(post.Post.Title, postJson, webPageUrl, post.Post.ImageUrl);
     }
 }

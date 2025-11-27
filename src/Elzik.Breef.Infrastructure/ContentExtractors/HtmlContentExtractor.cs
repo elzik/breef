@@ -31,8 +31,7 @@ public class HtmlContentExtractor(IHttpClientFactory httpClientFactory) : Conten
         var title = GetTitle(htmlDocument, webPageUrl);
         var largestImageUrl = GetLargestImageUrl(htmlDocument);
 
-
-        return new UntypedExtract(title, content, largestImageUrl);
+        return new UntypedExtract(title, content, webPageUrl, largestImageUrl);
     }
 
     private static string GetContent(HtmlDocument htmlDocument)

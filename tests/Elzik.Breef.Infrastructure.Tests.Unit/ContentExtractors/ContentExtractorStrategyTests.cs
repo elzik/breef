@@ -8,9 +8,9 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors;
 
 public class ContentExtractorStrategyTests
 {
-    private readonly Extract _extractedByExtractor1 = new("Title1", "Content1", "Image1", "Extractor1Type");
-    private readonly Extract _extractedByExtractor2 = new("Title2", "Content2", "Image2", "Extractor2Type");
-    private readonly Extract _extractedByDefaultExtractor = new("DefaultTitle", "DefaultContent", "DefaultImage", "DefaultExtractorType");
+    private readonly Extract _extractedByExtractor1 = new("Title1", "Content1", "Image1", "https://original.url.com", "Extractor1Type");
+    private readonly Extract _extractedByExtractor2 = new("Title2", "Content2", "Image2", "https://original.url.com", "Extractor2Type");
+    private readonly Extract _extractedByDefaultExtractor = new("DefaultTitle", "DefaultContent", "https://original.url.com", "DefaultImage", "DefaultExtractorType");
 
     private readonly IContentExtractor _extractor1 = Substitute.For<IContentExtractor>();
     private readonly IContentExtractor _extractor2 = Substitute.For<IContentExtractor>();

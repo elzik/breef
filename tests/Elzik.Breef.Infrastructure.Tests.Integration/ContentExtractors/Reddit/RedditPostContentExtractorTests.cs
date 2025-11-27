@@ -2,6 +2,7 @@ using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using Refit;
 using Shouldly;
@@ -15,6 +16,7 @@ public sealed class RedditPostContentExtractorTests : IDisposable
 
     private readonly RedditPostContentExtractor _extractor;
     private readonly HttpClient _httpClient;
+    private readonly FakeTimeProvider _fakeTimeProvider;
 
     public RedditPostContentExtractorTests()
     {
@@ -39,7 +41,10 @@ public sealed class RedditPostContentExtractorTests : IDisposable
         _httpClient.Timeout = TimeSpan.FromSeconds(httpClientOptions.Value.TimeoutSeconds);
         mockHttpClientFactory.CreateClient("BreefDownloader").Returns(_httpClient);
 
-        var subredditImageExtractor = new SubredditContentExtractor(subredditClient, mockHttpClientFactory, redditOptions);
+        _fakeTimeProvider = new FakeTimeProvider();
+
+        var subredditImageExtractor = new SubredditContentExtractor(
+            subredditClient, mockHttpClientFactory, _fakeTimeProvider, redditOptions);
       
         _extractor = new RedditPostContentExtractor(redditPostClient, subredditImageExtractor, redditOptions);
     }
@@ -61,6 +66,7 @@ public sealed class RedditPostContentExtractorTests : IDisposable
         result.Title.ShouldNotBeNullOrWhiteSpace();
         result.Content.ShouldNotBeNullOrWhiteSpace();
         result.PreviewImageUrl.ShouldNotBeNullOrWhiteSpace();
+        result.OriginalUrl.ShouldBe(url);
 
         var redditPost = JsonSerializer.Deserialize<RedditPost>(result.Content);
         redditPost.ShouldNotBeNull();

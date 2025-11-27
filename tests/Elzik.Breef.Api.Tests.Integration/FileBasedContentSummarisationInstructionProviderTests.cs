@@ -98,10 +98,10 @@ public class FileBasedContentSummarisationInstructionProviderTests
 
     public static TheoryData<string[]> EmptyArrayTestData()
     {
-        return new TheoryData<string[]>
-        {
-            Array.Empty<string>()
-        };
+        return
+        [
+            []
+        ];
     }
 
     [Fact]

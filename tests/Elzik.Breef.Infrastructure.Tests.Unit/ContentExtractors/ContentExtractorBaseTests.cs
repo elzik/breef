@@ -106,7 +106,7 @@ public class ContentExtractorBaseTests
 
         protected override Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
         {
-            return Task.FromResult(new UntypedExtract("Test Title", "Test Content", "https://example.com/image.jpg"));
+            return Task.FromResult(new UntypedExtract("Test Title", "Test Content", "https://original.url.com", "https://example.com/image.jpg"));
         }
     }
 
@@ -116,7 +116,7 @@ public class ContentExtractorBaseTests
 
         protected override Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
         {
-            return Task.FromResult(new UntypedExtract("Another Title", "Another Content", null));
+            return Task.FromResult(new UntypedExtract("Another Title", "Another Content", "https://original.url.com", null));
         }
     }
 
@@ -126,7 +126,7 @@ public class ContentExtractorBaseTests
 
         protected override Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
         {
-            return Task.FromResult(new UntypedExtract("HTML Title", "HTML Content", null));
+            return Task.FromResult(new UntypedExtract("HTML Title", "HTML Content", "https://original.url.com", null));
         }
     }
 
@@ -136,7 +136,7 @@ public class ContentExtractorBaseTests
 
         protected override Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
         {
-            return Task.FromResult(new UntypedExtract("Invalid", "Invalid", null));
+            return Task.FromResult(new UntypedExtract("Invalid", "Invalid", "https://original.url.com", null));
         }
     }
 

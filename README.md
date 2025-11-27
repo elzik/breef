@@ -146,3 +146,14 @@ Logging is handled by Serilog and configuration is documented [here](https://git
     "Default": "Debug"   // breef_Serilog__MinimumLevel__Default
   }
 }
+```
+
+#### Time Zone
+
+By default, the Docker container for the Breef API uses the UTC time zone. If you need to set a specific time zone for the application running in the container, set the `TZ` environment variable when building or running the container. For example:
+
+```sh
+docker run -e TZ=Europe/London ...
+```
+
+Replace `Europe/London` with your desired time zone identifier. A [comprehensive list can be found in Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).

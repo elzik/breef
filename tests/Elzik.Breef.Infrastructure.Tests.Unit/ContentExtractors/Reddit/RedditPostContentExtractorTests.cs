@@ -211,6 +211,21 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         }
 
         [Fact]
+        public async Task ExtractAsync_ValidUrl_ReturnsCorrectOriginalUrl()
+        {
+            // Arrange
+            var url = "https://www.reddit.com/r/programming/comments/abc123/title";
+            var testPost = CreateTestRedditPost("abc123", "title", "https://example.com/image.jpg");
+            _mockRedditPostClient.GetPost("abc123").Returns(testPost);
+
+            // Act
+            var result = await _extractor.ExtractAsync(url);
+
+            // Assert
+            result.OriginalUrl.ShouldBe(url);
+        }
+
+        [Fact]
         public async Task ExtractAsync_ValidUrl_ReturnsSerializedPostAsContent()
         {
             // Arrange

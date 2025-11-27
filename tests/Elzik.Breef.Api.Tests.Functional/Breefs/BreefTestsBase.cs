@@ -44,7 +44,7 @@ namespace Elzik.Breef.Api.Tests.Functional.Breefs
             Skip.If(SkipTestsIf, SkipTestsReason);
 
             // Arrange
-            var breef = new { Url = $"https://example.com" };
+            var breef = new { Url = "http://example.com" };
 
             // Act
             var response = await Client.PostAsJsonAsync($"{BaseUrl}/breefs", breef);
