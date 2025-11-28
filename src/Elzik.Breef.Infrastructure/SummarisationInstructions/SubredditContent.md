@@ -1,6 +1,6 @@
 # Task
 
-Summarize the provided Reddit subreddit JSON data containing posts and nested comments.
+Summarise the provided Reddit subreddit JSON data containing posts and nested comments.
 
 ## Input Structure
 
@@ -17,7 +17,7 @@ JSON with a "Posts" array, where each post contains:
    - For a top-level post, include post title as HTML link to the post URL: `<a href="RedditPostContent.PostUrl" target="_blank" rel="noopener noreferrer">Title</a>`
    - For a post's highest-scoring replies, also summarise them and include author attribution with comment links: `<a href="RedditComment.PostUrl" target="_blank" rel="noopener noreferrer">@author</a>`. Link to the author's comment, not to the author's profile.
 4. **Exclude**:
-   - Links Subreddit
+   - Links to Subreddit
    - Root post title
    - Metadata timestamps/scores
    - Code blocks
