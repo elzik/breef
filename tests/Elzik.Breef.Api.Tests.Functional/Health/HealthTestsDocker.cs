@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 
 namespace Elzik.Breef.Api.Tests.Functional.Health;
 
+[Collection("Docker Tests")]
 public class HealthTestsDocker : HealthTestsBase, IAsyncLifetime
 {
     private const string DockerImageName = "ghcr.io/elzik/elzik-breef-api:latest";
