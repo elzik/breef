@@ -12,7 +12,7 @@ JSON with a top level "Post" item containing:
 
 1. **Overview**: Describe the general state/themes of the Reddit post
 2. **Top Level Post**: Summarise the top-level post in detail
-3. **Replies**: Summarise only the highest sacoring replies is lower detail
+3. **Replies**: Summarise only the highest scoring replies in lower detail
 4. **Summaries**: 
    - Maximum 200 words OR 10% of original length (whichever is shorter)
    - For a top-level post, include post title as HTML link to the post URL: `<a href="RedditPostContent.PostUrl" target="_blank" rel="noopener noreferrer">Title</a>`
