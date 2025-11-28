@@ -46,9 +46,9 @@ public class SubredditContentExtractor(
 
         var dateAndTime = timeProvider.GetLocalNow().ToString("yyyy-MM-dd HH:mm");
         var title = $"New in r/{subredditName} as of {dateAndTime}";
-        var instanceSpecificoriginalUrl = $"{webPageUrl}#{dateAndTime}";
+        var instanceSpecificOriginalUrl = $"{webPageUrl}#{dateAndTime}";
 
-        return new UntypedExtract(title, jsonContent, instanceSpecificoriginalUrl, imageUrl);
+        return new UntypedExtract(title, jsonContent, instanceSpecificOriginalUrl, imageUrl);
     }
 
     public async Task<string> GetSubredditImageUrlAsync(string subredditName)

@@ -51,6 +51,7 @@ public class ContentExtractorBaseTests
         result.Title.ShouldBe("Test Title");
         result.Content.ShouldBe("Test Content");
         result.PreviewImageUrl.ShouldBe("https://example.com/image.jpg");
+        result.OriginalUrl.ShouldBe(url);
     }
 
     [Fact]
@@ -106,7 +107,8 @@ public class ContentExtractorBaseTests
 
         protected override Task<UntypedExtract> CreateUntypedExtractAsync(string webPageUrl)
         {
-            return Task.FromResult(new UntypedExtract("Test Title", "Test Content", "https://original.url.com", "https://example.com/image.jpg"));
+            return Task.FromResult(new 
+                UntypedExtract("Test Title", "Test Content", webPageUrl, "https://example.com/image.jpg"));
         }
     }
 
