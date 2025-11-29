@@ -1,8 +1,11 @@
-﻿using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
+﻿using Elzik.Breef.Domain;
+using Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 using Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using Shouldly;
+using System;
 using System.Text.Json;
 
 namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
@@ -15,12 +18,13 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
         private readonly IHttpClientFactory _mockHttpClientFactory;
         private readonly IOptions<RedditOptions> _mockRedditOptions;
         private readonly SubredditContentExtractor _extractor;
+        private readonly FakeTimeProvider _fakeTimeProvider;
 
         public SubredditExtractorTests()
         {
             _mockSubredditClient = Substitute.For<ISubredditClient>();
             _mockSubredditClient.GetNewInSubreddit(Arg.Any<string>())
-                .Returns(new NewInSubreddit { Posts = new List<RedditPost>() });
+                .Returns(new NewInSubreddit { Posts = [] });
 
             _mockHttpClientFactory = Substitute.For<IHttpClientFactory>();
             var mockHandler = new MockHttpMessageHandler(JsonSerializer.Serialize(new { data = new { } }), System.Net.HttpStatusCode.OK);
@@ -35,7 +39,9 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                 FallbackImageUrl = FallbackImageUrl
             });
 
-            _extractor = new SubredditContentExtractor(_mockSubredditClient, _mockHttpClientFactory, _mockRedditOptions);
+            _fakeTimeProvider = new FakeTimeProvider(new DateTimeOffset(2015, 10, 21, 7, 28, 0, TimeSpan.Zero));
+
+            _extractor = new SubredditContentExtractor(_mockSubredditClient, _mockHttpClientFactory, _fakeTimeProvider, _mockRedditOptions);
         }
 
         [Theory]
@@ -81,7 +87,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                 FallbackImageUrl = FallbackImageUrl
             };
             _mockRedditOptions.Value.Returns(customOptions);
-            var extractor = new SubredditContentExtractor(_mockSubredditClient, _mockHttpClientFactory, _mockRedditOptions);
+            var extractor = new SubredditContentExtractor(
+                _mockSubredditClient, _mockHttpClientFactory, _fakeTimeProvider, _mockRedditOptions);
 
             // Act
             var canHandle = extractor.CanHandle(url);
@@ -103,7 +110,8 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                 FallbackImageUrl = FallbackImageUrl
             };
             _mockRedditOptions.Value.Returns(customOptions);
-            var extractor = new SubredditContentExtractor(_mockSubredditClient, _mockHttpClientFactory, _mockRedditOptions);
+            var extractor = new SubredditContentExtractor(
+                _mockSubredditClient, _mockHttpClientFactory, _fakeTimeProvider, _mockRedditOptions);
 
             // Act
             var canHandle = extractor.CanHandle(url);
@@ -193,7 +201,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync(url);
 
             // Assert
-            result.Title.ShouldBe($"New in r/subreddit");
+            result.Title.ShouldBe($"New in r/subreddit as of 2015-10-21 07:28");
         }
 
         [Fact]
@@ -213,12 +221,12 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
                     Content = "Test content",
                     CreatedUtc = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
-                Comments = new List<RedditComment>()
+                Comments = []
             };
 
             var newInSubreddit = new NewInSubreddit
             {
-                Posts = new List<RedditPost> { samplePost }
+                Posts = [samplePost]
             };
             var expectedJson = JsonSerializer.Serialize(newInSubreddit);
 
@@ -485,8 +493,25 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var result = await _extractor.ExtractAsync("https://www.reddit.com/r/dotnet/?utm_source=share#section");
 
             // Assert
-            result.Title.ShouldBe("New in r/dotnet");
+            result.Title.ShouldBe("New in r/dotnet as of 2015-10-21 07:28");
             await _mockSubredditClient.Received(1).GetNewInSubreddit("dotnet");
+        }
+
+        [Fact]
+        public async Task ExtractAsync_ValidUrl_GeneratesInstanceSpecificOriginalUrl()
+        {
+            // Arrange
+            var json = JsonSerializer.Serialize(new { data = new { } });
+            var mockHandler = new MockHttpMessageHandler(json, System.Net.HttpStatusCode.OK);
+            var httpClient = new HttpClient(mockHandler);
+            _mockHttpClientFactory.CreateClient("BreefDownloader").Returns(httpClient);
+            var url = "https://www.reddit.com/r/dotnet";
+
+            // Act - URL with both query string and fragment
+            var result = await _extractor.ExtractAsync(url);
+
+            // Assert
+            result.OriginalUrl.ShouldBe($"{url}#{_fakeTimeProvider.GetLocalNow():yyyy-MM-dd HH:mm}");
         }
 
         [Theory]
@@ -512,7 +537,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             var json = CreateJsonWithImageKey("icon_img", imageUrl);
 
             _mockSubredditClient.GetNewInSubreddit("subreddit")
-               .Returns(new NewInSubreddit { Posts = new List<RedditPost>() });
+               .Returns(new NewInSubreddit { Posts = [] });
 
             var mockHandler = new MockHttpMessageHandler(json, System.Net.HttpStatusCode.OK);
             var httpClient = new HttpClient(mockHandler);
@@ -540,52 +565,38 @@ namespace Elzik.Breef.Infrastructure.Tests.Unit.ContentExtractors.Reddit
             return JsonSerializer.Serialize(new { data });
         }
 
-        private class MockHttpMessageHandler : HttpMessageHandler
+        private class MockHttpMessageHandler(
+            string defaultResponse, 
+            System.Net.HttpStatusCode defaultStatusCode, 
+            string? failUrl = null, 
+            System.Net.HttpStatusCode failStatusCode = System.Net.HttpStatusCode.NotFound) 
+            : HttpMessageHandler
         {
-            private readonly string _defaultResponse;
-            private readonly System.Net.HttpStatusCode _defaultStatusCode;
-            private readonly string? _failUrl;
-            private readonly System.Net.HttpStatusCode _failStatusCode;
-
-            public MockHttpMessageHandler(string defaultResponse, System.Net.HttpStatusCode defaultStatusCode, string? failUrl = null, System.Net.HttpStatusCode failStatusCode = System.Net.HttpStatusCode.NotFound)
-            {
-                _defaultResponse = defaultResponse;
-                _defaultStatusCode = defaultStatusCode;
-                _failUrl = failUrl;
-                _failStatusCode = failStatusCode;
-            }
-
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                if (_failUrl != null && request.RequestUri?.AbsoluteUri == _failUrl)
+                if (failUrl != null && request.RequestUri?.AbsoluteUri == failUrl)
                 {
                     return Task.FromResult(new HttpResponseMessage
                     {
-                        StatusCode = _failStatusCode,
+                        StatusCode = failStatusCode,
                         Content = new StringContent("")
                     });
                 }
 
                 return Task.FromResult(new HttpResponseMessage
                 {
-                    StatusCode = _defaultStatusCode,
-                    Content = new StringContent(_defaultResponse)
+                    StatusCode = defaultStatusCode,
+                    Content = new StringContent(defaultResponse)
                 });
             }
         }
 
-        private class ThrowingMockHttpMessageHandler : HttpMessageHandler
+        private class ThrowingMockHttpMessageHandler(Exception exception) : HttpMessageHandler
         {
-            private readonly Exception _exception;
-
-            public ThrowingMockHttpMessageHandler(Exception exception)
+            protected override Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                _exception = exception;
-            }
-
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                throw _exception;
+                throw exception;
             }
         }
     }

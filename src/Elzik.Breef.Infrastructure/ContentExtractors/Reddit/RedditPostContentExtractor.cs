@@ -60,6 +60,7 @@ public class RedditPostContentExtractor(
 
         var postId = segments[3];
         var post = await redditPostClient.GetPost(postId);
+        post.Post.PostUrl = webPageUrl;
 
         if (string.IsNullOrWhiteSpace(post.Post.ImageUrl))
         {
@@ -69,6 +70,6 @@ public class RedditPostContentExtractor(
 
         var postJson = JsonSerializer.Serialize(post);
 
-        return new UntypedExtract(post.Post.Title, postJson, post.Post.ImageUrl);
+        return new UntypedExtract(post.Post.Title, postJson, webPageUrl, post.Post.ImageUrl);
     }
 }

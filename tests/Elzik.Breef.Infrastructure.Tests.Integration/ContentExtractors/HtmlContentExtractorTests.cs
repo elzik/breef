@@ -1,4 +1,3 @@
-using Elzik.Breef.Domain;
 using Elzik.Breef.Infrastructure.ContentExtractors;
 using NSubstitute;
 using Shouldly;
@@ -42,6 +41,7 @@ namespace Elzik.Breef.Infrastructure.Tests.Integration.ContentExtractors
             result.Title.ShouldBe(expectedTitle);
             result.PreviewImageUrl.ShouldBe(expectedPreviewImageUrl);
             result.ExtractType.ShouldBe("HtmlContent");
+            result.OriginalUrl.ShouldBe(mockTestUrl);
         }
 
         [Fact]

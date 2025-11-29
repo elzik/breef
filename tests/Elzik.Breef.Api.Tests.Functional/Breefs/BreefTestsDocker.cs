@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 
 namespace Elzik.Breef.Api.Tests.Functional.Breefs;
 
+[Collection("Docker Tests")]
 public class BreefTestsDocker : BreefTestsBase, IAsyncLifetime
 {
     private const string DockerImageName = "ghcr.io/elzik/elzik-breef-api:latest";

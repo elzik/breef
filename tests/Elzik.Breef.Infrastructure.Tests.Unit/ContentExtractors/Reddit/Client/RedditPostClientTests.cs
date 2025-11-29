@@ -55,7 +55,7 @@ public class RedditPostClientTests
         comment.Content.ShouldBe("This is a comment");
         comment.Score.ShouldBe(50);
         comment.CreatedUtc.ShouldBe(new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc));
-
+        comment.PostUrl.ShouldBe($"https://www.reddit.com/r/testsubreddit/comments/test123/comment/comment123/");
 
         comment.Replies.Count.ShouldBe(1);
         var reply = comment.Replies[0];
@@ -64,6 +64,7 @@ public class RedditPostClientTests
         reply.Content.ShouldBe("This is a reply");
         reply.Score.ShouldBe(25);
         reply.Replies.Count.ShouldBe(0);
+        reply.PostUrl.ShouldBe($"https://www.reddit.com/r/testsubreddit/comments/test123/comment/reply123/");
 
 
         _ = _mockRawClient.Received(1).GetPost(postId);
@@ -267,6 +268,7 @@ public class RedditPostClientTests
                     Content = "This is a comment",
                     Score = 50,
                     CreatedUtc = new DateTime(2025, 1, 1, 12, 30, 0, DateTimeKind.Utc),
+                    PostUrl = "https://www.reddit.com/r/testsubreddit/comments/test123/comment/comment123/",
                     Replies =
                     [
                         new() {
@@ -275,6 +277,7 @@ public class RedditPostClientTests
                             Content = "This is a reply",
                             Score = 25,
                             CreatedUtc = new DateTime(2025, 1, 1, 13, 0, 0, DateTimeKind.Utc),
+                            PostUrl = "https://www.reddit.com/r/testsubreddit/comments/test123/comment/reply123/",
                             Replies = []
                         }
                     ]

@@ -1,43 +1,21 @@
 using System.Text.Json;
 using System.Web;
+using Microsoft.Extensions.Options;
 
 namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit.Client.Raw;
 
 public class RawRedditPostTransformer : IRawRedditPostTransformer
 {
-    public RedditPost Transform(RawRedditPost rawRedditPost)
+    private readonly RedditOptions _options;
+
+    public RawRedditPostTransformer(IOptions<RedditOptions> options)
     {
-        ArgumentNullException.ThrowIfNull(rawRedditPost);
-        if (rawRedditPost.Count < 2)
-            throw new ArgumentException("Reddit post must have at least 2 listings (post and comments)", nameof(rawRedditPost));
+        ArgumentNullException.ThrowIfNull(options);
 
-        var postListing = rawRedditPost[0];
-        var commentsListing = rawRedditPost[1];
+        if (options.Value == null)
+            throw new InvalidOperationException("RedditOptions configuration is missing or not bound.");
 
-        var postChildren = postListing.Data?.Children;
-        if (postChildren == null || postChildren.Count == 0)
-            throw new ArgumentException("Post listing must contain at least one child", nameof(rawRedditPost));
-
-        var mainPostData = postChildren[0].Data;
-        var bestImage = ExtractBestImage(mainPostData);
-
-        var redditPost = new RedditPost
-        {
-            Post = new RedditPostContent
-            {
-                Id = mainPostData.Id ?? string.Empty,
-                Title = mainPostData.Title ?? throw new InvalidOperationException("Reddit post must have a title"),
-                Author = mainPostData.Author ?? string.Empty,
-                Subreddit = mainPostData.Subreddit ?? string.Empty,
-                Score = mainPostData.Score,
-                Content = mainPostData.Content ?? string.Empty,
-                CreatedUtc = mainPostData.CreatedUtc,
-                ImageUrl = bestImage
-            },
-            Comments = TransformComments(commentsListing)
-        };
-
-        return redditPost;
+        _options = options.Value;
     }
 
     private static string? ExtractBestImage(RawRedditCommentData postData)
@@ -91,7 +69,6 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
 
         return null;
     }
-
     private static bool IsImageUrl(string? url)
     {
         if (string.IsNullOrEmpty(url))
@@ -104,7 +81,7 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         return extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp" or ".bmp" or ".svg";
     }
 
-    private List<RedditComment> TransformComments(List<RawRedditChild> children)
+    private List<RedditComment> TransformComments(List<RawRedditChild> children, string subreddit, string postId, string host)
     {
         var comments = new List<RedditComment>();
 
@@ -112,6 +89,7 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         {
             if (child.Kind == "t1")
             {
+                var commentUrl = $"https://{host}/r/{subreddit}/comments/{postId}/comment/{child.Data.Id}/";
                 var comment = new RedditComment
                 {
                     Id = child.Data.Id ?? string.Empty,
@@ -119,7 +97,8 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
                     Score = child.Data.Score,
                     Content = child.Data.Content ?? string.Empty,
                     CreatedUtc = child.Data.CreatedUtc,
-                    Replies = TransformComments(child.Data.Replies)
+                    PostUrl = commentUrl,
+                    Replies = TransformComments(child.Data.Replies, subreddit, postId, host)
                 };
 
                 comments.Add(comment);
@@ -129,7 +108,7 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         return comments;
     }
 
-    private List<RedditComment> TransformComments(object? replies)
+    private List<RedditComment> TransformComments(object? replies, string subreddit, string postId, string host)
     {
         if (replies == null)
             return [];
@@ -148,7 +127,7 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
             try
             {
                 var deserializedListing = JsonSerializer.Deserialize<RawRedditListing>(jsonElement.GetRawText());
-                return TransformComments(deserializedListing);
+                return TransformComments(deserializedListing, subreddit, postId, host);
             }
             catch
             {
@@ -157,12 +136,12 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         }
 
         if (replies is RawRedditListing listing)
-            return TransformComments(listing);
+            return TransformComments(listing, subreddit, postId, host);
 
         return [];
     }
 
-    private List<RedditComment> TransformComments(RawRedditListing? replies)
+    private List<RedditComment> TransformComments(RawRedditListing? replies, string subreddit, string postId, string host)
     {
         if (replies == null)
             return [];
@@ -173,6 +152,51 @@ public class RawRedditPostTransformer : IRawRedditPostTransformer
         if (replies.Data.Children == null)
             return [];
 
-        return TransformComments(replies.Data.Children);
+        return TransformComments(replies.Data.Children, subreddit, postId, host);
+    }
+
+    public RedditPost Transform(RawRedditPost rawRedditPost)
+    {
+        ArgumentNullException.ThrowIfNull(rawRedditPost);
+        if (rawRedditPost.Count < 2)
+            throw new ArgumentException("Reddit post must have at least 2 listings (post and comments)", nameof(rawRedditPost));
+
+        var postListing = rawRedditPost[0];
+        var commentsListing = rawRedditPost[1];
+
+        var postChildren = postListing.Data?.Children;
+        if (postChildren == null || postChildren.Count == 0)
+            throw new ArgumentException("Post listing must contain at least one child", nameof(rawRedditPost));
+
+        var mainPostData = postChildren[0].Data;
+        var bestImage = ExtractBestImage(mainPostData);
+
+        var subreddit = mainPostData.Subreddit ?? string.Empty;
+        var postId = mainPostData.Id ?? string.Empty;
+        var postUrl = mainPostData.Url ?? string.Empty;
+
+        if (!Uri.TryCreate(_options.DefaultBaseAddress, UriKind.Absolute, out var defaultUri))
+        {
+            throw new InvalidOperationException("RedditOptions.DefaultBaseAddress is not a valid absolute URI");
+        }
+
+        var redditPost = new RedditPost
+        {
+            Post = new RedditPostContent
+            {
+                Id = mainPostData.Id ?? string.Empty,
+                Title = mainPostData.Title ?? throw new InvalidOperationException("Reddit post must have a title"),
+                Author = mainPostData.Author ?? string.Empty,
+                Subreddit = subreddit,
+                Score = mainPostData.Score,
+                Content = mainPostData.Content ?? string.Empty,
+                CreatedUtc = mainPostData.CreatedUtc,
+                ImageUrl = bestImage,
+                PostUrl = postUrl
+            },
+            Comments = TransformComments(commentsListing.Data?.Children ?? [], subreddit, postId, defaultUri.Host)
+        };
+
+        return redditPost;
     }
 }

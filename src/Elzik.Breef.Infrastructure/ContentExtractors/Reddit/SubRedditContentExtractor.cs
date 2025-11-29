@@ -8,6 +8,7 @@ namespace Elzik.Breef.Infrastructure.ContentExtractors.Reddit;
 public class SubredditContentExtractor(
     ISubredditClient subredditClient,
     IHttpClientFactory httpClientFactory,
+    TimeProvider timeProvider,
     IOptions<RedditOptions> redditOptions)
     : ContentExtractorBase, ISubredditImageExtractor
 {
@@ -43,7 +44,11 @@ public class SubredditContentExtractor(
         var jsonContent = JsonSerializer.Serialize(newInSubreddit);
         var imageUrl = await ExtractImageUrlAsync(webPageUri);
 
-        return new UntypedExtract($"New in r/{subredditName}", jsonContent, imageUrl);
+        var dateAndTime = timeProvider.GetLocalNow().ToString("yyyy-MM-dd HH:mm");
+        var title = $"New in r/{subredditName} as of {dateAndTime}";
+        var instanceSpecificOriginalUrl = $"{webPageUrl}#{dateAndTime}";
+
+        return new UntypedExtract(title, jsonContent, instanceSpecificOriginalUrl, imageUrl);
     }
 
     public async Task<string> GetSubredditImageUrlAsync(string subredditName)
