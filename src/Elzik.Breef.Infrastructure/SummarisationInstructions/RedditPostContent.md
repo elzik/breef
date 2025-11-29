@@ -22,11 +22,9 @@ JSON with a top-level "Post" item containing:
    - Root post title
    - Metadata timestamps/scores
    - Code blocks
+   - General description of the subreddit itself
 
-## Output Format
+## Output Formatting
 
 - Strictly well-formatted HTML output
 - Do not include any markdown notation nor put the summary in a codeblock
-- Brief overview of themes covered in this specific JSON document
-- Do not include a general description of the subreddit itself
-- Summaries of the top-level post and highest-scoring replies
