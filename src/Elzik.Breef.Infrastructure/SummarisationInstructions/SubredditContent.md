@@ -28,4 +28,4 @@ JSON with a "Posts" array, where each post contains:
 - Do not include any markdown notation nor put the summary in a codeblock
 - Brief overview of themes covered in this specific JSON document
 - Do not include a general description of the subreddit itself
-- Summaries of the highest scoring top-level posts
+- Summaries of the highest-scoring top-level posts
