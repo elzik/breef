@@ -12,10 +12,10 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" Version="1.67.1" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.51.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.67.1" />
-		<PackageReference Include="Refit" Version="8.0.0" />
-		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
-		<PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
-		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.15.0.120848">
+		<PackageReference Include="Refit" Version="9.0.2" />
+		<PackageReference Include="Refit.HttpClientFactory" Version="9.0.2" />
+		<PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.17.0.131074">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
