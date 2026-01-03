@@ -11,7 +11,7 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Directory.Packages.props", "./"]
+COPY ["../Directory.Packages.props", "./"]
 COPY ["Elzik.Breef.Api/Elzik.Breef.Api.csproj", "Elzik.Breef.Api/"]
 RUN dotnet restore "./Elzik.Breef.Api/Elzik.Breef.Api.csproj"
 COPY . .
