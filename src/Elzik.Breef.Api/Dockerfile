@@ -11,6 +11,7 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /repo
+COPY ["nuget.config", "./"]
 COPY ["Directory.Packages.props", "./"]
 COPY ["src/Elzik.Breef.Api/Elzik.Breef.Api.csproj", "src/Elzik.Breef.Api/"]
 RUN dotnet restore "./src/Elzik.Breef.Api/Elzik.Breef.Api.csproj"
@@ -28,4 +29,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENTRYPOINT ["dotnet", "Elzik.Breef.Api.dll"]
+ENTRYPOINT ["dot ${({token}}}", "Elzik.Breef.Api.dll"]
