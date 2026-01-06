@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11217.181 d18.0
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elzik.Breef.Api", "src\Elzik.Breef.Api\Elzik.Breef.Api.csproj", "{C4C2EC01-2064-4409-A13B-BD3F391614E7}"
 EndProject
@@ -43,6 +43,18 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleRequests", "SampleRequests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		tests\SampleRequests\Elzik.Breef.Api.http = tests\SampleRequests\Elzik.Breef.Api.http
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{34D36A81-314B-4D09-B1C0-1D2C72653E39}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{DCAB55F3-E907-4901-A3AC-3C7A2036A034}"
+	ProjectSection(SolutionItems) = preProject
+		build\api\build-docker.ps1 = build\api\build-docker.ps1
+		build\api\build.ps1 = build\api\build.ps1
+		build\api\get-semver.ps1 = build\api\get-semver.ps1
+		build\api\local-build.ps1 = build\api\local-build.ps1
+		build\api\restore.ps1 = build\api\restore.ps1
+		build\api\test.ps1 = build\api\test.ps1
 	EndProjectSection
 EndProject
 Global
@@ -94,6 +106,8 @@ Global
 		{6CACB8E5-4B4C-4C05-AD80-32561037DAF0} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
 		{F1FD6E10-FB87-4BBD-B853-05889A04CFA9} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
 		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {C0C3A88F-44EC-4383-96FF-3BE016F2122B}
+		{34D36A81-314B-4D09-B1C0-1D2C72653E39} = {187D512C-3DC8-4ADA-A51C-2415FE9F18C3}
+		{DCAB55F3-E907-4901-A3AC-3C7A2036A034} = {34D36A81-314B-4D09-B1C0-1D2C72653E39}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6E3F0693-A48D-48DC-935C-2D8758390BC2}
