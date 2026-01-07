@@ -29,4 +29,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENTRYPOINT ["dot ${({token}}}", "Elzik.Breef.Api.dll"]
+ENTRYPOINT ["dotnet", "Elzik.Breef.Api.dll"]
