@@ -17,7 +17,7 @@ namespace Elzik.Breef.Api.Tests.Functional.Breefs
         protected virtual int HostPort { get; set; } = 8080;
         protected abstract HttpClient Client { get; }
         protected virtual bool SkipTestsIf { get; }
-        protected virtual string SkipTestsReason { get; } = "Test was skipped but no reason was given.";
+        protected virtual string SkipTestsReason { get; private set; } = "Test was skipped but no reason was given.";
 
         private readonly WallabagOptions _wallabagOptions;
 
@@ -38,13 +38,26 @@ namespace Elzik.Breef.Api.Tests.Functional.Breefs
             ApiKey = breefApiOptions.ApiKey;
         }
 
-        [SkippableFact]
-        public async Task EndToEndHappyPath()
+        [SkippableTheory]
+        [InlineData("http://example.com")]
+        [InlineData("https://www.reddit.com/r/dotnet/")]
+        [InlineData("https://www.reddit.com/r/selfhosted/comments/1ojndg6/advice_should_i_buy_a_new_router_or_build_one/")]
+        public async Task EndToEndHappyPath(string url)
         {
-            Skip.If(SkipTestsIf, SkipTestsReason);
+            var attemptingRedditTestInGithubWorklow = 
+                url.StartsWith("https://www.reddit.com") && 
+                Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
+            var skipTest = SkipTestsIf || attemptingRedditTestInGithubWorklow;
+            if(attemptingRedditTestInGithubWorklow)
+            {
+                SkipTestsReason = "Skipped because requests to reddit.com from GitHub workflows are " +
+                    "always blocked meaning this test case always fails. This must be run locally instead.";
+            }
+            
+            Skip.If(skipTest, SkipTestsReason);
 
             // Arrange
-            var breef = new { Url = "http://example.com" };
+            var breef = new { Url = url };
 
             // Act
             var response = await Client.PostAsJsonAsync($"{BaseUrl}/breefs", breef);
