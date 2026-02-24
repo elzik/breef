@@ -28,6 +28,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+  	<PackageReference Include="Serilog" VersionOverride="4.3.1" />
 		<None Include="SummarisationInstructions\**\*.md" Link="SummarisationInstructions\%(RecursiveDir)%(Filename)%(Extension)">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
